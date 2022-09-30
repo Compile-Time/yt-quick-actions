@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+  "name": "yt-pl-quick-actions",
+  "version": "1.0",
+  "description": "Un-hide playlist actions when managing playlist.",
+  "icons": {
+    "48": "icons/border-48.png"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "borderify@example.com"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/playlist*"
+      ],
+      "js": [
+        "yt-pl-quick.actions.js"
+      ]
+    }
+  ]
+}
