@@ -162,23 +162,27 @@ function main() {
     firstItemMenu.click();
     firstItemMenu.click();
 
-    const myButton = document.createElement('button');
-    myButton.innerText = 'Remove';
-    myButton.onclick = () => {
-        firstItemMenu.click();
-        triggerDelete();
-    };
+    for (const item of videoPlaylistItems) {
+        const itemMenu = navigateTreeToFinalElement(item, playlistItemToMenuButtonTree[0]);
 
-    firstItemMenu.parentElement.parentElement.insertBefore(myButton, firstItemMenu.parentElement);
+        const myButton = document.createElement('button');
+        myButton.innerText = 'Remove';
+        myButton.onclick = () => {
+            itemMenu.click();
+            triggerDelete();
+        };
+
+        const divMenu = itemMenu.parentElement.parentElement;
+        const ytdMenuRenderer = itemMenu.parentElement;
+        divMenu.insertBefore(myButton, ytdMenuRenderer);
+    }
 }
-
-// main();
 
 const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
         if (mutation.target.nodeName.toLowerCase() === 'ytd-browse') {
-            console.log('node', mutation);
             main();
+            observer.disconnect();
         }
     })
 })
