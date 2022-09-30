@@ -67,7 +67,7 @@ function setupPlaylistItemToMenuButtonTree() {
     return playlistItemTree;
 }
 
-function setupPopupContainerToMenuDeleteTree() {
+function setupPopupContainerToMenuTree() {
     const popupTree = [
         TreeItem.withId('ytd-app', null),
         TreeItem.withId('ytd-popup-container', null),
@@ -126,7 +126,7 @@ function navigateTreeToFinalElement(element, treeItem) {
 
 const bodyToPlaylistHolderTree = setupButtonToPlaylistHolderTree();
 const playlistItemToMenuButtonTree = setupPlaylistItemToMenuButtonTree();
-const popupContainerToMenuDeleteTree = setupPopupContainerToMenuDeleteTree();
+const popupContainerToMenuDeleteTree = setupPopupContainerToMenuTree();
 const menuPopupToDeleteItemTree = setupMenuPopupToDeleteItem();
 
 function getPlaylistItems() {
@@ -143,11 +143,27 @@ function openItemMenu(playlistItem) {
 
 function triggerDelete() {
     const menuItemsHolder = navigateTreeToFinalElement(document.body, popupContainerToMenuDeleteTree[0]);
-    const menuItems = menuItemsHolder.getElementsByTagName('ytd-menu-service-item-renderer');
-    console.log('menu items', menuItems);
 
-    const span = navigateTreeToFinalElement(menuItems[2], menuPopupToDeleteItemTree[0]);
-    console.log('span', span);
+    const menuUpdateObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            const ytFormattedText = mutation.target;
+            if (ytFormattedText.nodeName.toLowerCase() === 'span'
+                && ytFormattedText.textContent === 'Remove from ') {
+                console.log('counter');
+
+                const menuItems = menuItemsHolder.getElementsByTagName('ytd-menu-service-item-renderer');
+                const span = navigateTreeToFinalElement(menuItems[2], menuPopupToDeleteItemTree[0]);
+                span.click();
+
+                menuUpdateObserver.disconnect();
+            }
+
+        })
+    })
+
+    menuUpdateObserver.observe(menuItemsHolder, {
+        subtree: true, attributes: true, attributeFilter: ['class']
+    })
 }
 
 function main() {
@@ -156,7 +172,6 @@ function main() {
 
     const firstItem = videoPlaylistItems[0];
     const firstItemMenu = navigateTreeToFinalElement(firstItem, playlistItemToMenuButtonTree[0]);
-    console.log('button', firstItemMenu);
 
     // This cause the popup HTML to be loaded.
     firstItemMenu.click();
@@ -178,16 +193,14 @@ function main() {
     }
 }
 
-const observer = new MutationObserver((mutations) => {
+const initializationObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
         if (mutation.target.nodeName.toLowerCase() === 'ytd-browse') {
             main();
-            observer.disconnect();
+            initializationObserver.disconnect();
         }
     })
 })
 
-observer.observe(document.body, {
-    childList: true, subtree: true, attributes: false, characterData: false
-})
+initializationObserver.observe(document.body, {subtree: true, childList: true})
 
