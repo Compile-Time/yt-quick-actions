@@ -144,6 +144,8 @@ function openItemMenu(playlistItem) {
 function triggerDelete() {
     const menuItemsHolder = navigateTreeToFinalElement(document.body, popupContainerToMenuDeleteTree[0]);
 
+    // If we do not wait for the popup content to update, the first entry in the playlist is deleted due
+    // to the HTML load performed with the first entry.
     const menuUpdateObserver = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             const ytFormattedText = mutation.target;
@@ -153,7 +155,8 @@ function triggerDelete() {
 
                 const menuItems = menuItemsHolder.getElementsByTagName('ytd-menu-service-item-renderer');
                 const span = navigateTreeToFinalElement(menuItems[2], menuPopupToDeleteItemTree[0]);
-                span.click();
+                console.log('span', span);
+                // span.click();
 
                 menuUpdateObserver.disconnect();
             }

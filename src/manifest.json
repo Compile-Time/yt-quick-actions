@@ -1,15 +1,10 @@
 {
   "manifest_version": 2,
   "name": "yt-pl-quick-actions",
-  "version": "1.0",
-  "description": "Un-hide playlist actions when managing playlist.",
+  "version": "1.0.0",
+  "description": "Provide quick access to hidden actions.",
   "icons": {
-    "48": "icons/border-48.png"
-  },
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "borderify@example.com"
-    }
+    "48": "../icons/border-48.png"
   },
   "content_scripts": [
     {
