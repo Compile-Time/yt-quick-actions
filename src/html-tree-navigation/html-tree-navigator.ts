@@ -14,12 +14,7 @@ export class HtmlTreeNavigator {
     }
 
     find(): Element[] {
-        const finalElements = this.navigateTree(0, this.htmlElement.children);
-        if (finalElements.length > 0) {
-            console.error('Did not find exactly one element');
-        }
-
-        return finalElements;
+        return this.navigateTree(0, this.htmlElement.children);
     }
 
     private navigateTree(filterStartIndex: number, htmlCollection: HTMLCollection): Element[] | undefined {

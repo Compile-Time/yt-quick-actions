@@ -1,19 +1,28 @@
 {
   "scripts": {
-    "start": "parcel watch src/manifest.json --host localhost",
-    "build": "parcel build src/manifest.json"
+    "start": "parcel watch manifest.json --host localhost",
+    "build": "parcel build manifest.json",
+    "test": "karma start karma.conf.js"
   },
   "dependencies": {
     "@types/webextension-polyfill": "^0.9.1"
   },
   "devDependencies": {
+    "@parcel/config-webextension": "^2.7.0",
+    "@types/jasmine": "^4.3.0",
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "eslint": "^8.24.0",
     "eslint-config-standard-with-typescript": "^23.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.3.0",
     "eslint-plugin-promise": "^6.0.1",
-    "@parcel/config-webextension": "^2.7.0",
+    "jasmine": "^4.4.0",
+    "jasmine-core": "^4.4.0",
+    "karma": "^6.4.1",
+    "karma-chrome-launcher": "^3.1.1",
+    "karma-firefox-launcher": "^2.1.2",
+    "karma-jasmine": "^5.1.0",
+    "karma-typescript": "^5.5.3",
     "parcel": "^2.7.0",
     "typescript": "^4.8.4"
   }
