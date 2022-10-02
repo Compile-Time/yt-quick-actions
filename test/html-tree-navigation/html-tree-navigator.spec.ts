@@ -1,4 +1,8 @@
-import {HtmlTreeNavigator, NavigationFilter} from "../../src/html-tree-navigation/html-tree-navigator";
+import {HtmlTreeNavigator} from "../../src/html-tree-navigation/html-tree-navigator";
+import {
+    TagNavigationFilter,
+    TextContentNavigationFilter
+} from "../../src/html-tree-navigation/navigation-filter";
 
 describe('HtmlTreeNavigator', () => {
     it('should return the only element present on matching filters', () => {
@@ -9,10 +13,9 @@ describe('HtmlTreeNavigator', () => {
         div.appendChild(div2);
 
         const elements: Element[] = HtmlTreeNavigator.navigate(div)
-            .filter(NavigationFilter.of('div'))
+            .filter(new TagNavigationFilter('div'))
             .find();
 
-        expect(elements.length).toEqual(1);
         expect(elements).toEqual([div2]);
     });
 
@@ -24,7 +27,7 @@ describe('HtmlTreeNavigator', () => {
         div.appendChild(div2);
 
         const elements: Element[] = HtmlTreeNavigator.navigate(div)
-            .filter(NavigationFilter.of('span'))
+            .filter(new TagNavigationFilter('span'))
             .find();
 
         expect(elements).toEqual([]);
@@ -46,10 +49,9 @@ describe('HtmlTreeNavigator', () => {
         rootContainer.appendChild(div3);
 
         const elements: Element[] = HtmlTreeNavigator.navigate(rootContainer)
-            .filter(NavigationFilter.of('div'))
+            .filter(new TagNavigationFilter('div'))
             .find();
 
-        expect(elements.length).toEqual(3);
         expect(elements).toEqual([div1, div2, div3]);
     });
 
@@ -80,11 +82,10 @@ describe('HtmlTreeNavigator', () => {
         rootContainer.appendChild(div3);
 
         const elements: Element[] = HtmlTreeNavigator.navigate(rootContainer)
-            .filter(NavigationFilter.of('div'))
-            .filter(NavigationFilter.of('span'))
+            .filter(new TagNavigationFilter('div'))
+            .filter(new TextContentNavigationFilter('span', 'Span2'))
             .find();
 
-        expect(elements.length).toEqual(3);
-        expect(elements).toEqual([div1, div2, div3]);
+        expect(elements).toEqual([span2]);
     });
 });

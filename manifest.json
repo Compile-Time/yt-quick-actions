@@ -4,15 +4,15 @@
   "version": "1.0.0",
   "description": "Provide quick access to hidden actions.",
   "icons": {
-    "48": "../icons/border-48.png"
+    "48": "icons/border-48.png"
   },
   "content_scripts": [
     {
       "matches": [
-        "*://*.youtube.com/playlist*"
+        "*://*.youtube.com/*"
       ],
       "js": [
-        "extension.ts"
+        "src/extension.ts"
       ]
     }
   ]
