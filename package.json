@@ -2,7 +2,8 @@
   "scripts": {
     "start": "parcel watch manifest.json --host localhost",
     "build": "parcel build manifest.json",
-    "test": "karma start karma.conf.js"
+    "test": "karma run",
+    "karma-start": "karma start karma.conf.js"
   },
   "dependencies": {
     "@types/webextension-polyfill": "^0.9.1"
