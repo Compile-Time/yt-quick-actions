@@ -32,10 +32,9 @@ function createRemoveButton(menuButton: HTMLButtonElement): Element {
                         .filter(new TagNavigationFilter('ytd-menu-service-item-renderer'))
                         .filter(new TagNavigationFilter('tp-yt-paper-item'))
                         .filter(new TagNavigationFilter('yt-formatted-string'))
-                        .filter(new TextContentNavigationFilter('span', 'Remove from'))
-                        .find();
-                    console.log('span', deleteItemEntrySpan);
-                    // span.click();
+                        .filter(new TextContentNavigationFilter('span', 'Remove from '))
+                        .find()[0] as HTMLElement;
+                    deleteItemEntrySpan.click();
 
                     menuUpdateObserver.disconnect();
                 }
@@ -69,6 +68,11 @@ function main(): void {
         .filter(new TagNavigationFilter('ytd-menu-renderer'))
         .filter(new IdNavigationFilter('yt-icon-button', 'button'))
         .find();
+
+    // This cause the popup HTML to be loaded.
+    const firstMenuButton = menuButtons[0] as HTMLButtonElement;
+    firstMenuButton.click();
+    firstMenuButton.click();
 
     for (const menuButton of menuButtons) {
         const divMenu = menuButton.parentElement.parentElement;
