@@ -24,6 +24,11 @@ export class HtmlTreeNavigator {
         return elements.length > 0 ? elements[0] : undefined;
     }
 
+    findLast(): HTMLElement | undefined {
+        const elements = this.navigateTree(0, this.element.children);
+        return elements.length > 0 ? elements[elements.length - 1] : undefined;
+    }
+
     private navigateTree(filterStartIndex: number, htmlCollection: HTMLCollection): HTMLElement[] | undefined {
         const relevantElements: HTMLElement[] = this.filters[filterStartIndex].apply(htmlCollection);
 

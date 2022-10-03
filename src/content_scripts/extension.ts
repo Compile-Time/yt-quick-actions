@@ -5,12 +5,17 @@ import {
     TextContentNavigationFilter
 } from "../html-tree-navigation/navigation-filter";
 import * as Browser from "webextension-polyfill";
+import {RELEVANT_IDS} from "../html-tree-navigation/relevant-elements";
+import {getRemoveButtons} from "../html-tree-navigation/common-navigations";
 
 let globalPageReadyInterval;
+
+const YT_PL_QA_REMOVE_BUTTON = 'yt-pl-qa-remove-button';
 
 function createRemoveButton(menuButton: HTMLButtonElement): Element {
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove';
+    removeButton.id = RELEVANT_IDS.YT_PL_QA_REMOVE_BUTTON;
     removeButton.onclick = () => {
         menuButton.click();
         const popupMenu = HtmlTreeNavigator.navigate(document.body)
@@ -53,6 +58,9 @@ function createRemoveButton(menuButton: HTMLButtonElement): Element {
 }
 
 function main(): void {
+    // Remove all previously created remove buttons.
+    getRemoveButtons().forEach(button => button.remove());
+
     const menuButtons: HTMLElement[] = HtmlTreeNavigator.navigate(document.body)
         .filter(new TagNavigationFilter('ytd-app'))
         .filter(new IdNavigationFilter('div', 'content'))
@@ -108,7 +116,7 @@ Browser.runtime.onMessage.addListener((message, sender) => {
                     .filter(new IdNavigationFilter('div', 'menu'))
                     .filter(new TagNavigationFilter('ytd-menu-renderer'))
                     .filter(new IdNavigationFilter('yt-icon-button', 'button'))
-                    .findFirst();
+                    .findLast();
 
                 if (!!firstMenuButton) {
                     console.log('found', firstMenuButton);

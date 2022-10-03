@@ -1,8 +1,9 @@
 import * as Browser from "webextension-polyfill";
 
-Browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+Browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     console.log(changeInfo);
-    if (!!changeInfo.url && tab.url.includes('playlist')) {
+    console.log(tab);
+    if (!!changeInfo.status && tab.url.includes('playlist') && tab.status === 'complete') {
         console.log('tab url', tab.url);
         Browser.tabs.sendMessage(tabId, 'on-playlist')
             .then(value => {
