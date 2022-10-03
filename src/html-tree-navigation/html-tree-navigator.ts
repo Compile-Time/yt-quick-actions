@@ -3,10 +3,10 @@ import {NavigationFilter} from "./navigation-filter";
 export class HtmlTreeNavigator {
     filters: NavigationFilter[] = [];
 
-    constructor(private element: Element) {
+    constructor(private element: HTMLElement) {
     }
 
-    static navigate(element: Element): HtmlTreeNavigator {
+    static navigate(element: HTMLElement): HtmlTreeNavigator {
         return new HtmlTreeNavigator(element);
     }
 
@@ -15,12 +15,17 @@ export class HtmlTreeNavigator {
         return this;
     }
 
-    find(): Element[] {
+    find(): HTMLElement[] {
         return this.navigateTree(0, this.element.children);
     }
 
-    private navigateTree(filterStartIndex: number, htmlCollection: HTMLCollection): Element[] | undefined {
-        const relevantElements: Element[] = this.filters[filterStartIndex].apply(htmlCollection);
+    findFirst(): HTMLElement | undefined {
+        const elements = this.navigateTree(0, this.element.children);
+        return elements.length > 0 ? elements[0] : undefined;
+    }
+
+    private navigateTree(filterStartIndex: number, htmlCollection: HTMLCollection): HTMLElement[] | undefined {
+        const relevantElements: HTMLElement[] = this.filters[filterStartIndex].apply(htmlCollection);
 
         if (filterStartIndex === this.filters.length - 1) {
             return relevantElements;

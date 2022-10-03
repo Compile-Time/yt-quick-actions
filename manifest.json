@@ -6,13 +6,23 @@
   "icons": {
     "48": "icons/border-48.png"
   },
+  "permissions": [
+    "*://*.youtube.com/*",
+    "tabs"
+  ],
+  "background": {
+    "scripts": [
+      "src/background_scripts/url-change-watcher.ts"
+    ],
+    "persistent": false
+  },
   "content_scripts": [
     {
       "matches": [
         "*://*.youtube.com/*"
       ],
       "js": [
-        "src/extension.ts"
+        "src/content_scripts/extension.ts"
       ]
     }
   ]
