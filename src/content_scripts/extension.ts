@@ -49,10 +49,8 @@ function main(): void {
 
     for (const menuButton of menuButtons) {
         const ytdPlaylistVideoRenderer = menuButton.parentElement.parentElement.parentElement;
-        const divMenu = menuButton.parentElement.parentElement;
-
-        const customButton = createRemoveButton(menuButton as HTMLButtonElement);
-        ytdPlaylistVideoRenderer.insertBefore(customButton, divMenu);
+        const removeButton = createRemoveButton(menuButton as HTMLButtonElement);
+        ytdPlaylistVideoRenderer.append(removeButton);
     }
 }
 
