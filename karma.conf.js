@@ -16,18 +16,17 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'test/**/*spec.ts',
-      'src/**/*.ts'
+      'src/html-tree-navigation/*.ts',
     ],
 
     // list of files / patterns to exclude
-    exclude: [
-    ],
+    exclude: [],
 
 
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://www.npmjs.com/search?q=keywords:karma-preprocessor
     preprocessors: {
-      "**/*.ts": "karma-typescript" // *.tsx for React Jsx
+      "**/*.ts": "karma-typescript" /* *.tsx for React Jsx */
     },
 
 

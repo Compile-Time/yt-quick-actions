@@ -1,31 +1,17 @@
-import {HtmlTreeNavigator} from "../html-tree-navigation/html-tree-navigator";
-import {
-    IdNavigationFilter,
-    TagNavigationFilter,
-    TextContentNavigationFilter
-} from "../html-tree-navigation/navigation-filter";
 import * as Browser from "webextension-polyfill";
-import {RELEVANT_IDS} from "../html-tree-navigation/relevant-elements";
-import {getRemoveButtons} from "../html-tree-navigation/common-navigations";
+import {Ids, Tags, TextContent} from "../html-tree-navigation/element-data";
+import {CommonNavigations} from "../html-tree-navigation/common-navigations";
+import {RuntimeMessages} from "../messaging/runtime-messages";
 
 let globalPageReadyInterval;
-
-const YT_PL_QA_REMOVE_BUTTON = 'yt-pl-qa-remove-button';
 
 function createRemoveButton(menuButton: HTMLButtonElement): Element {
     const removeButton = document.createElement('button');
     removeButton.textContent = 'Remove';
-    removeButton.id = RELEVANT_IDS.YT_PL_QA_REMOVE_BUTTON;
+    removeButton.id = Ids.YT_PL_QA_REMOVE_BUTTON;
     removeButton.onclick = () => {
         menuButton.click();
-        const popupMenu = HtmlTreeNavigator.navigate(document.body)
-            .filter(new TagNavigationFilter('ytd-app'))
-            .filter(new TagNavigationFilter('ytd-popup-container'))
-            .filter(new TagNavigationFilter('tp-yt-iron-dropdown'))
-            .filter(new IdNavigationFilter('div', 'contentWrapper'))
-            .filter(new TagNavigationFilter('ytd-menu-popup-renderer'))
-            .filter(new IdNavigationFilter('tp-yt-paper-listbox', 'items'))
-            .findFirst();
+        const popupMenu = CommonNavigations.getPopupMenu();
         console.log(popupMenu);
 
         // If we do not wait for the popup content to update, the first entry in the playlist is deleted due
@@ -34,16 +20,10 @@ function createRemoveButton(menuButton: HTMLButtonElement): Element {
             mutations.forEach((mutation) => {
                 console.log(mutation);
                 const ytFormattedText = mutation.target;
-                if (ytFormattedText.nodeName.toLowerCase() === 'span'
-                    && ytFormattedText.textContent === 'Remove from ') {
-                    const deleteItemEntrySpan = HtmlTreeNavigator.navigate(popupMenu)
-                        .filter(new TagNavigationFilter('ytd-menu-service-item-renderer'))
-                        .filter(new TagNavigationFilter('tp-yt-paper-item'))
-                        .filter(new TagNavigationFilter('yt-formatted-string'))
-                        .filter(new TextContentNavigationFilter('span', 'Remove from '))
-                        .findFirst();
+                if (ytFormattedText.nodeName.toLowerCase() === Tags.SPAN
+                    && ytFormattedText.textContent === TextContent.REMOVE_FROM) {
+                    const deleteItemEntrySpan = CommonNavigations.getPopupDeleteEntry(popupMenu);
                     deleteItemEntrySpan.click();
-
                     observer.disconnect();
                 }
             })
@@ -59,26 +39,8 @@ function createRemoveButton(menuButton: HTMLButtonElement): Element {
 
 function main(): void {
     // Remove all previously created remove buttons.
-    getRemoveButtons().forEach(button => button.remove());
-
-    const menuButtons: HTMLElement[] = HtmlTreeNavigator.navigate(document.body)
-        .filter(new TagNavigationFilter('ytd-app'))
-        .filter(new IdNavigationFilter('div', 'content'))
-        .filter(new IdNavigationFilter('ytd-page-manager', 'page-manager'))
-        .filter(new TagNavigationFilter('ytd-browse'))
-        .filter(new TagNavigationFilter('ytd-two-column-browse-results-renderer'))
-        .filter(new IdNavigationFilter('div', 'primary'))
-        .filter(new TagNavigationFilter('ytd-section-list-renderer'))
-        .filter(new IdNavigationFilter('div', 'contents'))
-        .filter(new TagNavigationFilter('ytd-item-section-renderer'))
-        .filter(new IdNavigationFilter('div', 'contents'))
-        .filter(new TagNavigationFilter('ytd-playlist-video-list-renderer'))
-        .filter(new IdNavigationFilter('div', 'contents'))
-        .filter(new TagNavigationFilter('ytd-playlist-video-renderer'))
-        .filter(new IdNavigationFilter('div', 'menu'))
-        .filter(new TagNavigationFilter('ytd-menu-renderer'))
-        .filter(new IdNavigationFilter('yt-icon-button', 'button'))
-        .find();
+    CommonNavigations.getRemoveButtons().forEach(button => button.remove());
+    const menuButtons: HTMLElement[] = CommonNavigations.getPlaylistItemsMenuButtons();
 
     // This cause the popup HTML to be loaded.
     const firstMenuButton = menuButtons[0] as HTMLButtonElement;
@@ -96,30 +58,12 @@ function main(): void {
 
 Browser.runtime.onMessage.addListener((message, sender) => {
     console.log('runtime', message);
-    if (message === 'on-playlist') {
+    if (message === RuntimeMessages.NAVIGATED_TO_PLAYLIST) {
         if (!globalPageReadyInterval) {
             globalPageReadyInterval = setInterval(() => {
-                const firstMenuButton: HTMLElement = HtmlTreeNavigator.navigate(document.body)
-                    .filter(new TagNavigationFilter('ytd-app'))
-                    .filter(new IdNavigationFilter('div', 'content'))
-                    .filter(new IdNavigationFilter('ytd-page-manager', 'page-manager'))
-                    .filter(new TagNavigationFilter('ytd-browse'))
-                    .filter(new TagNavigationFilter('ytd-two-column-browse-results-renderer'))
-                    .filter(new IdNavigationFilter('div', 'primary'))
-                    .filter(new TagNavigationFilter('ytd-section-list-renderer'))
-                    .filter(new IdNavigationFilter('div', 'contents'))
-                    .filter(new TagNavigationFilter('ytd-item-section-renderer'))
-                    .filter(new IdNavigationFilter('div', 'contents'))
-                    .filter(new TagNavigationFilter('ytd-playlist-video-list-renderer'))
-                    .filter(new IdNavigationFilter('div', 'contents'))
-                    .filter(new TagNavigationFilter('ytd-playlist-video-renderer'))
-                    .filter(new IdNavigationFilter('div', 'menu'))
-                    .filter(new TagNavigationFilter('ytd-menu-renderer'))
-                    .filter(new IdNavigationFilter('yt-icon-button', 'button'))
-                    .findLast();
-
-                if (!!firstMenuButton) {
-                    console.log('found', firstMenuButton);
+                const lastMenuButton: HTMLElement = CommonNavigations.getLastPlaylistItemMenuButton();
+                if (!!lastMenuButton) {
+                    console.log('found', lastMenuButton);
                     clearInterval(globalPageReadyInterval);
                     globalPageReadyInterval = null;
 
