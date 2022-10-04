@@ -51,7 +51,7 @@ export class CommonNavigations {
     }
 
     static getLastPlaylistItemMenuButton(): HTMLElement {
-        return this.getPlaylistItemMenuButtonPath().findFirst();
+        return this.getPlaylistItemMenuButtonPath().findLast();
     }
 
     private static getPlaylistItemMenuButtonPath(): HtmlTreeNavigator {
@@ -65,7 +65,7 @@ export class CommonNavigations {
             .filter(new TagNavigationFilter(Tags.YTD_SECTION_LIST_RENDERER))
             .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENTS))
             .filter(new TagNavigationFilter(Tags.YTD_ITEM_SECTION_RENDERER))
-            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENTS))
             .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
             .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENTS))
             .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
