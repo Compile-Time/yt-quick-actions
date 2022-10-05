@@ -1,0 +1,16 @@
+.remove-button-icon {
+    color: white;
+}
+
+.remove-button-icon:hover {
+    color: rgba(255, 0, 0, 0.93);
+}
+
+.remove-button {
+    border: none;
+    background: transparent;
+}
+
+.remove-button:hover {
+    cursor: pointer;
+}

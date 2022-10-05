@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "yt-pl-quick-actions",
+  "name": "yt-quick-actions",
   "version": "1.0.0",
-  "description": "Provide quick access to hidden actions.",
+  "description": "Provide quick access to hidden YouTube actions.",
   "icons": {
     "48": "icons/border-48.png"
   },
@@ -23,6 +23,11 @@
       ],
       "js": [
         "src/content_scripts/extension.ts"
+      ],
+      "css": [
+        "assets/css/yt-quick-actions.css",
+        "assets/fontawesome/css/fontawesome.min.css",
+        "assets/fontawesome/css/solid.min.css"
       ]
     }
   ]

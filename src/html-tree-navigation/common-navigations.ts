@@ -18,7 +18,7 @@ export class CommonNavigations {
             .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
             .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENTS))
             .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
-            .filter(new IdNavigationFilter(Tags.BUTTON, Ids.YT_PL_QA_REMOVE_BUTTON))
+            .filter(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON))
             .find();
     }
 

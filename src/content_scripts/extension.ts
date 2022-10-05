@@ -1,14 +1,13 @@
 import * as Browser from "webextension-polyfill";
-import {Ids, Tags, TextContent} from "../html-tree-navigation/element-data";
+import {Tags, TextContent} from "../html-tree-navigation/element-data";
 import {CommonNavigations} from "../html-tree-navigation/common-navigations";
 import {RuntimeMessages} from "../messaging/runtime-messages";
+import {YtQuickActionsElements} from "../html-elments";
 
 let globalPageReadyInterval;
 
-function createRemoveButton(menuButton: HTMLButtonElement): Element {
-    const removeButton = document.createElement('button');
-    removeButton.textContent = 'Remove';
-    removeButton.id = Ids.YT_PL_QA_REMOVE_BUTTON;
+function setupRemoveButton(menuButton: HTMLButtonElement): Element {
+    const removeButton = YtQuickActionsElements.removeButton();
     removeButton.onclick = () => {
         menuButton.click();
         const popupMenu = CommonNavigations.getPopupMenu();
@@ -49,7 +48,7 @@ function main(): void {
 
     for (const menuButton of menuButtons) {
         const ytdPlaylistVideoRenderer = menuButton.parentElement.parentElement.parentElement;
-        const removeButton = createRemoveButton(menuButton as HTMLButtonElement);
+        const removeButton = setupRemoveButton(menuButton as HTMLButtonElement);
         ytdPlaylistVideoRenderer.append(removeButton);
     }
 }
@@ -71,4 +70,3 @@ Browser.runtime.onMessage.addListener((message, sender) => {
         }
     }
 })
-

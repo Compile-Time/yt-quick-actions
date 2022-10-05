@@ -28,10 +28,9 @@ export enum Ids {
     CONTENT = 'content',
     PRIMARY = 'primary',
     CONTENTS = 'contents',
-    SECONDARY = 'secondary',
     PAGE_MANAGER = 'page-manager',
     CONTENT_WRAPPER = 'contentWrapper',
-    YT_PL_QA_REMOVE_BUTTON = 'yt-pl-qa-remove-button',
+    YT_QUICK_ACTIONS_REMOVE_BUTTON = 'yt-quick-actions-remove-button',
 }
 
 export enum TextContent {
