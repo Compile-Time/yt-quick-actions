@@ -1,5 +1,5 @@
 import * as Browser from "webextension-polyfill";
-import {RuntimeMessages} from "../messaging/runtime-messages";
+import {RuntimeMessages} from "../runtime-messages";
 
 Browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (!!changeInfo.status && tab.url.includes('playlist') && tab.status === 'complete') {

@@ -1,7 +1,7 @@
 import * as Browser from "webextension-polyfill";
 import {Tags, TextContent} from "../html-tree-navigation/element-data";
 import {CommonNavigations} from "../html-tree-navigation/common-navigations";
-import {RuntimeMessages} from "../messaging/runtime-messages";
+import {RuntimeMessages} from "../runtime-messages";
 import {YtQuickActionsElements} from "../html-elments";
 
 let globalPageReadyInterval;
