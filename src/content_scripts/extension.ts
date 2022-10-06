@@ -11,13 +11,11 @@ function setupRemoveButton(menuButton: HTMLButtonElement): Element {
     removeButton.onclick = () => {
         menuButton.click();
         const popupMenu = CommonNavigations.getPopupMenu();
-        console.log(popupMenu);
 
         // If we do not wait for the popup content to update, the first entry in the playlist is deleted due
         // to the HTML load performed with the first entry.
         const menuUpdateObserver = new MutationObserver((mutations, observer) => {
             mutations.forEach((mutation) => {
-                console.log(mutation);
                 const ytFormattedText = mutation.target;
                 if (ytFormattedText.nodeName.toLowerCase() === Tags.SPAN
                     && ytFormattedText.textContent === TextContent.REMOVE_FROM) {
@@ -41,7 +39,7 @@ function main(): void {
     CommonNavigations.getRemoveButtons().forEach(button => button.remove());
     const menuButtons: HTMLElement[] = CommonNavigations.getPlaylistItemsMenuButtons();
 
-    // This cause the popup HTML to be loaded.
+    // This cause the popup HTML to be loaded, otherwise we can not find it by navigating the HTML tree.
     const firstMenuButton = menuButtons[0] as HTMLButtonElement;
     firstMenuButton.click();
     firstMenuButton.click();
@@ -54,13 +52,11 @@ function main(): void {
 }
 
 Browser.runtime.onMessage.addListener((message, sender) => {
-    console.log('runtime', message);
     if (message === RuntimeMessages.NAVIGATED_TO_PLAYLIST) {
         if (!globalPageReadyInterval) {
             globalPageReadyInterval = setInterval(() => {
                 const lastMenuButton: HTMLElement = CommonNavigations.getLastPlaylistItemMenuButton();
                 if (!!lastMenuButton) {
-                    console.log('found', lastMenuButton);
                     clearInterval(globalPageReadyInterval);
                     globalPageReadyInterval = null;
 
