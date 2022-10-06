@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "parcel watch manifest.json --host localhost",
+    "start": "parcel watch manifest.json --host localhost --dist-dir=build",
     "build": "parcel build manifest.json",
     "test": "karma run",
     "karma-start": "karma start karma.conf.js"
