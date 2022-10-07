@@ -25,7 +25,7 @@ export class IdNavigationFilter extends NavigationFilter {
     }
 
     applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
-        return lowercaseElementTagName === this.tagName && element.id === this.id;
+        return element.id === this.id && lowercaseElementTagName === this.tagName;
     }
 }
 
@@ -49,4 +49,19 @@ export class TextContentNavigationFilter extends NavigationFilter {
     applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
         return element.textContent === this.textContent && lowercaseElementTagName === this.tagName;
     }
+}
+
+export class IdAndTextContentNavigationFilter extends NavigationFilter {
+    constructor(private tagName: string,
+                private id: string,
+                private textContent: string) {
+        super();
+    }
+
+    applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
+        return element.id === this.id
+            && element.textContent === this.textContent
+            && lowercaseElementTagName === this.tagName;
+    }
+
 }
