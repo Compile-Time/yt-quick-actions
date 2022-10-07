@@ -9,6 +9,14 @@ Browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
                 console.error(`Could not send navigate message in tab ${tab.title}`, reason);
             });
     }
+
+    if (!!changeInfo.status && tab.url.includes('watch') && tab.status === 'complete') {
+        Browser.tabs.sendMessage(tabId, RuntimeMessages.NAVIGATED_TO_VIDEO)
+            .then()
+            .catch(reason => {
+                console.error(`Could not send navigate message in tab ${tab.title}`, reason);
+            });
+    }
 }, {
     urls: ['*://*.youtube.com/*']
 })

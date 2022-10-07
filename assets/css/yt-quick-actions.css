@@ -1,16 +1,15 @@
-.remove-button-icon {
+.quick-actions-button, .quick-actions-watch-later-under-video-button {
     color: white;
-}
-
-.remove-button-icon:hover {
-    color: rgba(255, 0, 0, 0.93);
-}
-
-.remove-button {
     border: none;
     background: transparent;
 }
 
-.remove-button:hover {
+.quick-actions-button:hover, .quick-actions-watch-later-under-video-button:hover {
+    color: red;
     cursor: pointer;
+}
+
+.quick-actions-watch-later-under-video-icon {
+    padding-left: .6em;
+    vertical-align: .1em !important;
 }

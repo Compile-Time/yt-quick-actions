@@ -3,10 +3,12 @@ import {Tags, TextContent} from "../html-tree-navigation/element-data";
 import {CommonNavigations} from "../html-tree-navigation/common-navigations";
 import {RuntimeMessages} from "../runtime-messages";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
+import {IntervalRunner, RunningInterval} from "../interval-runner";
 
-let globalPageReadyInterval;
+const globalPageReadyInterval = new IntervalRunner();
+const createdElements: HTMLElement[] = [];
 
-function setupRemoveButton(menuButton: HTMLButtonElement): Element {
+function setupRemoveButton(menuButton: HTMLButtonElement): HTMLButtonElement {
     const removeButton = YtQuickActionsElements.removeButton();
     removeButton.onclick = () => {
         menuButton.click();
@@ -36,7 +38,7 @@ function setupRemoveButton(menuButton: HTMLButtonElement): Element {
 
 function main(): void {
     // Remove all previously created remove buttons.
-    CommonNavigations.getRemoveButtons().forEach(button => button.remove());
+    createdElements.forEach(element => element.remove());
     const menuButtons: HTMLElement[] = CommonNavigations.getPlaylistItemsMenuButtons();
 
     // This cause the popup HTML to be loaded, otherwise we can not find it by navigating the HTML tree.
@@ -47,22 +49,19 @@ function main(): void {
     for (const menuButton of menuButtons) {
         const ytdPlaylistVideoRenderer = menuButton.parentElement.parentElement.parentElement;
         const removeButton = setupRemoveButton(menuButton as HTMLButtonElement);
+        createdElements.push(removeButton);
         ytdPlaylistVideoRenderer.append(removeButton);
     }
 }
 
-Browser.runtime.onMessage.addListener((message, sender) => {
+Browser.runtime.onMessage.addListener((message) => {
     if (message === RuntimeMessages.NAVIGATED_TO_PLAYLIST) {
-        if (!globalPageReadyInterval) {
-            globalPageReadyInterval = setInterval(() => {
-                const lastMenuButton: HTMLElement = CommonNavigations.getLastPlaylistItemMenuButton();
-                if (!!lastMenuButton) {
-                    clearInterval(globalPageReadyInterval);
-                    globalPageReadyInterval = null;
-
-                    main();
-                }
-            })
-        }
+        globalPageReadyInterval.start(1000, (runningInterval: RunningInterval) => {
+            const lastMenuButton: HTMLElement = CommonNavigations.getLastPlaylistItemMenuButton();
+            if (!!lastMenuButton) {
+                runningInterval.stop();
+                main();
+            }
+        })
     }
 })
