@@ -6,7 +6,7 @@ export class HtmlTreeNavigator {
     constructor(private element: HTMLElement) {
     }
 
-    static navigate(element: HTMLElement): HtmlTreeNavigator {
+    static startFrom(element: HTMLElement): HtmlTreeNavigator {
         return new HtmlTreeNavigator(element);
     }
 

@@ -12,7 +12,7 @@ describe('HtmlTreeNavigator', () => {
         div2.id = 'div2';
         div.appendChild(div2);
 
-        const elements: Element[] = HtmlTreeNavigator.navigate(div)
+        const elements: Element[] = HtmlTreeNavigator.startFrom(div)
             .filter(new TagNavigationFilter('div'))
             .find();
 
@@ -26,7 +26,7 @@ describe('HtmlTreeNavigator', () => {
         div2.id = 'div2';
         div.appendChild(div2);
 
-        const elements: Element[] = HtmlTreeNavigator.navigate(div)
+        const elements: Element[] = HtmlTreeNavigator.startFrom(div)
             .filter(new TagNavigationFilter('span'))
             .find();
 
@@ -48,7 +48,7 @@ describe('HtmlTreeNavigator', () => {
         rootContainer.appendChild(div2);
         rootContainer.appendChild(div3);
 
-        const elements: Element[] = HtmlTreeNavigator.navigate(rootContainer)
+        const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter('div'))
             .find();
 
@@ -81,7 +81,7 @@ describe('HtmlTreeNavigator', () => {
         rootContainer.appendChild(div2);
         rootContainer.appendChild(div3);
 
-        const elements: Element[] = HtmlTreeNavigator.navigate(rootContainer)
+        const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter('div'))
             .filter(new TextContentNavigationFilter('span', 'Span2'))
             .find();
