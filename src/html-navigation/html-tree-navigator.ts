@@ -3,7 +3,7 @@ import {NavigationFilter} from "./navigation-filter";
 export class HtmlTreeNavigator {
     filters: NavigationFilter[] = [];
 
-    constructor(private element: HTMLElement) {
+    private constructor(private element: HTMLElement) {
     }
 
     static startFrom(element: HTMLElement): HtmlTreeNavigator {

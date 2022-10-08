@@ -15,7 +15,11 @@ export abstract class NavigationFilter {
         return filteredElements;
     }
 
-    abstract applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean;
+    applySingle(element: HTMLElement): HTMLElement | undefined {
+        return this.applyCondition(element, element.tagName.toLowerCase()) ? element : undefined;
+    }
+
+    protected abstract applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean;
 }
 
 export class IdNavigationFilter extends NavigationFilter {

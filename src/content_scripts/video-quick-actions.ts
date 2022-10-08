@@ -1,14 +1,14 @@
-import {CommonNavigations} from "../html-tree-navigation/common-navigations";
+import {CommonNavigations} from "../html-navigation/common-navigations";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import * as Browser from "webextension-polyfill";
 import {RuntimeMessages} from "../runtime-messages";
 import {IntervalRunner} from "../interval-runner";
-import {Tags, TextContent} from "../html-tree-navigation/element-data";
+import {Tags, TextContent} from "../html-navigation/element-data";
 
 const globalPageReadyInterval = new IntervalRunner();
 const createdElements: HTMLElement[] = [];
 
-function main(flexibleItemButtons: HTMLElement) {
+function main(flexibleItemButtons: HTMLElement): void {
     // Remove existing buttons otherwise duplicates are present on the page.
     createdElements.forEach(element => element.remove());
 

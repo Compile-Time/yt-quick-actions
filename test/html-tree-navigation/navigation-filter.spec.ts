@@ -3,7 +3,7 @@ import {
     IdNavigationFilter,
     TagNavigationFilter,
     TextContentNavigationFilter
-} from "../../src/html-tree-navigation/navigation-filter";
+} from "../../src/html-navigation/navigation-filter";
 
 function createDocument(): HTMLCollection {
     const div = document.createElement('div');

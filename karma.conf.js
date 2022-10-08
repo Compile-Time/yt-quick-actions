@@ -16,7 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'test/**/*spec.ts',
-      'src/html-tree-navigation/*.ts',
+      'src/html-navigation/*.ts',
     ],
 
     // list of files / patterns to exclude

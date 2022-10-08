@@ -1,8 +1,8 @@
-import {HtmlTreeNavigator} from "../../src/html-tree-navigation/html-tree-navigator";
+import {HtmlTreeNavigator} from "../../src/html-navigation/html-tree-navigator";
 import {
     TagNavigationFilter,
     TextContentNavigationFilter
-} from "../../src/html-tree-navigation/navigation-filter";
+} from "../../src/html-navigation/navigation-filter";
 
 describe('HtmlTreeNavigator', () => {
     it('should return the only element present on matching filters', () => {
