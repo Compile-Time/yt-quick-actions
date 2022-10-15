@@ -1,13 +1,19 @@
 import {NavigationFilter} from "./navigation-filter";
 
 export class HtmlTreeNavigator {
-    filters: NavigationFilter[] = [];
+    private filters: NavigationFilter[] = [];
+    private debug: boolean = false;
 
     private constructor(private element: HTMLElement) {
     }
 
     static startFrom(element: HTMLElement): HtmlTreeNavigator {
         return new HtmlTreeNavigator(element);
+    }
+
+    debugNavigation(): HtmlTreeNavigator {
+        this.debug = true;
+        return this;
     }
 
     filter(filter: NavigationFilter): HtmlTreeNavigator {
@@ -30,7 +36,15 @@ export class HtmlTreeNavigator {
     }
 
     private navigateTree(filterStartIndex: number, htmlCollection: HTMLCollection): HTMLElement[] | undefined {
-        const relevantElements: HTMLElement[] = this.filters[filterStartIndex].apply(htmlCollection);
+        const currentFilter = this.filters[filterStartIndex];
+        const relevantElements: HTMLElement[] = currentFilter.apply(htmlCollection);
+
+        if (this.debug) {
+            const relevantElementNames = relevantElements
+                .map(element => element.tagName)
+                .join(', ');
+            console.debug(`Found the following elements with filter ${currentFilter}: ${relevantElementNames}`);
+        }
 
         if (filterStartIndex === this.filters.length - 1) {
             return relevantElements;
