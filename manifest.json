@@ -24,7 +24,8 @@
       "js": [
         "src/content_scripts/watch-later-quick-actions.ts",
         "src/content_scripts/video-quick-actions.ts",
-        "src/content_scripts/home-page-quick-actions.ts"
+        "src/content_scripts/home-page-quick-actions.ts",
+        "src/content_scripts/watching-playlist-quick-actions.ts"
       ],
       "css": [
         "assets/css/yt-quick-actions.css",

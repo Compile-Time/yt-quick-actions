@@ -19,6 +19,8 @@ export enum Tags {
     YTD_MENU_SERVICE_ITEM_RENDERER = 'ytd-menu-service-item-renderer',
     YTD_PAGE_MANAGER = 'ytd-page-manager',
     YTD_PLAYLIST_ADD_TO_OPTION_RENDERER = 'ytd-playlist-add-to-option-renderer',
+    YTD_PLAYLIST_PANEL_RENDERER = 'ytd-playlist-panel-renderer',
+    YTD_PLAYLIST_PANEL_VIDEO_RENDERER = 'ytd-playlist-panel-video-renderer',
     YTD_PLAYLIST_VIDEO_LIST_RENDERER = 'ytd-playlist-video-list-renderer',
     YTD_PLAYLIST_VIDEO_RENDERER = 'ytd-playlist-video-renderer',
     YTD_POPUP_CONTAINER = 'ytd-popup-container',
@@ -33,7 +35,7 @@ export enum Tags {
     YTD_WATCH_METADATA = 'ytd-watch-metadata',
     YT_FORMATTED_STRING = 'yt-formatted-string',
     YT_ICON = 'yt-icon',
-    YT_ICON_BUTTON = 'yt-icon-button',
+    YT_ICON_BUTTON = 'yt-icon-button'
 }
 
 export enum Ids {
@@ -47,6 +49,7 @@ export enum Ids {
     CHECKBOX_LABEL = 'checkbox-label',
     CHECKBOX_LABEL_CAMEL_CASE = 'checkboxLabel',
     COLUMNS = 'columns',
+    CONTAINER = 'container',
     CONTENT = 'content',
     CONTENTS = 'contents',
     CONTENT_WRAPPER_CAMEL_CASE = 'contentWrapper',
@@ -58,21 +61,31 @@ export enum Ids {
     MENU = 'menu',
     META = 'meta',
     PAGE_MANAGER = 'page-manager',
+    PLAYLIST = 'playlist',
     PLAYLISTS = 'playlists',
+    PLAYLIST_ITEMS = 'playlist-items',
     PRIMARY = 'primary',
     PRIMARY_INNER = 'primary-inner',
+    SECONDARY = 'secondary',
+    SECONDARY_INNER = 'secondary-inner',
     TEXT = 'text',
     TOP_LEVEL_BUTTONS_COMPUTED = 'top-level-buttons-computed',
     TOP_ROW = 'top-row',
     YT_QUICK_ACTIONS_HOME_WATCH_LATER = 'yt-quick-actions-home-watch-later',
     YT_QUICK_ACTIONS_REMOVE_BUTTON = 'yt-quick-actions-remove-button',
-    YT_QUICK_ACTIONS_VIDEO_WATCH_LATER = 'yt-quick-actions-video-watch-later',
+    YT_QUICK_ACTIONS_VIDEO_WATCH_LATER = 'yt-quick-actions-video-watch-later'
 }
 
 export enum TextContent {
     // The trailing whitespace is intentional and required!
     REMOVE_FROM = 'Remove from ',
+    REMOVE_FROM_PLAYLIST = 'Remove from playlist',
     SAVE = 'Save',
     SAVE_TO_WATCH_LATER = 'Save to Watch later',
-    WATCH_LATER = 'Watch later',
+    WATCH_LATER = 'Watch later'
+}
+
+export enum AttributeNames {
+    HIDDEN = 'hidden',
+    DISABLE_UPGRADE = 'disable-upgrade',
 }

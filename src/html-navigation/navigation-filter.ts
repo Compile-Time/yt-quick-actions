@@ -19,7 +19,12 @@ export abstract class NavigationFilter {
         return this.applyCondition(element, element.tagName.toLowerCase()) ? element : undefined;
     }
 
+    toString(): string {
+        return JSON.stringify(this);
+    }
+
     protected abstract applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean;
+
 }
 
 export class IdNavigationFilter extends NavigationFilter {

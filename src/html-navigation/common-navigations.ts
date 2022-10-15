@@ -155,6 +155,50 @@ export class CommonNavigations {
             .findFirst();
     }
 
+    static getWatchingPlaylistItemsContainer(): HTMLElement {
+        return HtmlTreeNavigator.startFrom(document.body)
+            .filter(new TagNavigationFilter(Tags.YTD_APP))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
+            .filter(new TagNavigationFilter(Tags.YTD_PAGE_MANAGER))
+            .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.COLUMNS))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.SECONDARY))
+            .findLast();
+    }
+
+    static getWatchingPlaylistItemsMenuButtons(): HTMLElement[] {
+        return HtmlTreeNavigator.startFrom(document.body)
+            .filter(new TagNavigationFilter(Tags.YTD_APP))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
+            .filter(new IdNavigationFilter(Tags.YTD_PAGE_MANAGER, Ids.PAGE_MANAGER))
+            .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.COLUMNS))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.SECONDARY))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.SECONDARY_INNER))
+            .filter(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_RENDERER, Ids.PLAYLIST))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTAINER))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.ITEMS))
+            .filter(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.MENU))
+            .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
+            .filter(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+            .find();
+    }
+
+    static getWatchingPlaylistItemMenuRemoveOption(): HTMLElement {
+        return HtmlTreeNavigator.startFrom(document.body)
+            .filter(new TagNavigationFilter(Tags.YTD_APP))
+            .filter(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+            .filter(new TagNavigationFilter(Tags.TP_YT_IRON_DROPDOWN))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT_WRAPPER_CAMEL_CASE))
+            .filter(new TagNavigationFilter(Tags.YTD_MENU_POPUP_RENDERER))
+            .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
+            .filter(new TagNavigationFilter(Tags.YTD_MENU_SERVICE_ITEM_RENDERER))
+            .filter(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+            .filter(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_PLAYLIST))
+            .findFirst();
+    }
+
     static getPlaylistItemsMenuButtons(): HTMLElement[] {
         return this.getPlaylistItemMenuButtonPath().find();
     }
