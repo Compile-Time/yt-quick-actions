@@ -49,7 +49,7 @@ export enum Ids {
     COLUMNS = 'columns',
     CONTENT = 'content',
     CONTENTS = 'contents',
-    CONTENT_WRAPPER = 'contentWrapper',
+    CONTENT_WRAPPER_CAMEL_CASE = 'contentWrapper',
     DETAILS = 'details',
     DISMISSIBLE = 'dismissible',
     FLEXIBLE_ITEM_BUTTONS = 'flexible-item-buttons',

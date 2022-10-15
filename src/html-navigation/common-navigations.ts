@@ -39,7 +39,7 @@ export class CommonNavigations {
             .filter(new TagNavigationFilter(Tags.YTD_APP))
             .filter(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
             .filter(new TagNavigationFilter(Tags.TP_YT_IRON_DROPDOWN))
-            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT_WRAPPER))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT_WRAPPER_CAMEL_CASE))
             .filter(new TagNavigationFilter(Tags.YTD_MENU_POPUP_RENDERER))
             .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
             .findFirst();
@@ -134,7 +134,7 @@ export class CommonNavigations {
             .filter(new TagNavigationFilter(Tags.YTD_APP))
             .filter(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
             .filter(new TagNavigationFilter(Tags.TP_YT_IRON_DROPDOWN))
-            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT_WRAPPER))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT_WRAPPER_CAMEL_CASE))
             .filter(new TagNavigationFilter(Tags.YTD_MENU_POPUP_RENDERER))
             .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
             .filter(new TagNavigationFilter(Tags.YTD_MENU_SERVICE_ITEM_RENDERER))
