@@ -1,70 +1,70 @@
 // Karma configuration
 // Generated on Sat Oct 01 2022 17:49:59 GMT+0200 (Central European Summer Time)
 
-module.exports = function(config) {
-  config.set({
+module.exports = function (config) {
+    config.set({
 
-    // base path that will be used to resolve all patterns (eg. files, exclude)
-    basePath: '',
-
-
-    // frameworks to use
-    // available frameworks: https://www.npmjs.com/search?q=keywords:karma-adapter
-    frameworks: ['jasmine', 'karma-typescript'],
+        // base path that will be used to resolve all patterns (eg. files, exclude)
+        basePath: '',
 
 
-    // list of files / patterns to load in the browser
-    files: [
-      'test/**/*spec.ts',
-      'src/html-navigation/*.ts',
-      'src/interval-runner.ts'
-    ],
-
-    // list of files / patterns to exclude
-    exclude: [],
+        // frameworks to use
+        // available frameworks: https://www.npmjs.com/search?q=keywords:karma-adapter
+        frameworks: ['jasmine', 'karma-typescript'],
 
 
-    // preprocess matching files before serving them to the browser
-    // available preprocessors: https://www.npmjs.com/search?q=keywords:karma-preprocessor
-    preprocessors: {
-      "**/*.ts": "karma-typescript" /* *.tsx for React Jsx */
-    },
+        // list of files / patterns to load in the browser
+        files: [
+            'test/**/*spec.ts',
+            'src/html-navigation/*.ts',
+            'src/interval-runner.ts'
+        ],
+
+        // list of files / patterns to exclude
+        exclude: [],
 
 
-    // test results reporter to use
-    // possible values: 'dots', 'progress'
-    // available reporters: https://www.npmjs.com/search?q=keywords:karma-reporter
-    reporters: ['progress', 'karma-typescript'],
+        // preprocess matching files before serving them to the browser
+        // available preprocessors: https://www.npmjs.com/search?q=keywords:karma-preprocessor
+        preprocessors: {
+            "**/*.ts": "karma-typescript" /* *.tsx for React Jsx */
+        },
 
 
-    // web server port
-    port: 9876,
+        // test results reporter to use
+        // possible values: 'dots', 'progress'
+        // available reporters: https://www.npmjs.com/search?q=keywords:karma-reporter
+        reporters: ['progress', 'karma-typescript'],
 
 
-    // enable / disable colors in the output (reporters and logs)
-    colors: true,
+        // web server port
+        port: 9876,
 
 
-    // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+        // enable / disable colors in the output (reporters and logs)
+        colors: true,
 
 
-    // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
+        // level of logging
+        // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+        logLevel: config.LOG_INFO,
 
 
-    // start these browsers
-    // available browser launchers: https://www.npmjs.com/search?q=keywords:karma-launcher
-    browsers: ['ChromiumHeadless'],
+        // enable / disable watching file and executing tests whenever any file changes
+        autoWatch: false,
 
 
-    // Continuous Integration mode
-    // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false,
+        // start these browsers
+        // available browser launchers: https://www.npmjs.com/search?q=keywords:karma-launcher
+        browsers: ['ChromiumHeadless'],
 
-    // Concurrency level
-    // how many browser instances should be started simultaneously
-    concurrency: Infinity
-  })
+
+        // Continuous Integration mode
+        // if true, Karma captures browsers, runs the tests and exits
+        singleRun: false,
+
+        // Concurrency level
+        // how many browser instances should be started simultaneously
+        concurrency: Infinity
+    })
 }
