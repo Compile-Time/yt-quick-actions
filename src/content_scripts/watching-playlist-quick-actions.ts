@@ -35,8 +35,12 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
     return button;
 }
 
-function main(): void {
-    const ytMenuIconButtons = CommonNavigations.getWatchingPlaylistItemsMenuButtons();
+function main(playlistPanelVideoRendererItems: HTMLElement[]): void {
+    const ytMenuIconButtons = playlistPanelVideoRendererItems
+        .map(element => HtmlTreeDirectNavigator.startFrom(element)
+            .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+        );
+    console.log(ytMenuIconButtons);
     for (const ytMenuIconButton of ytMenuIconButtons) {
         const removeButton = setupRemoveButton(ytMenuIconButton);
 
@@ -56,10 +60,14 @@ function main(): void {
 Browser.runtime.onMessage.addListener(message => {
     if (message === RuntimeMessages.NAVIGATED_TO_VIDEO_IN_PLAYLIST) {
         globalPageReadyInterval.start(1000, runningInterval => {
-            const watchingPlaylistItemsContainer = CommonNavigations.getWatchingPlaylistItemsContainer();
-            if (!!watchingPlaylistItemsContainer) {
+            const playlistPanelVideoRendererItems = HtmlTreeDirectNavigator.startFrom(document.body)
+                .find(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
+
+            if (!!playlistPanelVideoRendererItems) {
                 runningInterval.stop();
-                main();
+                main(playlistPanelVideoRendererItems);
+            } else {
+                console.error('Could not find required HTML elements for page manipulation!');
             }
         });
     }
