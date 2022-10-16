@@ -45,7 +45,11 @@ function main(): void {
         const divMenu = HtmlParentNavigator.startFrom(ytMenuIconButton)
             .find(new IdNavigationFilter(Tags.DIV, Ids.MENU));
 
-        playlistItem.insertBefore(removeButton, divMenu);
+        const existingRemoveButton = HtmlTreeDirectNavigator.startFrom(playlistItem)
+            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON));
+        if (!existingRemoveButton) {
+            playlistItem.insertBefore(removeButton, divMenu);
+        }
     }
 }
 
