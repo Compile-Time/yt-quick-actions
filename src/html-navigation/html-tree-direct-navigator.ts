@@ -10,6 +10,11 @@ export class HtmlTreeDirectNavigator {
         return new HtmlTreeDirectNavigator(element);
     }
 
+    debugNavigation(): HtmlTreeDirectNavigator {
+        this.debug = true;
+        return this;
+    }
+
     find(filter: NavigationFilter): HTMLElement[] | undefined {
         return this.navigateTree(filter, this.element.children);
     }
