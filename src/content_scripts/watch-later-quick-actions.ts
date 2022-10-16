@@ -5,7 +5,7 @@ import {RuntimeMessages} from "../runtime-messages";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {IntervalRunner, RunningInterval} from "../interval-runner";
 
-const globalPageReadyInterval = new IntervalRunner();
+const globalPageReadyInterval = new IntervalRunner(5);
 const createdElements: HTMLElement[] = [];
 
 function setupRemoveButton(menuButton: HTMLButtonElement): HTMLButtonElement {

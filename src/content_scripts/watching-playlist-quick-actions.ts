@@ -8,7 +8,7 @@ import {IdNavigationFilter, TextContentNavigationFilter} from "../html-navigatio
 import {AttributeNames, Ids, Tags, TextContent} from "../html-navigation/element-data";
 import {HtmlTreeDirectNavigator} from "../html-navigation/html-tree-direct-navigator";
 
-const globalPageReadyInterval = new IntervalRunner();
+const globalPageReadyInterval = new IntervalRunner(5);
 
 function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
     const button = YtQuickActionsElements.removeButton();

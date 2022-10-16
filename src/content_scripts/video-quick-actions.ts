@@ -5,7 +5,7 @@ import {RuntimeMessages} from "../runtime-messages";
 import {IntervalRunner} from "../interval-runner";
 import {Tags, TextContent} from "../html-navigation/element-data";
 
-const globalPageReadyInterval = new IntervalRunner();
+const globalPageReadyInterval = new IntervalRunner(5);
 const createdElements: HTMLElement[] = [];
 
 function main(flexibleItemButtons: HTMLElement): void {

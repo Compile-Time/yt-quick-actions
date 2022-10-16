@@ -8,8 +8,7 @@ import {Ids, Tags} from "../html-navigation/element-data";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 
-const globalPageReadyInterval = new IntervalRunner();
-const createdElements: HTMLElement[] = [];
+const globalPageReadyInterval = new IntervalRunner(5);
 
 function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement {
     const watchLaterButton = YtQuickActionsElements.watchLaterHomeVideoButton();
@@ -40,7 +39,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
 function main(): void {
     const homePageVideos = CommonNavigations.getHomePageVideoRow();
 
-    const observer = new MutationObserver((mutations, observer) => {
+    const observer = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
             const target = mutation.target as HTMLElement;
             const ytdRichGridRow = HtmlParentNavigator.startFrom(target)

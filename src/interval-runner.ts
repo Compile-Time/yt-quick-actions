@@ -5,7 +5,7 @@ export class IntervalRunner {
     private passedIterations: number = 0;
     private iterationLimitReachedCallback: () => void;
 
-    constructor(iterationLimit: number = 10) {
+    constructor(iterationLimit: number) {
         this.iterationLimit = iterationLimit;
     }
 
