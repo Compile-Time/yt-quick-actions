@@ -17,6 +17,7 @@ module.exports = function(config) {
     files: [
       'test/**/*spec.ts',
       'src/html-navigation/*.ts',
+      'src/interval-runner.ts'
     ],
 
     // list of files / patterns to exclude

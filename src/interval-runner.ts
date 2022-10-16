@@ -1,21 +1,50 @@
 export class IntervalRunner {
-    id: NodeJS.Timer = undefined;
+    private readonly iterationLimit: number;
+
+    private timerId: NodeJS.Timer = undefined;
+    private passedIterations: number = 0;
+    private iterationLimitReachedCallback: () => void;
+
+    constructor(iterationLimit: number = 10) {
+        this.iterationLimit = iterationLimit;
+    }
 
     start(interval: number, callback: (runningInterval: RunningInterval) => void): void {
-        if (this.notRunning()) {
-            this.id = setInterval(() => {
+        if (this.isNotRunning()) {
+            this.timerId = setInterval(() => {
                 callback(new RunningInterval(this));
+                this.updatePassedIterations();
+                this.stopIfIterationLimitReached();
             }, interval);
         }
     }
 
-    notRunning(): boolean {
-        return !this.id;
+    registerIterationLimitReachedCallback(callback: () => void): void {
+        this.iterationLimitReachedCallback = callback;
+    }
+
+    isRunning(): boolean {
+        return !!this.timerId;
+    }
+
+    isNotRunning(): boolean {
+        return !this.timerId;
     }
 
     stop(): void {
-        clearInterval(this.id);
-        this.id = undefined;
+        clearInterval(this.timerId);
+        this.timerId = undefined;
+    }
+
+    private updatePassedIterations(): void {
+        this.passedIterations += 1;
+    }
+
+    private stopIfIterationLimitReached(): void {
+        if (this.passedIterations === this.iterationLimit) {
+            this.stop();
+            this.iterationLimitReachedCallback();
+        }
     }
 }
 
@@ -25,5 +54,13 @@ export class RunningInterval {
 
     stop(): void {
         this.intervalRunner.stop();
+    }
+
+    isRunning(): boolean {
+        return this.intervalRunner.isRunning();
+    }
+
+    isNotRunning(): boolean {
+        return this.intervalRunner.isNotRunning();
     }
 }
