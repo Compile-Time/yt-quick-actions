@@ -61,8 +61,8 @@ export class TagNavigationFilter extends NavigationFilter {
 }
 
 export class TextContentNavigationFilter extends NavigationFilter {
-    constructor(private tagName: string,
-                private textContent: string) {
+    constructor(protected tagName: string,
+                protected textContent: string) {
         super();
     }
 
@@ -73,6 +73,19 @@ export class TextContentNavigationFilter extends NavigationFilter {
     equals(other: TextContentNavigationFilter): boolean {
         return this.textContent === other.textContent
             && this.tagName === other.tagName;
+    }
+}
+
+export class TextContentContainsNavigationFilter extends TextContentNavigationFilter {
+    constructor(protected tagName: string,
+                protected textContent: string) {
+        super(tagName, textContent);
+    }
+
+
+    applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
+        return element.textContent.toLowerCase().includes(this.textContent)
+            && lowercaseElementTagName === this.tagName;
     }
 }
 
