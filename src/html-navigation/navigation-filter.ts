@@ -23,6 +23,8 @@ export abstract class NavigationFilter {
         return JSON.stringify(this);
     }
 
+    abstract equals(other: NavigationFilter): boolean;
+
     protected abstract applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean;
 
 }
@@ -36,6 +38,11 @@ export class IdNavigationFilter extends NavigationFilter {
     applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
         return element.id === this.id && lowercaseElementTagName === this.tagName;
     }
+
+    equals(other: IdNavigationFilter): boolean {
+        return this.tagName === other.tagName
+            && this.id === other.id;
+    }
 }
 
 
@@ -47,6 +54,10 @@ export class TagNavigationFilter extends NavigationFilter {
     applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
         return lowercaseElementTagName === this.tagName;
     }
+
+    equals(other: TagNavigationFilter): boolean {
+        return this.tagName === other.tagName;
+    }
 }
 
 export class TextContentNavigationFilter extends NavigationFilter {
@@ -57,6 +68,11 @@ export class TextContentNavigationFilter extends NavigationFilter {
 
     applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
         return element.textContent === this.textContent && lowercaseElementTagName === this.tagName;
+    }
+
+    equals(other: TextContentNavigationFilter): boolean {
+        return this.textContent === other.textContent
+            && this.tagName === other.tagName;
     }
 }
 
@@ -73,4 +89,9 @@ export class IdAndTextContentNavigationFilter extends NavigationFilter {
             && lowercaseElementTagName === this.tagName;
     }
 
+    equals(other: IdAndTextContentNavigationFilter): boolean {
+        return this.id === other.id
+            && this.textContent === other.textContent
+            && this.tagName === other.tagName;
+    }
 }

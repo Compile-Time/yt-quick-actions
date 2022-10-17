@@ -1,7 +1,9 @@
 import {NavigationFilter} from "./navigation-filter";
+import {NavigationFilterQueue} from "./navigation-filter-queue";
 
 export class HtmlTreeDirectNavigator {
     private debug: boolean = false;
+    private initialFilterQueue: NavigationFilterQueue = new NavigationFilterQueue();
 
     constructor(private element: HTMLElement) {
     }
@@ -15,25 +17,32 @@ export class HtmlTreeDirectNavigator {
         return this;
     }
 
-    find(filter: NavigationFilter): HTMLElement[] | undefined {
-        return this.navigateTree(filter, this.element.children);
+    filter(filter: NavigationFilter): HtmlTreeDirectNavigator {
+        this.initialFilterQueue.addFilter(filter);
+        return this;
     }
 
-    findFirst(filter: NavigationFilter): HTMLElement | undefined {
-        const foundElements = this.find(filter);
+    find(): HTMLElement[] | undefined {
+        return this.navigateTree(this.initialFilterQueue.clone(), this.element.children);
+    }
+
+    findFirst(): HTMLElement | undefined {
+        const foundElements = this.find();
         return foundElements.length > 0 ? foundElements[0] : undefined;
     }
 
-    findLast(filter: NavigationFilter): HTMLElement | undefined {
-        const foundElements = this.find(filter);
+    findLast(): HTMLElement | undefined {
+        const foundElements = this.find();
         return foundElements.length > 0 ? foundElements[foundElements.length - 1] : undefined;
     }
 
-    private navigateTree(filter: NavigationFilter, htmlCollection: HTMLCollection): HTMLElement[] {
+    private navigateTree(filterQueue: NavigationFilterQueue, htmlCollection: HTMLCollection): HTMLElement[] {
         if (htmlCollection.length === 0) {
             return [];
         }
 
+        const filterToProcess = filterQueue.getCurrentOrNextUnprocessedFilter();
+        const filter = filterToProcess.getFilter();
         const foundElements: HTMLElement[] = filter.apply(htmlCollection);
 
         if (this.debug) {
@@ -44,12 +53,15 @@ export class HtmlTreeDirectNavigator {
         }
 
         if (foundElements.length > 0) {
-            return foundElements;
+            filterToProcess.markProcessed();
+            if (filterQueue.areAllFiltersProcessed()) {
+                return foundElements;
+            }
         }
 
         return Array.from(htmlCollection)
             .flatMap(element => element.children)
-            .flatMap(children => this.navigateTree(filter, children))
+            .flatMap(children => this.navigateTree(filterQueue.clone(), children))
             .filter(element => !!element);
     }
 }
