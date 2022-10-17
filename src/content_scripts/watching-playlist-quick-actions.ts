@@ -18,7 +18,8 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
         const popupReadyObserver = new MutationObserver((mutations, observer) => {
             for (const mutation of mutations) {
                 const removeOption: HTMLElement = HtmlTreeDirectNavigator.startFrom(mutation.target as HTMLElement)
-                    .findFirst(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_PLAYLIST))
+                    .filter(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_PLAYLIST))
+                    .findFirst()
                 if (!!removeOption && mutation.oldValue === '') {
                     removeOption.click();
                     observer.disconnect();
@@ -38,9 +39,9 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
 function main(playlistPanelVideoRendererItems: HTMLElement[]): void {
     const ytMenuIconButtons = playlistPanelVideoRendererItems
         .map(element => HtmlTreeDirectNavigator.startFrom(element)
-            .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+            .filter(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+            .findFirst()
         );
-    console.log(ytMenuIconButtons);
     for (const ytMenuIconButton of ytMenuIconButtons) {
         const removeButton = setupRemoveButton(ytMenuIconButton);
 
@@ -50,7 +51,8 @@ function main(playlistPanelVideoRendererItems: HTMLElement[]): void {
             .find(new IdNavigationFilter(Tags.DIV, Ids.MENU));
 
         const existingRemoveButton = HtmlTreeDirectNavigator.startFrom(playlistItem)
-            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON));
+            .filter(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON))
+            .findFirst();
         if (!existingRemoveButton) {
             playlistItem.insertBefore(removeButton, divMenu);
         }
@@ -61,7 +63,8 @@ Browser.runtime.onMessage.addListener(message => {
     if (message === RuntimeMessages.NAVIGATED_TO_VIDEO_IN_PLAYLIST) {
         globalPageReadyInterval.start(1000, runningInterval => {
             const playlistPanelVideoRendererItems = HtmlTreeDirectNavigator.startFrom(document.body)
-                .find(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
+                .filter(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+                .find();
 
             if (!!playlistPanelVideoRendererItems) {
                 runningInterval.stop();

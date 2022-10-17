@@ -7,6 +7,7 @@ import {IdNavigationFilter, TagNavigationFilter} from "../html-navigation/naviga
 import {Ids, Tags} from "../html-navigation/element-data";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
+import {activePageObserverManager} from "../active-page-observer-manager";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 
@@ -39,7 +40,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
 function main(): void {
     const homePageVideos = CommonNavigations.getHomePageVideoRow();
 
-    const observer = new MutationObserver((mutations) => {
+    const homePageVideoElementsObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
             const target = mutation.target as HTMLElement;
             const ytdRichGridRow = HtmlParentNavigator.startFrom(target)
@@ -61,7 +62,8 @@ function main(): void {
     });
 
     const firstHomePageVideo = homePageVideos[0];
-    observer.observe(firstHomePageVideo.parentElement, {
+    activePageObserverManager.switchObserver(homePageVideoElementsObserver);
+    homePageVideoElementsObserver.observe(firstHomePageVideo.parentElement, {
         subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
     })
 }
