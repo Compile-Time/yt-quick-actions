@@ -79,6 +79,7 @@ export enum Ids {
 export enum TextContent {
     // The trailing whitespace is intentional and required!
     REMOVE_FROM = 'Remove from ',
+    REMOVE_FROM_LOWERCASE = 'remove from',
     REMOVE_FROM_PLAYLIST = 'Remove from playlist',
     SAVE = 'Save',
     SAVE_TO_WATCH_LATER = 'Save to Watch later',
