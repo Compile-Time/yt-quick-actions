@@ -10,7 +10,7 @@ import {
     TagNavigationFilter,
     TextContentContainsNavigationFilter
 } from "../html-navigation/navigation-filter";
-import {HtmlTreeDirectNavigator} from "../html-navigation/html-tree-direct-navigator";
+import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {activePageObserverManager} from "../active-page-observer-manager";
 
 const globalPageReadyInterval = new IntervalRunner(5);
@@ -27,7 +27,7 @@ function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
         const menuUpdateObserver = new MutationObserver((mutations, observer) => {
             mutations.forEach((mutation) => {
                 if (mutation.oldValue === '') {
-                    const ytFormattedText = HtmlTreeDirectNavigator.startFrom(mutation.target as HTMLElement)
+                    const ytFormattedText = HtmlTreeNavigator.startFrom(mutation.target as HTMLElement)
                         .filter(new TextContentContainsNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_LOWERCASE))
                         .findFirst();
                     if (!!ytFormattedText) {
@@ -77,11 +77,11 @@ function main(menuButtons: HTMLElement[]): void {
         for (const mutation of mutations) {
             const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(mutation.target as HTMLElement)
                 .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER));
-            const ytIconButton = HtmlTreeDirectNavigator.startFrom(ytdPlaylistVideoRenderer)
+            const ytIconButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
                 .filter(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
                 .findFirst();
 
-            const existingRemoveButton = HtmlTreeDirectNavigator.startFrom(ytdPlaylistVideoRenderer)
+            const existingRemoveButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
                 .filter(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON))
                 .findFirst();
             if (!!ytdPlaylistVideoRenderer && !existingRemoveButton) {

@@ -7,7 +7,7 @@ import {IdNavigationFilter, TagNavigationFilter} from "../html-navigation/naviga
 import {Ids, Tags} from "../html-navigation/element-data";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {activePageObserverManager} from "../active-page-observer-manager";
-import {HtmlTreeDirectNavigator} from "../html-navigation/html-tree-direct-navigator";
+import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 
@@ -49,7 +49,7 @@ function main(homePageVideos: HTMLElement[]): void {
                 const divMenu = HtmlParentNavigator.startFrom(menuButton)
                     .find(new IdNavigationFilter(Tags.DIV, Ids.MENU));
 
-                const existingWatchLaterButton = HtmlTreeDirectNavigator.startFrom(divMenu.parentElement)
+                const existingWatchLaterButton = HtmlTreeNavigator.startFrom(divMenu.parentElement)
                     .filter(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER))
                     .findFirst();
                 if (!existingWatchLaterButton) {

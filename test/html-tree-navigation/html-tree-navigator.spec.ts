@@ -1,4 +1,4 @@
-import {HtmlTreeDirectNavigator} from "../../src/html-navigation/html-tree-direct-navigator";
+import {HtmlTreeNavigator} from "../../src/html-navigation/html-tree-navigator";
 import {
     IdNavigationFilter,
     TagNavigationFilter,
@@ -14,7 +14,7 @@ describe('HtmlTreeDirectNavigator', () => {
         div2.id = 'div2';
         div.appendChild(div2);
 
-        const elements: Element[] = HtmlTreeDirectNavigator.startFrom(div)
+        const elements: Element[] = HtmlTreeNavigator.startFrom(div)
             .filter(new TagNavigationFilter('div'))
             .find();
 
@@ -28,7 +28,7 @@ describe('HtmlTreeDirectNavigator', () => {
         div2.id = 'div2';
         div.appendChild(div2);
 
-        const elements: Element[] = HtmlTreeDirectNavigator.startFrom(div)
+        const elements: Element[] = HtmlTreeNavigator.startFrom(div)
             .filter(new TagNavigationFilter('span'))
             .find();
 
@@ -50,7 +50,7 @@ describe('HtmlTreeDirectNavigator', () => {
         rootContainer.appendChild(div2);
         rootContainer.appendChild(div3);
 
-        const elements: Element[] = HtmlTreeDirectNavigator.startFrom(rootContainer)
+        const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter('div'))
             .find();
 
@@ -83,7 +83,7 @@ describe('HtmlTreeDirectNavigator', () => {
         rootContainer.appendChild(div2);
         rootContainer.appendChild(div3);
 
-        const elements: Element[] = HtmlTreeDirectNavigator.startFrom(rootContainer)
+        const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TextContentNavigationFilter('span', 'Span2'))
             .find();
 
@@ -118,7 +118,7 @@ describe('HtmlTreeDirectNavigator', () => {
         rootContainer.appendChild(div2);
         rootContainer.appendChild(div3);
 
-        const elements: Element[] = HtmlTreeDirectNavigator.startFrom(rootContainer)
+        const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter(Tags.BUTTON))
             .filter(new TextContentNavigationFilter('span', 'Span1'))
             .find();
@@ -156,7 +156,7 @@ describe('HtmlTreeDirectNavigator', () => {
         rootContainer.appendChild(div2);
         rootContainer.appendChild(div3);
 
-        const elements: Element[] = HtmlTreeDirectNavigator.startFrom(rootContainer)
+        const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter(Tags.DIV))
             .filter(new IdNavigationFilter('button', 'button1'))
             .find();

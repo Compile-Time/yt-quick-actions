@@ -5,29 +5,29 @@ import {
     TextContentNavigationFilter
 } from "./navigation-filter";
 import {Ids, Tags, TextContent} from "./element-data";
-import {HtmlTreeDirectNavigator} from "./html-tree-direct-navigator";
+import {HtmlTreeNavigator} from "./html-tree-navigator";
 
 export class CommonNavigations {
     static getPlaylistMenuButtons(): HTMLElement[] {
-        return HtmlTreeDirectNavigator.startFrom(document.body)
+        return HtmlTreeNavigator.startFrom(document.body)
             .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
             .filter(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
             .find();
     }
 
     static getPopupContainer(): HTMLElement | undefined {
-        return HtmlTreeDirectNavigator.startFrom(document.body)
+        return HtmlTreeNavigator.startFrom(document.body)
             .filter(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
             .findFirst();
     }
 
     static getPopupMenu(): HTMLElement {
-        return HtmlTreeDirectNavigator.startFrom(document.body)
+        return HtmlTreeNavigator.startFrom(document.body)
             .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
             .findFirst();
     }
     static getVideoFlexibleItemButtons(): HTMLElement | undefined {
-        return HtmlTreeDirectNavigator.startFrom(document.body)
+        return HtmlTreeNavigator.startFrom(document.body)
             .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
             .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
             .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
@@ -36,7 +36,7 @@ export class CommonNavigations {
     }
 
     static getPlaylistAddPopupContainerTrigger(): HTMLElement | undefined {
-        return HtmlTreeDirectNavigator.startFrom(document.body)
+        return HtmlTreeNavigator.startFrom(document.body)
             .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
             .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
             .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
@@ -46,7 +46,7 @@ export class CommonNavigations {
     }
 
     static getPlaylistAddWatchLaterEntry(): HTMLElement | undefined {
-        return HtmlTreeDirectNavigator.startFrom(document.body)
+        return HtmlTreeNavigator.startFrom(document.body)
             .filter(new TagNavigationFilter(Tags.YTD_ADD_TO_PLAYLIST_RENDERER))
             .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_ADD_TO_OPTION_RENDERER))
             .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_CHECKBOX, Ids.CHECKBOX))
@@ -55,7 +55,7 @@ export class CommonNavigations {
     }
 
     static getHomePageVideoRow(): HTMLElement[] {
-        return HtmlTreeDirectNavigator.startFrom(document.body)
+        return HtmlTreeNavigator.startFrom(document.body)
             .filter(new TagNavigationFilter(Tags.YTD_APP))
             .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
             .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
@@ -64,7 +64,7 @@ export class CommonNavigations {
     }
 
     static getHomePageVideoWatchLaterMenuEntry(): HTMLElement {
-        return HtmlTreeDirectNavigator.startFrom(document.body)
+        return HtmlTreeNavigator.startFrom(document.body)
             .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
             .filter(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.SAVE_TO_WATCH_LATER))
             .findFirst();
