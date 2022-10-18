@@ -76,7 +76,7 @@ describe('NavigationFilterQueue', () => {
 
         expect(filterQueue.areAllFiltersProcessed()).toBeTrue();
 
-        const clonedQueue = filterQueue.clone();
+        const clonedQueue = filterQueue.cloneWithoutProcessed();
         expect(clonedQueue.areAllFiltersProcessed()).toBeTrue();
     });
 });

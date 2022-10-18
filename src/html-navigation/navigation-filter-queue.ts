@@ -31,7 +31,14 @@ export class NavigationFilterQueue {
             .length === this.filtersToProcess.length;
     }
 
-    clone(): NavigationFilterQueue {
-        return new NavigationFilterQueue(this.filtersToProcess.map(toProcess => toProcess.clone()))
+    cloneWithoutProcessed(): NavigationFilterQueue {
+        return new NavigationFilterQueue(this.filtersToProcess
+            .filter(toProcess => !toProcess.isProcessed())
+            .map(toProcess => toProcess.clone())
+        )
+    }
+
+    getFilters(): NavigationFilterToProcess[] {
+        return this.filtersToProcess;
     }
 }
