@@ -1,5 +1,6 @@
 import {NavigationFilter} from "./navigation-filter";
 import {NavigationFilterQueue} from "./navigation-filter-queue";
+import {NavigationFilterToProcess} from "./navigation-filter-to-process";
 
 /**
  * Builder-like class for HTML tree navigation.
@@ -7,6 +8,8 @@ import {NavigationFilterQueue} from "./navigation-filter-queue";
 export class HtmlTreeNavigator {
     private debug: boolean = false;
     private initialFilterQueue: NavigationFilterQueue = new NavigationFilterQueue();
+    private debugFiltersToProcessMap: Map<NavigationFilter, NavigationFilterToProcess> =
+        new Map<NavigationFilter, NavigationFilterToProcess>();
 
     constructor(private element: HTMLElement) {
     }
@@ -53,7 +56,20 @@ export class HtmlTreeNavigator {
      */
     find(targetElementFilter: NavigationFilter): HTMLElement[] {
         this.filter(targetElementFilter);
-        return this.navigateTree(this.initialFilterQueue.clone(), this.element.children);
+        this.initialFilterQueue.getFilters().forEach(filterToProcess => {
+            this.debugFiltersToProcessMap.set(filterToProcess.getFilter(), filterToProcess);
+        })
+        const foundElement = this.navigateTree(this.initialFilterQueue, this.element.children);
+
+        if (this.debug) {
+            this.debugFiltersToProcessMap.forEach((filterToProcess) => {
+                if (!filterToProcess.isProcessed()) {
+                    console.debug(`Could not find matching element for filter ${filterToProcess.getFilter()}`)
+                }
+            })
+        }
+
+        return foundElement;
     }
 
     /**
@@ -78,9 +94,6 @@ export class HtmlTreeNavigator {
         return foundElements.length > 0 ? foundElements[foundElements.length - 1] : undefined;
     }
 
-    // TODO: This method could be made into its own class that returns a new instance of itself with
-    //  reduced information. Currently the filter queue is copied over and over again. This could become
-    //  costly and right now propagates unnecessary data that isn't required into the next recursive call.
     private navigateTree(filterQueue: NavigationFilterQueue, htmlCollection: HTMLCollection): HTMLElement[] {
         if (htmlCollection.length === 0) {
             return [];
@@ -90,20 +103,9 @@ export class HtmlTreeNavigator {
         const filter = filterToProcess.getFilter();
         const foundElements: HTMLElement[] = filter.apply(htmlCollection);
 
-        if (this.debug) {
-            if (foundElements.length === 0) {
-                // FIXME: This case is a common case which leads to many false positives being written
-                //  into the console. This information should be collected and then written out once in
-                //  the end.
-                console.debug(`No elements found with filter ${filter}`);
-            } else {
-                const foundElementNames = foundElements.map(element => element.tagName).join(', ');
-                console.debug(`Found the following elements with filter ${filter}: ${foundElementNames}`);
-            }
-        }
-
         if (foundElements.length > 0) {
             filterToProcess.markProcessed();
+            this.debugFiltersToProcessMap.set(filter, filterToProcess);
             if (filterQueue.areAllFiltersProcessed()) {
                 return foundElements;
             }
@@ -111,7 +113,7 @@ export class HtmlTreeNavigator {
 
         return Array.from(htmlCollection)
             .flatMap(element => element.children)
-            .flatMap(children => this.navigateTree(filterQueue.clone(), children))
+            .flatMap(children => this.navigateTree(filterQueue.cloneWithoutProcessed(), children))
             .filter(element => !!element);
     }
 }
