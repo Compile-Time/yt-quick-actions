@@ -1,7 +1,12 @@
 import {NavigationFilter} from "./navigation-filter";
 
+/**
+ * Class to keep track of process state for a filter.
+ *
+ * This is useful for situations where it is desirable to know if a filter has been already used (=processed) or not.
+ */
 export class NavigationFilterToProcess {
-    private filter: NavigationFilter;
+    private readonly filter: NavigationFilter;
     private processed: boolean;
 
     constructor(filter: NavigationFilter,

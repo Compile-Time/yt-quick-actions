@@ -1,11 +1,11 @@
-import {NavigationFilterQueue} from "../../src/html-navigation/navigation-filter-queue";
+import {NavigationFiltersToProcessQueue} from "../../src/html-navigation/navigation-filters-to-process-queue";
 import {TagNavigationFilter} from "../../src/html-navigation/navigation-filter";
 import {Tags} from "../../src/html-navigation/element-data";
 
 describe('NavigationFilterQueue', () => {
     it('should return first filter when no filters are marked as processed', () => {
         const divFilter = new TagNavigationFilter(Tags.DIV);
-        const filterQueue = NavigationFilterQueue.fromFilters([
+        const filterQueue = NavigationFiltersToProcessQueue.fromFilters([
             divFilter
         ]);
 
@@ -18,7 +18,7 @@ describe('NavigationFilterQueue', () => {
         const divFilter = new TagNavigationFilter(Tags.DIV);
         const spanFilter = new TagNavigationFilter(Tags.SPAN);
         const buttonFilter = new TagNavigationFilter(Tags.BUTTON);
-        const filterQueue = NavigationFilterQueue.fromFilters([
+        const filterQueue = NavigationFiltersToProcessQueue.fromFilters([
             divFilter, spanFilter, buttonFilter
         ]);
 
@@ -38,7 +38,7 @@ describe('NavigationFilterQueue', () => {
         const divFilter = new TagNavigationFilter(Tags.DIV);
         const spanFilter = new TagNavigationFilter(Tags.SPAN);
         const buttonFilter = new TagNavigationFilter(Tags.BUTTON);
-        const filterQueue = NavigationFilterQueue.fromFilters([
+        const filterQueue = NavigationFiltersToProcessQueue.fromFilters([
             divFilter, spanFilter, buttonFilter
         ]);
 
@@ -53,7 +53,7 @@ describe('NavigationFilterQueue', () => {
         const divFilter = new TagNavigationFilter(Tags.DIV);
         const spanFilter = new TagNavigationFilter(Tags.SPAN);
         const buttonFilter = new TagNavigationFilter(Tags.BUTTON);
-        const filterQueue = NavigationFilterQueue.fromFilters([
+        const filterQueue = NavigationFiltersToProcessQueue.fromFilters([
             divFilter, spanFilter, buttonFilter
         ]);
 
@@ -66,7 +66,7 @@ describe('NavigationFilterQueue', () => {
         const divFilter = new TagNavigationFilter(Tags.DIV);
         const spanFilter = new TagNavigationFilter(Tags.SPAN);
         const buttonFilter = new TagNavigationFilter(Tags.BUTTON);
-        const filterQueue = NavigationFilterQueue.fromFilters([
+        const filterQueue = NavigationFiltersToProcessQueue.fromFilters([
             divFilter, spanFilter, buttonFilter
         ]);
 

@@ -1,5 +1,5 @@
 import {NavigationFilter} from "./navigation-filter";
-import {NavigationFilterQueue} from "./navigation-filter-queue";
+import {NavigationFiltersToProcessQueue} from "./navigation-filters-to-process-queue";
 import {NavigationFilterToProcess} from "./navigation-filter-to-process";
 
 /**
@@ -7,7 +7,7 @@ import {NavigationFilterToProcess} from "./navigation-filter-to-process";
  */
 export class HtmlTreeNavigator {
     private debug: boolean = false;
-    private initialFilterQueue: NavigationFilterQueue = new NavigationFilterQueue();
+    private initialFilterQueue: NavigationFiltersToProcessQueue = new NavigationFiltersToProcessQueue();
     private debugFiltersToProcessMap: Map<NavigationFilter, NavigationFilterToProcess> =
         new Map<NavigationFilter, NavigationFilterToProcess>();
 
@@ -94,7 +94,7 @@ export class HtmlTreeNavigator {
         return foundElements.length > 0 ? foundElements[foundElements.length - 1] : undefined;
     }
 
-    private navigateTree(filterQueue: NavigationFilterQueue, htmlCollection: HTMLCollection): HTMLElement[] {
+    private navigateTree(filterQueue: NavigationFiltersToProcessQueue, htmlCollection: HTMLCollection): HTMLElement[] {
         if (htmlCollection.length === 0) {
             return [];
         }

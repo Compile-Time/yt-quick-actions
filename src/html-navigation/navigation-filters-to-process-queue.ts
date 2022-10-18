@@ -1,15 +1,21 @@
 import {NavigationFilterToProcess} from "./navigation-filter-to-process";
 import {NavigationFilter} from "./navigation-filter";
 
-export class NavigationFilterQueue {
+/**
+ * Class representing a queue of filters to be processed.
+ *
+ * This class provides methods for determining the overall state of the filters and is designed with
+ * recursion usage in mind.
+ */
+export class NavigationFiltersToProcessQueue {
     private readonly filtersToProcess: NavigationFilterToProcess[] = [];
 
     constructor(filters: NavigationFilterToProcess[] = []) {
         this.filtersToProcess = filters;
     }
 
-    static fromFilters(navigationFilters: NavigationFilter[]): NavigationFilterQueue {
-        return new NavigationFilterQueue(navigationFilters.map(filter => new NavigationFilterToProcess(filter)));
+    static fromFilters(navigationFilters: NavigationFilter[]): NavigationFiltersToProcessQueue {
+        return new NavigationFiltersToProcessQueue(navigationFilters.map(filter => new NavigationFilterToProcess(filter)));
     }
 
     getCurrentOrNextUnprocessedFilter(): NavigationFilterToProcess | undefined {
@@ -31,8 +37,8 @@ export class NavigationFilterQueue {
             .length === this.filtersToProcess.length;
     }
 
-    cloneWithoutProcessed(): NavigationFilterQueue {
-        return new NavigationFilterQueue(this.filtersToProcess
+    cloneWithoutProcessed(): NavigationFiltersToProcessQueue {
+        return new NavigationFiltersToProcessQueue(this.filtersToProcess
             .filter(toProcess => !toProcess.isProcessed())
             .map(toProcess => toProcess.clone())
         )
