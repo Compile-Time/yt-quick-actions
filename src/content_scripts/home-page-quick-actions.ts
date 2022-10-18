@@ -10,6 +10,10 @@ import {activePageObserverManager} from "../active-page-observer-manager";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 
 const globalPageReadyInterval = new IntervalRunner(5);
+globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
+    console.error('Could not determine if page is ready for operation. Please enable debug mode and check' +
+        ' the logs.')
+});
 
 function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement {
     const watchLaterButton = YtQuickActionsElements.watchLaterHomeVideoButton();

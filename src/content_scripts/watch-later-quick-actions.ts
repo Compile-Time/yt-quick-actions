@@ -14,6 +14,10 @@ import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {activePageObserverManager} from "../active-page-observer-manager";
 
 const globalPageReadyInterval = new IntervalRunner(5);
+globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
+    console.error('Could not determine if page is ready for operation. Please enable debug mode and check' +
+        ' the logs.')
+});
 const createdElements: HTMLElement[] = [];
 
 function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {

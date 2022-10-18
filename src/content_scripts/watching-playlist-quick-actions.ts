@@ -9,6 +9,10 @@ import {AttributeNames, Ids, Tags, TextContent} from "../html-navigation/element
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 
 const globalPageReadyInterval = new IntervalRunner(5);
+globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
+    console.error('Could not determine if page is ready for operation. Please enable debug mode and check' +
+        ' the logs.')
+});
 
 function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
     const button = YtQuickActionsElements.removeButton();

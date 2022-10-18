@@ -6,6 +6,10 @@ import {IntervalRunner} from "../interval-runner";
 import {Tags, TextContent} from "../html-navigation/element-data";
 
 const globalPageReadyInterval = new IntervalRunner(5);
+globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
+    console.error('Could not determine if page is ready for operation. Please enable debug mode and check' +
+        ' the logs.')
+});
 const createdElements: HTMLElement[] = [];
 
 function main(flexibleItemButtons: HTMLElement): void {
