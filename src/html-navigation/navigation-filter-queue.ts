@@ -2,7 +2,7 @@ import {NavigationFilterToProcess} from "./navigation-filter-to-process";
 import {NavigationFilter} from "./navigation-filter";
 
 export class NavigationFilterQueue {
-    private filtersToProcess: NavigationFilterToProcess[] = [];
+    private readonly filtersToProcess: NavigationFilterToProcess[] = [];
 
     constructor(filters: NavigationFilterToProcess[] = []) {
         this.filtersToProcess = filters;

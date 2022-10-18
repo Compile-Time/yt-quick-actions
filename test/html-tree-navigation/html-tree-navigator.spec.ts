@@ -6,7 +6,7 @@ import {
 } from "../../src/html-navigation/navigation-filter";
 import {Tags} from "../../src/html-navigation/element-data";
 
-describe('HtmlTreeDirectNavigator', () => {
+describe('HtmlTreeNavigator', () => {
     it('should return the only element present on matching filters', () => {
         const div = document.createElement('div');
         div.id = 'div1';
@@ -15,8 +15,7 @@ describe('HtmlTreeDirectNavigator', () => {
         div.appendChild(div2);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(div)
-            .filter(new TagNavigationFilter('div'))
-            .find();
+            .find(new TagNavigationFilter('div'));
 
         expect(elements).toEqual([div2]);
     });
@@ -29,8 +28,7 @@ describe('HtmlTreeDirectNavigator', () => {
         div.appendChild(div2);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(div)
-            .filter(new TagNavigationFilter('span'))
-            .find();
+            .find(new TagNavigationFilter('span'));
 
         expect(elements).toEqual([]);
     });
@@ -51,8 +49,7 @@ describe('HtmlTreeDirectNavigator', () => {
         rootContainer.appendChild(div3);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
-            .filter(new TagNavigationFilter('div'))
-            .find();
+            .find(new TagNavigationFilter('div'));
 
         expect(elements).toEqual([div1, div2, div3]);
     });
@@ -84,8 +81,7 @@ describe('HtmlTreeDirectNavigator', () => {
         rootContainer.appendChild(div3);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
-            .filter(new TextContentNavigationFilter('span', 'Span2'))
-            .find();
+            .find(new TextContentNavigationFilter('span', 'Span2'));
 
         expect(elements).toEqual([span2]);
     });
@@ -120,8 +116,7 @@ describe('HtmlTreeDirectNavigator', () => {
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter(Tags.BUTTON))
-            .filter(new TextContentNavigationFilter('span', 'Span1'))
-            .find();
+            .find(new TextContentNavigationFilter('span', 'Span1'));
 
         expect(elements).toEqual([span1]);
     });
@@ -158,8 +153,7 @@ describe('HtmlTreeDirectNavigator', () => {
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter(Tags.DIV))
-            .filter(new IdNavigationFilter('button', 'button1'))
-            .find();
+            .find(new IdNavigationFilter('button', 'button1'));
 
         expect(elements).toEqual([button1]);
     });

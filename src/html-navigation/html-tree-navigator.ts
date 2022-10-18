@@ -18,8 +18,8 @@ export class HtmlTreeNavigator {
     /**
      * Enable debug mode for this HtmlTreeNavigator.
      *
-     * Debug mode causes the navigator to write out information if for a given filter an element could be
-     * found. The information is written out with console.debug.
+     * Debug mode causes the navigator to write out information about the results of the filter operation.
+     * The intent is to help with debugging by being able to see if for a filter a match could be found.
      */
     debugNavigation(): HtmlTreeNavigator {
         this.debug = true;
@@ -31,7 +31,8 @@ export class HtmlTreeNavigator {
      *
      * When looking for a specific element in the HTMl tree it might be possible that such an element
      * might exist in many places in the tree while only a specific subtree is relevant. This method
-     * allows restricting usage in a specific subtree.
+     * allows restricting the search to a specific subtree.
+     *
      * @param filter - The filter to use for subtree restriction
      */
     filter(filter: NavigationFilter): HtmlTreeNavigator {
@@ -39,22 +40,47 @@ export class HtmlTreeNavigator {
         return this;
     }
 
-    find(): HTMLElement[] | undefined {
-        // TODO: It would be nicer if the target element to find is provided as an argument to this
-        //  method. Otherwise it is unclear what the target should be when providing a bunch of filter calls.
+    /**
+     * Define the HTML element to look for with a filter.
+     *
+     * Calling this method will start the navigation process of this {@link HtmlTreeNavigator}.
+     * The {@link HtmlTreeNavigator} will then recursively navigate the HTML tree. If any filters are set
+     * those filters will be taken into account ({@see filter}). Only when all filters match a non-empty
+     * result will be returned.
+     *
+     * @param targetElementFilter - The filter to use for finding the desired target element
+     * @returns {HTMLElement[]} - If any of the given filters do not match, an empty array is returned
+     */
+    find(targetElementFilter: NavigationFilter): HTMLElement[] {
+        this.filter(targetElementFilter);
         return this.navigateTree(this.initialFilterQueue.clone(), this.element.children);
     }
 
-    findFirst(): HTMLElement | undefined {
-        const foundElements = this.find();
+    /**
+     * @see find for implementation details.
+     *
+     * This method differs to {@link find} that it only returns the first element of the array of found
+     * elements.
+     */
+    findFirst(filter: NavigationFilter): HTMLElement | undefined {
+        const foundElements = this.find(filter);
         return foundElements.length > 0 ? foundElements[0] : undefined;
     }
 
-    findLast(): HTMLElement | undefined {
-        const foundElements = this.find();
+    /**
+     * @see find for implementation details.
+     *
+     * This method differs to {@link find} that it only returns the last element of the array of found
+     * elements.
+     */
+    findLast(filter: NavigationFilter): HTMLElement | undefined {
+        const foundElements = this.find(filter);
         return foundElements.length > 0 ? foundElements[foundElements.length - 1] : undefined;
     }
 
+    // TODO: This method could be made into its own class that returns a new instance of itself with
+    //  reduced information. Currently the filter queue is copied over and over again. This could become
+    //  costly and right now propagates unnecessary data that isn't required into the next recursive call.
     private navigateTree(filterQueue: NavigationFilterQueue, htmlCollection: HTMLCollection): HTMLElement[] {
         if (htmlCollection.length === 0) {
             return [];
@@ -66,6 +92,9 @@ export class HtmlTreeNavigator {
 
         if (this.debug) {
             if (foundElements.length === 0) {
+                // FIXME: This case is a common case which leads to many false positives being written
+                //  into the console. This information should be collected and then written out once in
+                //  the end.
                 console.debug(`No elements found with filter ${filter}`);
             } else {
                 const foundElementNames = foundElements.map(element => element.tagName).join(', ');

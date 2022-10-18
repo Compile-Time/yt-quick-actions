@@ -28,8 +28,7 @@ function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
             mutations.forEach((mutation) => {
                 if (mutation.oldValue === '') {
                     const ytFormattedText = HtmlTreeNavigator.startFrom(mutation.target as HTMLElement)
-                        .filter(new TextContentContainsNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_LOWERCASE))
-                        .findFirst();
+                        .findFirst(new TextContentContainsNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_LOWERCASE));
                     if (!!ytFormattedText) {
                         ytFormattedText.click();
                     }
@@ -78,12 +77,10 @@ function main(menuButtons: HTMLElement[]): void {
             const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(mutation.target as HTMLElement)
                 .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER));
             const ytIconButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
-                .filter(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
-                .findFirst();
+                .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
 
             const existingRemoveButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
-                .filter(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON))
-                .findFirst();
+                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON));
             if (!!ytdPlaylistVideoRenderer && !existingRemoveButton) {
                 appendRemoveButton(ytIconButton, ytdPlaylistVideoRenderer);
             }

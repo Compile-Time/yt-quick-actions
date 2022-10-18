@@ -38,6 +38,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
 }
 
 function main(homePageVideos: HTMLElement[]): void {
+    // Home page videos are lazily loaded on scrolling, therefore, we need to observe them.
     const homePageVideoElementsObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
             const target = mutation.target as HTMLElement;
@@ -50,8 +51,7 @@ function main(homePageVideos: HTMLElement[]): void {
                     .find(new IdNavigationFilter(Tags.DIV, Ids.MENU));
 
                 const existingWatchLaterButton = HtmlTreeNavigator.startFrom(divMenu.parentElement)
-                    .filter(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER))
-                    .findFirst();
+                    .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER));
                 if (!existingWatchLaterButton) {
                     divMenu.parentElement.insertBefore(setupWatchLaterButton(menuButton), divMenu);
                 }
