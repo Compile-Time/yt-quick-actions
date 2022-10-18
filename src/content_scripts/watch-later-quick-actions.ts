@@ -55,7 +55,6 @@ function appendRemoveButton(ytIconButton: HTMLElement, ytdPlaylistVideoRenderer:
 function main(menuButtons: HTMLElement[]): void {
     // Remove all previously created remove buttons.
     createdElements.forEach(element => element.remove());
-    console.log(menuButtons);
 
     // This cause the YouTube icon button menu HTML to be loaded, otherwise we can not find it by
     // navigating the HTML tree.
@@ -76,7 +75,6 @@ function main(menuButtons: HTMLElement[]): void {
     // playlist items, therefore, we need both an interval and an observer.
     const loadingNewEntriesObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
-            console.log(mutation);
             const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(mutation.target as HTMLElement)
                 .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER));
             const ytIconButton = HtmlTreeDirectNavigator.startFrom(ytdPlaylistVideoRenderer)
@@ -101,10 +99,7 @@ function main(menuButtons: HTMLElement[]): void {
 Browser.runtime.onMessage.addListener((message) => {
     if (message === RuntimeMessages.NAVIGATED_TO_PLAYLIST) {
         globalPageReadyInterval.start(1000, (runningInterval: RunningInterval) => {
-            const menuButtons: HTMLElement[] = HtmlTreeDirectNavigator.startFrom(document.body)
-                .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
-                .filter(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
-                .find();
+            const menuButtons: HTMLElement[] = CommonNavigations.getPlaylistMenuButtons();
             if (!!menuButtons) {
                 runningInterval.stop();
                 main(menuButtons);

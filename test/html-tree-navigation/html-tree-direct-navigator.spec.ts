@@ -1,5 +1,9 @@
 import {HtmlTreeDirectNavigator} from "../../src/html-navigation/html-tree-direct-navigator";
-import {TagNavigationFilter, TextContentNavigationFilter} from "../../src/html-navigation/navigation-filter";
+import {
+    IdNavigationFilter,
+    TagNavigationFilter,
+    TextContentNavigationFilter
+} from "../../src/html-navigation/navigation-filter";
 import {Tags} from "../../src/html-navigation/element-data";
 
 describe('HtmlTreeDirectNavigator', () => {
@@ -120,5 +124,43 @@ describe('HtmlTreeDirectNavigator', () => {
             .find();
 
         expect(elements).toEqual([span1]);
+    });
+
+    it('should return the element whose path matches the most with the given filters even if it is not the' +
+        ' last element in the tree', () => {
+        const rootContainer = document.createElement('div');
+        rootContainer.id = 'root-container';
+
+        const div1 = document.createElement('div');
+        div1.id = 'div1';
+        const div2 = document.createElement('div');
+        div2.id = 'div2';
+        const div3 = document.createElement('div');
+        div3.id = 'div3';
+
+        const button1 = document.createElement('button');
+        button1.id = 'button1';
+        const button2 = document.createElement('button');
+        const button3 = document.createElement('button');
+
+        const span1 = document.createElement('span');
+        span1.textContent = 'Span1';
+
+        button1.appendChild(span1);
+
+        div1.appendChild(button1);
+        div2.appendChild(button2);
+        div3.appendChild(button3);
+
+        rootContainer.appendChild(div1);
+        rootContainer.appendChild(div2);
+        rootContainer.appendChild(div3);
+
+        const elements: Element[] = HtmlTreeDirectNavigator.startFrom(rootContainer)
+            .filter(new TagNavigationFilter(Tags.DIV))
+            .filter(new IdNavigationFilter('button', 'button1'))
+            .find();
+
+        expect(elements).toEqual([button1]);
     });
 });

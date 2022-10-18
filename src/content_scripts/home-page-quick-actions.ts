@@ -6,8 +6,8 @@ import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
 import {IdNavigationFilter, TagNavigationFilter} from "../html-navigation/navigation-filter";
 import {Ids, Tags} from "../html-navigation/element-data";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
-import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {activePageObserverManager} from "../active-page-observer-manager";
+import {HtmlTreeDirectNavigator} from "../html-navigation/html-tree-direct-navigator";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 
@@ -37,9 +37,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
     return watchLaterButton;
 }
 
-function main(): void {
-    const homePageVideos = CommonNavigations.getHomePageVideoRow();
-
+function main(homePageVideos: HTMLElement[]): void {
     const homePageVideoElementsObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
             const target = mutation.target as HTMLElement;
@@ -51,7 +49,7 @@ function main(): void {
                 const divMenu = HtmlParentNavigator.startFrom(menuButton)
                     .find(new IdNavigationFilter(Tags.DIV, Ids.MENU));
 
-                const existingWatchLaterButton = HtmlTreeNavigator.startFrom(divMenu.parentElement)
+                const existingWatchLaterButton = HtmlTreeDirectNavigator.startFrom(divMenu.parentElement)
                     .filter(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER))
                     .findFirst();
                 if (!existingWatchLaterButton) {
@@ -71,8 +69,11 @@ function main(): void {
 Browser.runtime.onMessage.addListener(message => {
     if (message === RuntimeMessages.NAVIGATED_TO_HOME_PAGE) {
         globalPageReadyInterval.start(1000, runningInterval => {
-            runningInterval.stop();
-            main();
+            const homePageVideos = CommonNavigations.getHomePageVideoRow();
+            if (homePageVideos.length > 0) {
+                runningInterval.stop();
+                main(homePageVideos);
+            }
         });
     }
 });
