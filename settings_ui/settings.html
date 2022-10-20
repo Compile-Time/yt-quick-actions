@@ -8,10 +8,16 @@
 <body>
 <form>
     <label>Log mode:</label><br>
-    <input type="radio" id="normal" name="log-mode" value="normal">
-    <label for="normal">Normal</label><br>
-    <input type="radio" id="debug" name="log-mode" value="debug">
-    <label for="debug">Debug</label><br>
+    <input id="log-mode-normal" name="log-mode" type="radio" value="normal">
+    <label for="log-mode-normal">Normal</label><br>
+    <input id="log-mode-debug" name="log-mode" type="radio" value="debug">
+    <label for="log-mode-debug">Debug</label><br>
+
+    <label>Theme:</label><br>
+    <input id="theme-light" name="theme" type="radio" value="light">
+    <label for="theme-light">Light</label><br>
+    <input id="theme-dark" name="theme" type="radio" value="dark">
+    <label for="theme-dark">Dark</label><br>
 
     <button type="submit">Save</button>
 </form>
