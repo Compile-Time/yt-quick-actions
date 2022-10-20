@@ -6,7 +6,7 @@ import {NavigationFilterToProcess} from "./navigation-filter-to-process";
  * Builder-like class for HTML tree navigation.
  */
 export class HtmlTreeNavigator {
-    private debug: boolean = false;
+    private logModePromise: Promise<string> = undefined;
     private initialFilterQueue: NavigationFiltersToProcessQueue = new NavigationFiltersToProcessQueue();
     private debugFiltersToProcessMap: Map<NavigationFilter, NavigationFilterToProcess> =
         new Map<NavigationFilter, NavigationFilterToProcess>();
@@ -24,8 +24,8 @@ export class HtmlTreeNavigator {
      * Debug mode causes the navigator to write out information about the results of the filter operation.
      * The intent is to help with debugging by being able to see if for a filter a match could be found.
      */
-    debugNavigation(): HtmlTreeNavigator {
-        this.debug = true;
+    logMode(logModePromise: Promise<string>): HtmlTreeNavigator {
+        this.logModePromise = logModePromise;
         return this;
     }
 
@@ -61,10 +61,18 @@ export class HtmlTreeNavigator {
         })
         const foundElement = this.navigateTree(this.initialFilterQueue, this.element.children);
 
-        if (this.debug) {
-            this.debugFiltersToProcessMap.forEach((filterToProcess) => {
-                if (!filterToProcess.isProcessed()) {
-                    console.debug(`Could not find matching element for filter ${filterToProcess.getFilter()}`)
+        if (!!this.logModePromise) {
+            this.logModePromise.then(logMode => {
+                if (logMode === 'debug') {
+                    let debugString = '';
+                    this.debugFiltersToProcessMap.forEach((filterToProcess) => {
+                        if (filterToProcess.isProcessed()) {
+                            debugString += `Filter ${filterToProcess.getFilter()} result: found element\n`;
+                        } else {
+                            debugString += `Filter ${filterToProcess.getFilter()} result: element not found!\n`;
+                        }
+                    })
+                    console.debug(debugString.trim());
                 }
             })
         }

@@ -11,6 +11,7 @@ import {Ids, Tags, TextContent} from "../html-navigation/element-data";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {activePageObserverManager} from "../active-page-observer-manager";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
+import {StorageAccessor} from "../storage-accessor";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
@@ -23,6 +24,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
     watchLaterButton.onclick = () => {
         videoMenuButton.click();
 
+        // Wait for the playlist save popup to be ready.
         const popupReadyObserver = new MutationObserver((mutations, observer) => {
             for (const mutation of mutations) {
                 const target = mutation.target;
@@ -80,6 +82,7 @@ Browser.runtime.onMessage.addListener(message => {
     if (message === RuntimeMessages.NAVIGATED_TO_HOME_PAGE) {
         globalPageReadyInterval.start(1000, runningInterval => {
             const homePageVideos = HtmlTreeNavigator.startFrom(document.body)
+                .logMode(StorageAccessor.getLogMode())
                 .filter(new TagNavigationFilter(Tags.YTD_APP))
                 .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
                 .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))

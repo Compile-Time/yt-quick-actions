@@ -6,6 +6,7 @@ import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
 import {IdNavigationFilter, TextContentNavigationFilter} from "../html-navigation/navigation-filter";
 import {AttributeNames, Ids, Tags, TextContent} from "../html-navigation/element-data";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
+import {StorageAccessor} from "../storage-accessor";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
@@ -65,6 +66,7 @@ Browser.runtime.onMessage.addListener(message => {
     if (message === RuntimeMessages.NAVIGATED_TO_VIDEO_IN_PLAYLIST) {
         globalPageReadyInterval.start(1000, runningInterval => {
             const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
+                .logMode(StorageAccessor.getLogMode())
                 .find(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
 
             if (!!playlistPanelVideoRendererItems) {

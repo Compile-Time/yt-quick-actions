@@ -9,6 +9,7 @@ import {
     TagNavigationFilter
 } from "../html-navigation/navigation-filter";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
+import {StorageAccessor} from "../storage-accessor";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
@@ -32,6 +33,7 @@ function main(flexibleItemButtons: HTMLElement): void {
             .findFirst(new IdAndTextContentNavigationFilter(Tags.YT_FORMATTED_STRING, Ids.TEXT, TextContent.SAVE));
         popupTrigger.click();
 
+        // Wait for the playlist save popup to be ready.
         const popupReadyObserver = new MutationObserver((mutations, observer) => {
             for (const mutation of mutations) {
                 const target = mutation.target;
@@ -67,6 +69,7 @@ Browser.runtime.onMessage.addListener((message) => {
     if (message === RuntimeMessages.NAVIGATED_TO_VIDEO) {
         globalPageReadyInterval.start(1000, runningInterval => {
             const flexibleItemButtons = HtmlTreeNavigator.startFrom(document.body)
+                .logMode(StorageAccessor.getLogMode())
                 .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
                 .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
                 .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
