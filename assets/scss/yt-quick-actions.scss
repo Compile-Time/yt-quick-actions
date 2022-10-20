@@ -1,0 +1,48 @@
+$light-theme-icon-color: black;
+$dark-theme-icon-color: white;
+
+@mixin quick-actions-button-style($color) {
+  color: $color;
+  border: none;
+  background: transparent;
+}
+
+@mixin quick-actions-button-hover-style() {
+  color: red;
+  cursor: pointer;
+}
+
+.quick-actions-button {
+  @include quick-actions-button-style($light-theme-icon-color);
+}
+
+.quick-actions-button:hover {
+  @include quick-actions-button-hover-style;
+}
+
+.quick-actions-watch-later-under-video-icon {
+  padding-left: .6em;
+  vertical-align: .1em !important;
+}
+
+@media screen and (prefers-color-scheme: dark) {
+  .quick-actions-button {
+    @include quick-actions-button-style($dark-theme-icon-color);
+  }
+}
+
+.quick-actions-button-light {
+  @include quick-actions-button-style($light-theme-icon-color);
+}
+
+.quick-actions-button-light:hover {
+  @include quick-actions-button-hover-style;
+}
+
+.quick-actions-button-dark {
+  @include quick-actions-button-style($dark-theme-icon-color);
+}
+
+.quick-actions-button-dark:hover {
+  @include quick-actions-button-hover-style;
+}
