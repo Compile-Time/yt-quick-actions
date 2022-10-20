@@ -1,6 +1,5 @@
 import * as Browser from "webextension-polyfill";
 import {RuntimeMessages} from "../runtime-messages";
-import {CommonNavigations} from "../html-navigation/common-navigations";
 import {IntervalRunner} from "../interval-runner";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
@@ -18,7 +17,8 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
     const button = YtQuickActionsElements.removeButton();
     button.onclick = () => {
         element.click();
-        const popupMenu = CommonNavigations.getPopupMenu();
+        const popupMenu = HtmlTreeNavigator.startFrom(document.body)
+            .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS));
         // Wait for menu popup to update with an observer so the correct video is removed.
         const popupReadyObserver = new MutationObserver((mutations, observer) => {
             for (const mutation of mutations) {

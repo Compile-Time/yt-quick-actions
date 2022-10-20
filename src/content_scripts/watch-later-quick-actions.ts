@@ -1,6 +1,5 @@
 import * as Browser from "webextension-polyfill";
 import {Ids, Tags, TextContent} from "../html-navigation/element-data";
-import {CommonNavigations} from "../html-navigation/common-navigations";
 import {RuntimeMessages} from "../runtime-messages";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {IntervalRunner, RunningInterval} from "../interval-runner";
@@ -24,7 +23,8 @@ function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
     const removeButton = YtQuickActionsElements.removeButton();
     removeButton.onclick = () => {
         menuButton.click();
-        const popupMenu = CommonNavigations.getPopupMenu();
+        const popupMenu = HtmlTreeNavigator.startFrom(document.body)
+            .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS));
 
         // If we do not wait for the popup content to update, the first entry in the playlist is deleted due
         // to the HTML load performed with the first entry.
@@ -100,7 +100,9 @@ function main(menuButtons: HTMLElement[]): void {
 Browser.runtime.onMessage.addListener((message) => {
     if (message === RuntimeMessages.NAVIGATED_TO_PLAYLIST) {
         globalPageReadyInterval.start(1000, (runningInterval: RunningInterval) => {
-            const menuButtons: HTMLElement[] = CommonNavigations.getPlaylistMenuButtons();
+            const menuButtons: HTMLElement[] = HtmlTreeNavigator.startFrom(document.body)
+                .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
+                .find(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
             if (!!menuButtons) {
                 runningInterval.stop();
                 main(menuButtons);

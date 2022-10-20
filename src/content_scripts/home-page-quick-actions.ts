@@ -1,10 +1,13 @@
 import * as Browser from "webextension-polyfill";
 import {RuntimeMessages} from "../runtime-messages";
 import {IntervalRunner} from "../interval-runner";
-import {CommonNavigations} from "../html-navigation/common-navigations";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
-import {IdNavigationFilter, TagNavigationFilter} from "../html-navigation/navigation-filter";
-import {Ids, Tags} from "../html-navigation/element-data";
+import {
+    IdNavigationFilter,
+    TagNavigationFilter,
+    TextContentNavigationFilter
+} from "../html-navigation/navigation-filter";
+import {Ids, Tags, TextContent} from "../html-navigation/element-data";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {activePageObserverManager} from "../active-page-observer-manager";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
@@ -25,14 +28,17 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
                 const target = mutation.target;
                 if (target.nodeName.toLowerCase() === Tags.YTD_MENU_SERVICE_ITEM_RENDERER
                     && mutation.oldValue === '') {
-                    const watchLaterButton = CommonNavigations.getHomePageVideoWatchLaterMenuEntry()
+                    const watchLaterButton = HtmlTreeNavigator.startFrom(document.body)
+                        .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
+                        .findFirst(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.SAVE_TO_WATCH_LATER));
                     watchLaterButton.click();
                     observer.disconnect();
                 }
             }
         });
 
-        const popupContainer = CommonNavigations.getPopupContainer();
+        const popupContainer = HtmlTreeNavigator.startFrom(document.body)
+            .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER));
         popupReadyObserver.observe(popupContainer, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
         })
@@ -73,7 +79,11 @@ function main(homePageVideos: HTMLElement[]): void {
 Browser.runtime.onMessage.addListener(message => {
     if (message === RuntimeMessages.NAVIGATED_TO_HOME_PAGE) {
         globalPageReadyInterval.start(1000, runningInterval => {
-            const homePageVideos = CommonNavigations.getHomePageVideoRow();
+            const homePageVideos = HtmlTreeNavigator.startFrom(document.body)
+                .filter(new TagNavigationFilter(Tags.YTD_APP))
+                .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
+                .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
+                .find(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW));
             if (homePageVideos.length > 0) {
                 runningInterval.stop();
                 main(homePageVideos);
