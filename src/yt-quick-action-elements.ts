@@ -1,5 +1,6 @@
 import {Ids, Tags} from "./html-navigation/element-data";
 import {StorageAccessor} from "./storage-accessor";
+import {Theme} from "./enums/theme";
 
 export class YtQuickActionsElements {
     static removeButton(): HTMLButtonElement {
@@ -30,10 +31,14 @@ export class YtQuickActionsElements {
         StorageAccessor.getTheme()
             .then(theme => {
                 let cssClass = 'quick-actions-button';
-                if (!!theme && theme === 'light') {
-                    cssClass = 'quick-actions-button-light'
-                } else if (!!theme && theme === 'dark') {
-                    cssClass = 'quick-actions-button-dark'
+                switch (theme) {
+                    case Theme.LIGHT:
+                        cssClass = 'quick-actions-button-light'
+                        break;
+
+                    case Theme.DARK:
+                        cssClass = 'quick-actions-button-dark'
+                        break;
                 }
                 button.setAttribute('class', cssClass);
             });

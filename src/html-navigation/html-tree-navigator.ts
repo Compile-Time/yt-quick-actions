@@ -1,6 +1,7 @@
 import {NavigationFilter} from "./navigation-filter";
 import {NavigationFiltersToProcessQueue} from "./navigation-filters-to-process-queue";
 import {NavigationFilterToProcess} from "./navigation-filter-to-process";
+import {LogMode} from "../enums/log-mode";
 
 /**
  * Builder-like class for HTML tree navigation.
@@ -63,7 +64,7 @@ export class HtmlTreeNavigator {
 
         if (!!this.logModePromise) {
             this.logModePromise.then(logMode => {
-                if (logMode === 'debug') {
+                if (logMode === LogMode.DEBUG) {
                     let debugString = '';
                     this.debugFiltersToProcessMap.forEach((filterToProcess) => {
                         if (filterToProcess.isProcessed()) {

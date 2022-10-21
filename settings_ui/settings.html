@@ -8,12 +8,13 @@
 <body>
 <form>
     <label>Log mode:</label><br>
-    <input id="log-mode-normal" name="log-mode" type="radio" value="normal">
-    <label for="log-mode-normal">Normal</label><br>
+    <input id="log-mode-default" name="log-mode" type="radio" value="default">
+    <label for="log-mode-default">Default</label><br>
     <input id="log-mode-debug" name="log-mode" type="radio" value="debug">
     <label for="log-mode-debug">Debug</label><br>
 
-    <label>Theme:</label><br>
+    <input id="theme-checkbox" name="theme-checkbox" type="checkbox">
+    <label for="theme-checkbox">Theme:</label><br>
     <input id="theme-light" name="theme" type="radio" value="light">
     <label for="theme-light">Light</label><br>
     <input id="theme-dark" name="theme" type="radio" value="dark">
@@ -22,6 +23,6 @@
     <button type="submit">Save</button>
 </form>
 
-<script src="settings.js"></script>
+<script src="settings.ts" type="module"></script>
 </body>
 </html>
