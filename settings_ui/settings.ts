@@ -2,7 +2,7 @@ import * as Browser from "webextension-polyfill";
 import {LogMode} from "../src/enums/log-mode";
 import {Theme} from "../src/enums/theme";
 
-function getFormLogMode() {
+function getFormLogMode(): string {
     let selectedValue = document.querySelector('input[name="log-mode"]:checked')
         .getAttribute('value');
 
@@ -19,11 +19,12 @@ function getFormLogMode() {
     return selectedValue;
 }
 
-function getFormTheme() {
+function getFormTheme(): string {
     let selectedValue = document.querySelector('input[name="theme"]:checked')
         .getAttribute('value');
 
     switch (selectedValue) {
+        case Theme.SYSTEM:
         case Theme.LIGHT:
         case Theme.DARK:
             break;
@@ -36,15 +37,7 @@ function getFormTheme() {
     return selectedValue;
 }
 
-function saveOptions(e) {
-    e.preventDefault();
-    Browser.storage.local.set({
-        logMode: getFormLogMode(),
-        theme: getFormTheme()
-    });
-}
-
-function initLogMode() {
+function initLogMode(): void {
     Browser.storage.local.get('logMode')
         .then(
             storage => {
@@ -60,12 +53,15 @@ function initLogMode() {
         );
 }
 
-function initTheme() {
+function initTheme(): void {
     Browser.storage.local.get('theme')
         .then(
             storage => {
                 if (!!storage.theme) {
                     document.querySelector(`#theme-${storage.theme}`)
+                        .setAttribute('checked', 'true');
+                } else {
+                    document.querySelector('#theme-system')
                         .setAttribute('checked', 'true');
                 }
             },
@@ -73,10 +69,18 @@ function initTheme() {
         )
 }
 
-function init() {
+function saveOptions(e): void {
+    e.preventDefault();
+    Browser.storage.local.set({
+        logMode: getFormLogMode(),
+        theme: getFormTheme()
+    });
+}
+
+function init(): void {
     initLogMode();
     initTheme();
 }
 
-document.addEventListener("DOMContentLoaded", init);
-document.querySelector("form").addEventListener("submit", saveOptions);
+document.addEventListener('DOMContentLoaded', init);
+document.querySelector('form').addEventListener('submit', saveOptions);

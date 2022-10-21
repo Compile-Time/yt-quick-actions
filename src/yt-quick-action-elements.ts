@@ -30,7 +30,7 @@ export class YtQuickActionsElements {
     private static setButtonClass(button: HTMLButtonElement): void {
         StorageAccessor.getTheme()
             .then(theme => {
-                let cssClass = 'quick-actions-button';
+                let cssClass;
                 switch (theme) {
                     case Theme.LIGHT:
                         cssClass = 'quick-actions-button-light'
@@ -38,6 +38,10 @@ export class YtQuickActionsElements {
 
                     case Theme.DARK:
                         cssClass = 'quick-actions-button-dark'
+                        break;
+
+                    default:
+                        cssClass = 'quick-actions-button';
                         break;
                 }
                 button.setAttribute('class', cssClass);
