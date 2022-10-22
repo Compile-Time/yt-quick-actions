@@ -69,6 +69,24 @@ function initTheme(): void {
         )
 }
 
+function onThemeChange(event: Event): void {
+    const target = (event.target as HTMLElement);
+    const theme = target.getAttribute('value');
+    switch (theme) {
+        case Theme.SYSTEM:
+            document.documentElement.removeAttribute('data-theme');
+            break;
+
+        case Theme.LIGHT:
+            document.documentElement.setAttribute('data-theme', 'light');
+            break;
+
+        case Theme.DARK:
+            document.documentElement.setAttribute('data-theme', 'dark');
+            break;
+    }
+}
+
 function saveOptions(e): void {
     e.preventDefault();
     Browser.storage.local.set({
@@ -84,3 +102,5 @@ function init(): void {
 
 document.addEventListener('DOMContentLoaded', init);
 document.querySelector('form').addEventListener('submit', saveOptions);
+document.querySelectorAll('[name="theme"]')
+    .forEach(element => element.addEventListener('change', onThemeChange))
