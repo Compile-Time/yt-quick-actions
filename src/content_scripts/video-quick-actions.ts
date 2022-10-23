@@ -6,10 +6,12 @@ import {Ids, Tags, TextContent} from "../html-navigation/element-data";
 import {
     IdAndTextContentNavigationFilter,
     IdNavigationFilter,
-    TagNavigationFilter
+    TagNavigationFilter,
+    TextContentContainsNavigationFilter
 } from "../html-navigation/navigation-filter";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {StorageAccessor} from "../storage-accessor";
+import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
@@ -18,83 +20,128 @@ globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
 });
 const createdElements: HTMLElement[] = [];
 
-function setupWatchLaterButton(): HTMLButtonElement {
-    const quickActionsWatchLater = YtQuickActionsElements.watchLaterUnderVideoButton();
-    createdElements.push(quickActionsWatchLater);
-    quickActionsWatchLater.onclick = () => {
-        const popupTrigger = HtmlTreeNavigator.startFrom(document.body)
-            .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
-            .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
-            .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
-            .filter(new TagNavigationFilter(Tags.YTD_BUTTON_RENDERER))
-            .findFirst(new IdAndTextContentNavigationFilter(Tags.YT_FORMATTED_STRING, Ids.TEXT, TextContent.SAVE));
-        popupTrigger.click();
-
-        // Wait for the playlist save popup to be ready.
-        const popupReadyObserver = new MutationObserver((mutations, observer) => {
-            for (const mutation of mutations) {
-                const target = mutation.target;
-                if (target.nodeName.toLowerCase() === Tags.YT_FORMATTED_STRING
-                    && target.textContent === TextContent.WATCH_LATER
-                    && (mutation.oldValue === '' || mutation.oldValue === TextContent.WATCH_LATER)) {
-
-                    const popupWatchLaterEntry = HtmlTreeNavigator.startFrom(document.body)
-                        .filter(new TagNavigationFilter(Tags.YTD_ADD_TO_PLAYLIST_RENDERER))
-                        .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_ADD_TO_OPTION_RENDERER))
-                        .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_CHECKBOX, Ids.CHECKBOX))
-                        .findFirst(new IdAndTextContentNavigationFilter(Tags.YT_FORMATTED_STRING, Ids.LABEL, TextContent.WATCH_LATER));
-                    popupWatchLaterEntry.click();
-                    // Close the playlist popup.
-                    popupTrigger.click();
-
-                    observer.disconnect();
-                }
-            }
-        });
-
-        const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-            .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER));
-        popupReadyObserver.observe(popupContainer, {
-            subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
-        });
-    };
-
-    return quickActionsWatchLater;
-}
-
-function main(videoActions: HTMLElement): void {
-    // Remove existing buttons otherwise duplicates are present on the page.
-    createdElements.forEach(element => element.remove());
-    const quickActionsWatchLater = setupWatchLaterButton();
-
-    const actionsObserver = new MutationObserver((mutations, observer) => {
+/**
+ * Wait for the "Save to" popup to be ready and then check the "Watch later" entry.
+ *
+ * @param popupTrigger - The html element which triggers the "Save to" pop up
+ */
+function clickSaveToWatchLaterOption(popupTrigger: HTMLElement): void {
+    const popupReadyObserver = new MutationObserver((mutations, observer) => {
         for (const mutation of mutations) {
-            const target = mutation.target as HTMLElement;
-            if (target.nodeName.toLowerCase() === Tags.DIV && target.id === 'actions-inner') {
-                const moreOptionsButton = HtmlTreeNavigator.startFrom(target)
-                    .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
-                moreOptionsButton.parentElement.insertBefore(quickActionsWatchLater, moreOptionsButton);
+            const target = mutation.target;
+            if (target.nodeName.toLowerCase() === Tags.YT_FORMATTED_STRING
+                && target.textContent === TextContent.WATCH_LATER
+                && (mutation.oldValue === '' || mutation.oldValue === TextContent.WATCH_LATER)) {
+
+                // FIXME: Why not just cast `target` to a HTMLElement and perform a click on it?
+                const popupWatchLaterEntry = HtmlTreeNavigator.startFrom(document.body)
+                    .filter(new TagNavigationFilter(Tags.YTD_ADD_TO_PLAYLIST_RENDERER))
+                    .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_ADD_TO_OPTION_RENDERER))
+                    .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_CHECKBOX, Ids.CHECKBOX))
+                    .findFirst(new IdAndTextContentNavigationFilter(Tags.YT_FORMATTED_STRING, Ids.LABEL, TextContent.WATCH_LATER));
+                popupWatchLaterEntry.click();
+                // Close the playlist popup.
+                popupTrigger.click();
+
                 observer.disconnect();
             }
         }
     });
 
-    actionsObserver.observe(videoActions, {
-        subtree: true, childList: true
+    const popupContainer = HtmlTreeNavigator.startFrom(document.body)
+        .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER));
+    popupReadyObserver.observe(popupContainer, {
+        subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
     });
+
+    popupTrigger.click();
+}
+
+/**
+ * Wait for the more options popup ("...") to be ready and click the "Save" entry then delegate to
+ * {@link clickSaveToWatchLaterOption}.
+ *
+ * @param moreOptionsButton - The HTML element which represents the more options menu ("...")
+ */
+function clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton: HTMLElement): void {
+    const saveToOptionObserver = new MutationObserver((mutations, observer) => {
+        for (const mutation of mutations) {
+            const target = mutation.target as HTMLElement;
+            const popupTrigger = HtmlTreeNavigator.startFrom(target)
+                .findFirst(new TextContentContainsNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.SAVE))
+            if (mutation.oldValue === ''
+                && target.nodeName.toLowerCase() === Tags.YTD_MENU_SERVICE_ITEM_RENDERER
+                && !!popupTrigger) {
+                clickSaveToWatchLaterOption(popupTrigger);
+                observer.disconnect();
+            }
+        }
+    });
+
+    const popupContainer = HtmlTreeNavigator.startFrom(document.body)
+        .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+    saveToOptionObserver.observe(popupContainer, {
+        subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
+    })
+
+    moreOptionsButton.click();
+}
+
+function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElement {
+    const quickActionsWatchLater = YtQuickActionsElements.watchLaterUnderVideoButton();
+    createdElements.push(quickActionsWatchLater);
+    quickActionsWatchLater.onclick = () => {
+        const ytdMenuRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
+            .find(new TagNavigationFilter(Tags.YTD_MENU_RENDERER));
+
+        const popupTrigger = HtmlTreeNavigator.startFrom(ytdMenuRenderer)
+            .filter(new TagNavigationFilter(Tags.YTD_BUTTON_RENDERER))
+            .findFirst(new IdAndTextContentNavigationFilter(Tags.YT_FORMATTED_STRING, Ids.TEXT, TextContent.SAVE));
+
+        if (!!popupTrigger) {
+            clickSaveToWatchLaterOption(popupTrigger);
+        } else if (!popupTrigger) {
+            const moreOptionsButton = HtmlTreeNavigator.startFrom(ytdMenuRenderer)
+                .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
+            clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton);
+        } else {
+            console.error('Could not HTML element for "Save to" action');
+        }
+    };
+
+    return quickActionsWatchLater;
+}
+
+function main(moreOptionsButton: HTMLElement): void {
+    // Remove existing buttons otherwise duplicates are present on the page.
+    createdElements.forEach(element => element.remove());
+    const quickActionsWatchLater = setupWatchLaterButton(moreOptionsButton);
+    moreOptionsButton.parentElement.insertBefore(quickActionsWatchLater, moreOptionsButton);
 }
 
 Browser.runtime.onMessage.addListener((message) => {
     if (message === RuntimeMessages.NAVIGATED_TO_VIDEO) {
         globalPageReadyInterval.start(1000, runningInterval => {
-            const videoActions = HtmlTreeNavigator.startFrom(document.body)
-                .logOperations('Find first container for video actions', StorageAccessor.getLogMode())
+            const moreOptionsButton = HtmlTreeNavigator.startFrom(document.body)
+                .logOperations('Find more options button ("...")', StorageAccessor.getLogMode())
                 .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
                 .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
-                .findFirst(new IdNavigationFilter(Tags.DIV, 'actions'));
-            if (videoActions) {
+                .filter(new IdNavigationFilter(Tags.DIV, 'actions'))
+                .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
+                .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
+
+            const existingQuickActionsWatchLaterButton = HtmlTreeNavigator.startFrom(document.body)
+                .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
+                .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
+                .filter(new IdNavigationFilter(Tags.DIV, 'actions'))
+                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_VIDEO_WATCH_LATER));
+
+            if (!!moreOptionsButton && !existingQuickActionsWatchLaterButton) {
+                main(moreOptionsButton);
+            }
+
+            if (!!existingQuickActionsWatchLaterButton) {
                 runningInterval.stop();
-                main(videoActions);
             }
         })
     }
