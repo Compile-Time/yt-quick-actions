@@ -84,7 +84,7 @@ export class TextContentContainsNavigationFilter extends TextContentNavigationFi
 
 
     applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
-        return element.textContent.toLowerCase().includes(this.textContent)
+        return element.textContent.toLowerCase().includes(this.textContent.toLowerCase())
             && lowercaseElementTagName === this.tagName;
     }
 }
