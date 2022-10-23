@@ -15,7 +15,7 @@ describe('HtmlTreeNavigator', () => {
         div.appendChild(div2);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(div)
-            .find(new TagNavigationFilter('div'));
+            .findAll(new TagNavigationFilter('div'));
 
         expect(elements).toEqual([div2]);
     });
@@ -28,7 +28,7 @@ describe('HtmlTreeNavigator', () => {
         div.appendChild(div2);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(div)
-            .find(new TagNavigationFilter('span'));
+            .findAll(new TagNavigationFilter('span'));
 
         expect(elements).toEqual([]);
     });
@@ -49,7 +49,7 @@ describe('HtmlTreeNavigator', () => {
         rootContainer.appendChild(div3);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
-            .find(new TagNavigationFilter('div'));
+            .findAll(new TagNavigationFilter('div'));
 
         expect(elements).toEqual([div1, div2, div3]);
     });
@@ -81,7 +81,7 @@ describe('HtmlTreeNavigator', () => {
         rootContainer.appendChild(div3);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
-            .find(new TextContentNavigationFilter('span', 'Span2'));
+            .findAll(new TextContentNavigationFilter('span', 'Span2'));
 
         expect(elements).toEqual([span2]);
     });
@@ -116,7 +116,7 @@ describe('HtmlTreeNavigator', () => {
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter(Tags.BUTTON))
-            .find(new TextContentNavigationFilter('span', 'Span1'));
+            .findAll(new TextContentNavigationFilter('span', 'Span1'));
 
         expect(elements).toEqual([span1]);
     });
@@ -153,7 +153,7 @@ describe('HtmlTreeNavigator', () => {
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter(Tags.DIV))
-            .find(new IdNavigationFilter('button', 'button1'));
+            .findAll(new IdNavigationFilter('button', 'button1'));
 
         expect(elements).toEqual([button1]);
     });

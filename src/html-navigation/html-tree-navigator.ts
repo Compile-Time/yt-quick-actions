@@ -7,7 +7,7 @@ import {LogMode} from "../enums/log-mode";
  * Builder-like class for HTML tree navigation.
  */
 export class HtmlTreeNavigator {
-    private logModePromise: Promise<LogMode> = undefined;
+    private logModePromise: Promise<LogMode> = null;
     private initialFilterQueue: NavigationFiltersToProcessQueue = new NavigationFiltersToProcessQueue();
     private debugContext: string;
     private debugFiltersToProcessMap: Map<NavigationFilter, NavigationFilterToProcess> =
@@ -51,17 +51,17 @@ export class HtmlTreeNavigator {
     }
 
     /**
-     * Define the HTML element to look for with a filter.
+     * Define the final HTML elements to find by providing a filter.
      *
      * Calling this method will start the navigation process of this {@link HtmlTreeNavigator}.
-     * The {@link HtmlTreeNavigator} will then recursively navigate the HTML tree. If any filters are set
-     * those filters will be taken into account ({@see filter}). Only when all filters match a non-empty
-     * result will be returned.
+     * The {@link HtmlTreeNavigator} will then recursively navigate the HTML tree. If any additional filters
+     * are set by {@link filter} those filters will be taken into account ({@see filter}). Only when all
+     * filters match (including the one given to {@link findAll}) a non-empty result will be returned.
      *
      * @param targetElementFilter - The filter to use for finding the desired target element
      * @returns {HTMLElement[]} - If any of the given filters do not match, an empty array is returned
      */
-    find(targetElementFilter: NavigationFilter): HTMLElement[] {
+    findAll(targetElementFilter: NavigationFilter): HTMLElement[] {
         this.filter(targetElementFilter);
         this.initialFilterQueue.getFilters().forEach(filterToProcess => {
             this.debugFiltersToProcessMap.set(filterToProcess.getFilter(), filterToProcess);
@@ -88,25 +88,27 @@ export class HtmlTreeNavigator {
     }
 
     /**
-     * @see find for implementation details.
+     * Define the final HTML element to find by providing a filter.
      *
-     * This method differs to {@link find} that it only returns the first element of the array of found
-     * elements.
+     * {@see findAll} for implementation details.
+     *
+     * @param filter - The filter defining the final element to look for
      */
-    findFirst(filter: NavigationFilter): HTMLElement | undefined {
-        const foundElements = this.find(filter);
-        return foundElements.length > 0 ? foundElements[0] : undefined;
+    findFirst(filter: NavigationFilter): HTMLElement | null {
+        const foundElements = this.findAll(filter);
+        return foundElements.length > 0 ? foundElements[0] : null;
     }
 
     /**
-     * @see find for implementation details.
+     * Define the final HTML element to find by providing a filter.
      *
-     * This method differs to {@link find} that it only returns the last element of the array of found
-     * elements.
+     * {@see findAll} find for implementation details.
+     *
+     * @param filter - The filter defining the final element to look for
      */
-    findLast(filter: NavigationFilter): HTMLElement | undefined {
-        const foundElements = this.find(filter);
-        return foundElements.length > 0 ? foundElements[foundElements.length - 1] : undefined;
+    findLast(filter: NavigationFilter): HTMLElement | null {
+        const foundElements = this.findAll(filter);
+        return foundElements.length > 0 ? foundElements[foundElements.length - 1] : null;
     }
 
     private navigateTree(filterQueue: NavigationFiltersToProcessQueue, htmlCollection: HTMLCollection): HTMLElement[] {
