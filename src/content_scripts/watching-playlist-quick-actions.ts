@@ -66,7 +66,7 @@ Browser.runtime.onMessage.addListener(message => {
     if (message === RuntimeMessages.NAVIGATED_TO_VIDEO_IN_PLAYLIST) {
         globalPageReadyInterval.start(1000, runningInterval => {
             const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
-                .logMode(StorageAccessor.getLogMode())
+                .logOperations('Find all playlist items', StorageAccessor.getLogMode())
                 .find(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
 
             if (!!playlistPanelVideoRendererItems) {

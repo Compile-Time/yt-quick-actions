@@ -102,7 +102,7 @@ Browser.runtime.onMessage.addListener((message) => {
     if (message === RuntimeMessages.NAVIGATED_TO_PLAYLIST) {
         globalPageReadyInterval.start(1000, (runningInterval: RunningInterval) => {
             const menuButtons: HTMLElement[] = HtmlTreeNavigator.startFrom(document.body)
-                .logMode(StorageAccessor.getLogMode())
+                .logOperations('Find all menu buttons of each playlist item', StorageAccessor.getLogMode())
                 .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
                 .find(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
             if (!!menuButtons) {

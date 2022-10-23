@@ -7,8 +7,9 @@ import {LogMode} from "../enums/log-mode";
  * Builder-like class for HTML tree navigation.
  */
 export class HtmlTreeNavigator {
-    private logModePromise: Promise<string> = undefined;
+    private logModePromise: Promise<LogMode> = undefined;
     private initialFilterQueue: NavigationFiltersToProcessQueue = new NavigationFiltersToProcessQueue();
+    private debugContext: string;
     private debugFiltersToProcessMap: Map<NavigationFilter, NavigationFilterToProcess> =
         new Map<NavigationFilter, NavigationFilterToProcess>();
 
@@ -20,12 +21,17 @@ export class HtmlTreeNavigator {
     }
 
     /**
-     * Enable debug mode for this HtmlTreeNavigator.
+     * Write debug messages to the console depending on if log mode is set to debug.
      *
-     * Debug mode causes the navigator to write out information about the results of the filter operation.
-     * The intent is to help with debugging by being able to see if for a filter a match could be found.
+     * This method takes a promise that returns the current log mode. If the log mode is set to debug the
+     * extension will write out information regarding filter results out to the console on the debug
+     * level. Additionally, a context string must be provided that is used to group the debug messages.
+     *
+     * @param context - A context string used to group the resulting debug messages
+     * @param logModePromise - A promise returning the currently enabled log mode
      */
-    logMode(logModePromise: Promise<string>): HtmlTreeNavigator {
+    logOperations(context: string, logModePromise: Promise<LogMode>): HtmlTreeNavigator {
+        this.debugContext = context;
         this.logModePromise = logModePromise;
         return this;
     }
@@ -65,15 +71,15 @@ export class HtmlTreeNavigator {
         if (!!this.logModePromise) {
             this.logModePromise.then(logMode => {
                 if (logMode === LogMode.DEBUG) {
-                    let debugString = '';
+                    console.group(this.debugContext);
                     this.debugFiltersToProcessMap.forEach((filterToProcess) => {
                         if (filterToProcess.isProcessed()) {
-                            debugString += `Filter ${filterToProcess.getFilter()} result: found element\n`;
+                            console.debug(`Filter ${filterToProcess.getFilter()} result: found element`);
                         } else {
-                            debugString += `Filter ${filterToProcess.getFilter()} result: element not found!\n`;
+                            console.debug(`Filter ${filterToProcess.getFilter()} result: element not found!`);
                         }
                     })
-                    console.debug(debugString.trim());
+                    console.groupEnd();
                 }
             })
         }

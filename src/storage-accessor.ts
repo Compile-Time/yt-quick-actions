@@ -1,16 +1,17 @@
 import * as Browser from "webextension-polyfill";
+import {LogMode, LogModeMapper} from "./enums/log-mode";
 
 export class StorageAccessor {
-    static getLogMode(): Promise<string> {
+    static getLogMode(): Promise<LogMode> {
         return Browser.storage.local.get('logMode')
-            .then(storage => storage.logMode);
+            .then(storage => LogModeMapper.fromStr(storage.logMode));
     }
 
-    static getTheme(): Promise<string | undefined> {
+    static getTheme(): Promise<string | null> {
         return Browser.storage.local.get('theme')
             .then(storage => {
                 if (!storage.theme) {
-                    return undefined;
+                    return null;
                 }
                 return storage.theme;
             });

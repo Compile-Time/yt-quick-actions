@@ -82,7 +82,7 @@ Browser.runtime.onMessage.addListener(message => {
     if (message === RuntimeMessages.NAVIGATED_TO_HOME_PAGE) {
         globalPageReadyInterval.start(1000, runningInterval => {
             const homePageVideos = HtmlTreeNavigator.startFrom(document.body)
-                .logMode(StorageAccessor.getLogMode())
+                .logOperations('Find all video containing grid rows', StorageAccessor.getLogMode())
                 .filter(new TagNavigationFilter(Tags.YTD_APP))
                 .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
                 .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
