@@ -18,10 +18,7 @@ globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
 });
 const createdElements: HTMLElement[] = [];
 
-function main(flexibleItemButtons: HTMLElement): void {
-    // Remove existing buttons otherwise duplicates are present on the page.
-    createdElements.forEach(element => element.remove());
-
+function setupWatchLaterButton(): HTMLButtonElement {
     const quickActionsWatchLater = YtQuickActionsElements.watchLaterUnderVideoButton();
     createdElements.push(quickActionsWatchLater);
     quickActionsWatchLater.onclick = () => {
@@ -62,21 +59,42 @@ function main(flexibleItemButtons: HTMLElement): void {
         });
     };
 
-    flexibleItemButtons.parentElement.insertBefore(quickActionsWatchLater, flexibleItemButtons);
+    return quickActionsWatchLater;
+}
+
+function main(videoActions: HTMLElement): void {
+    // Remove existing buttons otherwise duplicates are present on the page.
+    createdElements.forEach(element => element.remove());
+    const quickActionsWatchLater = setupWatchLaterButton();
+
+    const actionsObserver = new MutationObserver((mutations, observer) => {
+        for (const mutation of mutations) {
+            const target = mutation.target as HTMLElement;
+            if (target.nodeName.toLowerCase() === Tags.DIV && target.id === 'actions-inner') {
+                const moreOptionsButton = HtmlTreeNavigator.startFrom(target)
+                    .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
+                moreOptionsButton.parentElement.insertBefore(quickActionsWatchLater, moreOptionsButton);
+                observer.disconnect();
+            }
+        }
+    });
+
+    actionsObserver.observe(videoActions, {
+        subtree: true, childList: true
+    });
 }
 
 Browser.runtime.onMessage.addListener((message) => {
     if (message === RuntimeMessages.NAVIGATED_TO_VIDEO) {
         globalPageReadyInterval.start(1000, runningInterval => {
-            const flexibleItemButtons = HtmlTreeNavigator.startFrom(document.body)
-                .logMode(StorageAccessor.getLogMode())
+            const videoActions = HtmlTreeNavigator.startFrom(document.body)
+                .logOperations('Find first container for video actions', StorageAccessor.getLogMode())
                 .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
                 .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
-                .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
-                .findFirst(new IdNavigationFilter(Tags.DIV, Ids.FLEXIBLE_ITEM_BUTTONS));
-            if (flexibleItemButtons) {
+                .findFirst(new IdNavigationFilter(Tags.DIV, 'actions'));
+            if (videoActions) {
                 runningInterval.stop();
-                main(flexibleItemButtons);
+                main(videoActions);
             }
         })
     }

@@ -14,20 +14,20 @@ export class YtQuickActionsElements {
     static watchLaterUnderVideoButton(): HTMLButtonElement {
         const button = document.createElement(Tags.BUTTON);
         button.id = Ids.YT_QUICK_ACTIONS_VIDEO_WATCH_LATER;
-        button.innerHTML = `<i class="quick-actions-watch-later-under-video-icon fa-solid fa-clock fa-lg"></i>`
-        this.setButtonClass(button);
+        button.innerHTML = `<i class="fa-solid fa-clock fa-lg"></i>`
+        this.setButtonClass(button, 'quick-actions-watch-later-under-video-button');
         return button;
     }
 
     static watchLaterHomeVideoButton(): HTMLButtonElement {
         const button = document.createElement(Tags.BUTTON);
         button.id = Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER;
-        button.innerHTML = `<i class="quick-actions-watch-later-home-icon fa-solid fa-clock fa-lg"></i>`
+        button.innerHTML = `<i class="fa-solid fa-clock fa-lg"></i>`
         this.setButtonClass(button);
         return button;
     }
 
-    private static setButtonClass(button: HTMLButtonElement): void {
+    private static setButtonClass(button: HTMLButtonElement, additionalCss: string = ''): void {
         StorageAccessor.getTheme()
             .then(theme => {
                 let cssClass;
@@ -44,7 +44,7 @@ export class YtQuickActionsElements {
                         cssClass = 'quick-actions-button';
                         break;
                 }
-                button.setAttribute('class', cssClass);
+                button.setAttribute('class', cssClass + ' ' + additionalCss);
             });
     }
 }

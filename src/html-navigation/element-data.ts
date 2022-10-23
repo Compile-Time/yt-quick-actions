@@ -27,7 +27,6 @@ export enum Ids {
     BUTTON = 'button',
     CHECKBOX = 'checkbox',
     CONTENT = 'content',
-    FLEXIBLE_ITEM_BUTTONS = 'flexible-item-buttons',
     ITEMS = 'items',
     LABEL = 'label',
     MENU = 'menu',

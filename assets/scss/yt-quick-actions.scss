@@ -20,9 +20,8 @@ $dark-theme-icon-color: white;
   @include quick-actions-button-hover-style;
 }
 
-.quick-actions-watch-later-under-video-icon {
-  padding-left: .6em;
-  vertical-align: .1em !important;
+.quick-actions-watch-later-under-video-button {
+  margin-bottom: 0.4em;
 }
 
 @media screen and (prefers-color-scheme: dark) {
