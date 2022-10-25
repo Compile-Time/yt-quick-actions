@@ -1,15 +1,11 @@
 export class LogHelper {
     private static readonly APP_NAME = '[yt-quick-actions]';
 
-    static log(message: string): void {
-        console.log(`${this.APP_NAME}: ${message}`);
+    static log(message: string, ...optionalParams: any[]): void {
+        console.log(`${this.APP_NAME}: ${message}`, optionalParams);
     }
 
-    static error(message: string): void {
-        console.error(`${this.APP_NAME}: ${message}`);
-    }
-
-    static errorWithData(message?: string, ...optionalParams: any[]): void {
+    static error(message: string, ...optionalParams: any[]): void {
         console.error(`${this.APP_NAME}: ${message}`, optionalParams);
     }
 

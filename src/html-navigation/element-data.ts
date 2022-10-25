@@ -24,6 +24,7 @@ export enum Tags {
 }
 
 export enum Ids {
+    ACTIONS = 'actions',
     BUTTON = 'button',
     CHECKBOX = 'checkbox',
     CONTENT = 'content',
@@ -34,7 +35,7 @@ export enum Ids {
     TEXT = 'text',
     YT_QUICK_ACTIONS_HOME_WATCH_LATER = 'yt-quick-actions-home-watch-later',
     YT_QUICK_ACTIONS_REMOVE_BUTTON = 'yt-quick-actions-remove-button',
-    YT_QUICK_ACTIONS_VIDEO_WATCH_LATER = 'yt-quick-actions-video-watch-later'
+    YT_QUICK_ACTIONS_VIDEO_WATCH_LATER = 'yt-quick-actions-video-watch-later',
 }
 
 export enum TextContent {

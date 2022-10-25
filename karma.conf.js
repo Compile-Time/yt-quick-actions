@@ -16,12 +16,16 @@ module.exports = function (config) {
         // list of files / patterns to load in the browser
         files: [
             'test/**/*spec.ts',
-            'src/html-navigation/*.ts',
-            'src/interval-runner.ts'
+            'src/**/*.ts',
         ],
 
         // list of files / patterns to exclude
-        exclude: [],
+        exclude: [
+            'src/background_scripts/**/*.ts',
+            'src/content_scripts/**/*.ts',
+            'src/storage-accessor.ts',
+            'src/yt-quick-action-elements.ts'
+        ],
 
 
         // preprocess matching files before serving them to the browser
@@ -65,6 +69,10 @@ module.exports = function (config) {
 
         // Concurrency level
         // how many browser instances should be started simultaneously
-        concurrency: Infinity
+        concurrency: Infinity,
+
+        karmaTypescriptConfig: {
+            tsconfig: "./tsconfig.json",
+        }
     })
 }

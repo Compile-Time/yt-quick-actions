@@ -1,5 +1,5 @@
 import * as Browser from "webextension-polyfill";
-import {RuntimeMessages} from "../runtime-messages";
+import {RuntimeMessage} from "../enums/runtime-message";
 import {IntervalRunner} from "../interval-runner";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
@@ -8,10 +8,28 @@ import {AttributeNames, Ids, Tags, TextContent} from "../html-navigation/element
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {StorageAccessor} from "../storage-accessor";
 import {LogHelper} from "../log-helper";
+import {activeObserversManager} from "../active-observers-manager";
+import {OneshotObserver} from "../data/oneshot-observer";
+import {OneshotId} from "../enums/oneshot-id";
+import {TabMessage} from "../data/tab-message";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
     LogHelper.pageReadyIntervalLimitReached('watching-playlist-quick-actions');
+});
+
+/*
+Wait for the menu popup to update so the correct video is removed.
+*/
+const removePopupEntryReadyObserver = new MutationObserver((mutations, observer) => {
+    for (const mutation of mutations) {
+        const removeOption: HTMLElement = HtmlTreeNavigator.startFrom(mutation.target as HTMLElement)
+            .findFirst(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_PLAYLIST));
+        if (!!removeOption && mutation.oldValue === '') {
+            removeOption.click();
+            observer.disconnect();
+        }
+    }
 });
 
 function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
@@ -20,18 +38,12 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
         element.click();
         const popupMenu = HtmlTreeNavigator.startFrom(document.body)
             .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS));
-        // Wait for menu popup to update with an observer so the correct video is removed.
-        const popupReadyObserver = new MutationObserver((mutations, observer) => {
-            for (const mutation of mutations) {
-                const removeOption: HTMLElement = HtmlTreeNavigator.startFrom(mutation.target as HTMLElement)
-                    .findFirst(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_PLAYLIST));
-                if (!!removeOption && mutation.oldValue === '') {
-                    removeOption.click();
-                    observer.disconnect();
-                }
-            }
-        });
-        popupReadyObserver.observe(popupMenu, {
+
+        activeObserversManager.upsertOneshotObserver(new OneshotObserver(
+            OneshotId.REMOVE_POPUP_ENTRY_READY,
+            RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST,
+            removePopupEntryReadyObserver
+        )).observe(popupMenu, {
             subtree: true,
             attributes: true,
             attributeOldValue: true,
@@ -62,8 +74,12 @@ function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void
     }
 }
 
-Browser.runtime.onMessage.addListener(message => {
-    if (message === RuntimeMessages.NAVIGATED_TO_VIDEO_IN_PLAYLIST) {
+Browser.runtime.onMessage.addListener((message: TabMessage) => {
+    if (message.isWatchingVideoInPlaylistPage()) {
+        if (message.shouldDisconnectObservers()) {
+            activeObserversManager.disconnectAll();
+        }
+
         globalPageReadyInterval.start(1000, runningInterval => {
             const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
                 .logOperations('Find all playlist items', StorageAccessor.getLogMode())

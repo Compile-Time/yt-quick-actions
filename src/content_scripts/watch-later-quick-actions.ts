@@ -1,6 +1,6 @@
 import * as Browser from "webextension-polyfill";
 import {Ids, Tags, TextContent} from "../html-navigation/element-data";
-import {RuntimeMessages} from "../runtime-messages";
+import {RuntimeMessage} from "../enums/runtime-message";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {IntervalRunner, RunningInterval} from "../interval-runner";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
@@ -10,15 +10,35 @@ import {
     TextContentContainsNavigationFilter
 } from "../html-navigation/navigation-filter";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
-import {activePageObserverManager} from "../active-page-observer-manager";
+import {activeObserversManager} from "../active-observers-manager";
 import {StorageAccessor} from "../storage-accessor";
 import {LogHelper} from "../log-helper";
+import {OneshotObserver} from "../data/oneshot-observer";
+import {OneshotId} from "../enums/oneshot-id";
+import {TabMessage} from "../data/tab-message";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
     LogHelper.pageReadyIntervalLimitReached('watch-later-quick-actions');
 });
 const createdElements: HTMLElement[] = [];
+
+/*
+If we do not wait for the popup content to update, the first entry in the playlist is deleted due to the
+ HTML load performed with the first entry.
+ */
+const menuUpdatedObserver = new MutationObserver((mutations, observer) => {
+    mutations.forEach((mutation) => {
+        if (mutation.oldValue === '') {
+            const ytFormattedText = HtmlTreeNavigator.startFrom(mutation.target as HTMLElement)
+                .findFirst(new TextContentContainsNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_LOWERCASE));
+            if (!!ytFormattedText) {
+                ytFormattedText.click();
+            }
+            observer.disconnect();
+        }
+    })
+});
 
 function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
     const removeButton = YtQuickActionsElements.removeButton();
@@ -27,22 +47,11 @@ function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
         const popupMenu = HtmlTreeNavigator.startFrom(document.body)
             .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS));
 
-        // If we do not wait for the popup content to update, the first entry in the playlist is deleted due
-        // to the HTML load performed with the first entry.
-        const menuUpdateObserver = new MutationObserver((mutations, observer) => {
-            mutations.forEach((mutation) => {
-                if (mutation.oldValue === '') {
-                    const ytFormattedText = HtmlTreeNavigator.startFrom(mutation.target as HTMLElement)
-                        .findFirst(new TextContentContainsNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_LOWERCASE));
-                    if (!!ytFormattedText) {
-                        ytFormattedText.click();
-                    }
-                    observer.disconnect();
-                }
-            })
-        })
-
-        menuUpdateObserver.observe(popupMenu, {
+        activeObserversManager.upsertOneshotObserver(new OneshotObserver(
+            OneshotId.MENU_UPDATED_OBSERVER,
+            RuntimeMessage.NAVIGATED_TO_PLAYLIST,
+            menuUpdatedObserver
+        )).observe(popupMenu, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
         })
     };
@@ -92,14 +101,18 @@ function initContentScript(menuButtons: HTMLElement[]): void {
         }
     });
 
-    activePageObserverManager.switchObserver(loadingNewEntriesObserver);
-    loadingNewEntriesObserver.observe(ytdPlaylistVideoListRenderer, {
-        subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
-    })
+    activeObserversManager.addForPage(RuntimeMessage.NAVIGATED_TO_PLAYLIST, loadingNewEntriesObserver)
+        .observe(ytdPlaylistVideoListRenderer, {
+            subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
+        })
 }
 
-Browser.runtime.onMessage.addListener((message) => {
-    if (message === RuntimeMessages.NAVIGATED_TO_PLAYLIST) {
+Browser.runtime.onMessage.addListener((message: TabMessage) => {
+    if (message.isPlaylistPage()) {
+        if (message.shouldDisconnectObservers()) {
+            activeObserversManager.disconnectAll();
+        }
+
         globalPageReadyInterval.start(1000, (runningInterval: RunningInterval) => {
             const menuButtons: HTMLElement[] = HtmlTreeNavigator.startFrom(document.body)
                 .logOperations('Find all menu buttons of each playlist item', StorageAccessor.getLogMode())
