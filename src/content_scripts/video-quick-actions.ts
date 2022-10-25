@@ -12,11 +12,11 @@ import {
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {StorageAccessor} from "../storage-accessor";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
+import {LogHelper} from "../log-helper";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
-    console.error('Could not determine if page is ready for operation. Please enable debug mode and check' +
-        ' the logs.')
+    LogHelper.pageReadyIntervalLimitReached('video-quick-actions');
 });
 const createdElements: HTMLElement[] = [];
 
@@ -95,12 +95,15 @@ function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElemen
 
         if (!!popupTrigger) {
             clickSaveToWatchLaterOption(popupTrigger);
-        } else if (!popupTrigger) {
+        } else {
             const moreOptionsButton = HtmlTreeNavigator.startFrom(ytdMenuRenderer)
                 .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
-            clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton);
-        } else {
-            console.error('Could not HTML element for "Save to" action');
+
+            if (!!moreOptionsButton) {
+                clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton);
+            } else {
+                LogHelper.error('Could not find HTML elements for action "Save to" or "... > Save"');
+            }
         }
     };
 

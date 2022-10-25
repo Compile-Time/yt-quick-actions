@@ -12,11 +12,11 @@ import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {activePageObserverManager} from "../active-page-observer-manager";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {StorageAccessor} from "../storage-accessor";
+import {LogHelper} from "../log-helper";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
-    console.error('Could not determine if page is ready for operation. Please enable debug mode and check' +
-        ' the logs.')
+    LogHelper.pageReadyIntervalLimitReached('home-page-quick-actions')
 });
 
 function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement {

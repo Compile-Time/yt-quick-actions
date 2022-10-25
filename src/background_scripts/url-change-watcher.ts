@@ -1,13 +1,14 @@
 import * as Browser from "webextension-polyfill";
 import {Tabs} from "webextension-polyfill";
 import {RuntimeMessages} from "../runtime-messages";
+import {LogHelper} from "../log-helper";
 import Tab = Tabs.Tab;
 
 function sendMessage(tabId: number, tab: Tab, message: string): void {
     Browser.tabs.sendMessage(tabId, message)
         .then()
         .catch(reason => {
-            console.error(`Could not send navigate message in tab ${tab.title}`, reason);
+            LogHelper.errorWithData(`Could not send navigate message in tab ${tab.title}`, reason);
         });
 }
 

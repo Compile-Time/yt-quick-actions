@@ -1,4 +1,5 @@
 import {NavigationFilter} from "./navigation-filter";
+import {LogHelper} from "../log-helper";
 
 export class HtmlParentNavigator {
     private debug: boolean = false;
@@ -23,7 +24,7 @@ export class HtmlParentNavigator {
         const foundElement = filter.applySingle(element);
 
         if (this.debug) {
-            console.debug(`Found the following element for filter ${filter}: ${foundElement.tagName}`)
+            LogHelper.debug(`Found the following element for filter ${filter}: ${foundElement.tagName}`)
         }
 
         if (!foundElement && !element.parentElement) {

@@ -7,11 +7,11 @@ import {IdNavigationFilter, TextContentNavigationFilter} from "../html-navigatio
 import {AttributeNames, Ids, Tags, TextContent} from "../html-navigation/element-data";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {StorageAccessor} from "../storage-accessor";
+import {LogHelper} from "../log-helper";
 
 const globalPageReadyInterval = new IntervalRunner(5);
 globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
-    console.error('Could not determine if page is ready for operation. Please enable debug mode and check' +
-        ' the logs.')
+    LogHelper.pageReadyIntervalLimitReached('watching-playlist-quick-actions');
 });
 
 function setupRemoveButton(element: HTMLElement): HTMLButtonElement {

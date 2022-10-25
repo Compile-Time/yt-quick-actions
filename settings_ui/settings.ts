@@ -1,6 +1,7 @@
 import * as Browser from "webextension-polyfill";
 import {LogMode} from "../src/enums/log-mode";
 import {Theme} from "../src/enums/theme";
+import {LogHelper} from "../src/log-helper";
 
 function getFormLogMode(): string {
     let selectedValue = document.querySelector('input[name="log-mode"]:checked')
@@ -12,7 +13,7 @@ function getFormLogMode(): string {
             break;
 
         default:
-            console.error(`Selected log mode value does not match enum LogMode: ${selectedValue}`);
+            LogHelper.error(`Selected log mode value does not match enum LogMode: ${selectedValue}`);
             return;
     }
 
@@ -30,7 +31,7 @@ function getFormTheme(): string {
             break;
 
         default:
-            console.error(`Selected theme value does not match enum Theme: ${selectedValue}`);
+            LogHelper.error(`Selected theme value does not match enum Theme: ${selectedValue}`);
             return;
     }
 
@@ -49,7 +50,7 @@ function initLogMode(): void {
                         .setAttribute('checked', 'true');
                 }
             },
-            error => console.error(`Could not retrieve log mode value from storage: ${error}`)
+            error => LogHelper.error(`Could not retrieve log mode value from storage API: ${error}`)
         );
 }
 
@@ -65,7 +66,7 @@ function initTheme(): void {
                         .setAttribute('checked', 'true');
                 }
             },
-            error => console.error(`Could not retrieve theme value from storage: ${error}`)
+            error => LogHelper.error(`Could not retrieve theme value from storage API: ${error}`)
         )
 }
 

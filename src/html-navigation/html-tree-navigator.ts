@@ -2,6 +2,7 @@ import {NavigationFilter} from "./navigation-filter";
 import {NavigationFiltersToProcessQueue} from "./navigation-filters-to-process-queue";
 import {NavigationFilterToProcess} from "./navigation-filter-to-process";
 import {LogMode} from "../enums/log-mode";
+import {LogHelper} from "../log-helper";
 
 /**
  * Builder-like class for HTML tree navigation.
@@ -71,15 +72,15 @@ export class HtmlTreeNavigator {
         if (!!this.logModePromise) {
             this.logModePromise.then(logMode => {
                 if (logMode === LogMode.DEBUG) {
-                    console.group(this.debugContext);
+                    LogHelper.group(this.debugContext);
                     this.debugFiltersToProcessMap.forEach((filterToProcess) => {
                         if (filterToProcess.isProcessed()) {
-                            console.debug(`Filter ${filterToProcess.getFilter()} result: found element`);
+                            LogHelper.debug(`Filter ${filterToProcess.getFilter()} result: found element`);
                         } else {
-                            console.debug(`Filter ${filterToProcess.getFilter()} result: element not found!`);
+                            LogHelper.debug(`Filter ${filterToProcess.getFilter()} result: element not found!`);
                         }
                     })
-                    console.groupEnd();
+                    LogHelper.groupEnd();
                 }
             })
         }
