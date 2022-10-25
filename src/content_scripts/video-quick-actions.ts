@@ -107,7 +107,7 @@ function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElemen
     return quickActionsWatchLater;
 }
 
-function main(moreOptionsButton: HTMLElement): void {
+function initContentScript(moreOptionsButton: HTMLElement): void {
     // Remove existing buttons otherwise duplicates are present on the page.
     createdElements.forEach(element => element.remove());
     const quickActionsWatchLater = setupWatchLaterButton(moreOptionsButton);
@@ -132,7 +132,7 @@ Browser.runtime.onMessage.addListener((message) => {
                 .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_VIDEO_WATCH_LATER));
 
             if (!!moreOptionsButton && !existingQuickActionsWatchLaterButton) {
-                main(moreOptionsButton);
+                initContentScript(moreOptionsButton);
             }
 
             if (!!existingQuickActionsWatchLaterButton) {

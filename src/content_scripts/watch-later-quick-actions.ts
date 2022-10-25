@@ -56,7 +56,7 @@ function appendRemoveButton(ytIconButton: HTMLElement, ytdPlaylistVideoRenderer:
     ytdPlaylistVideoRenderer.append(removeButton);
 }
 
-function main(menuButtons: HTMLElement[]): void {
+function initContentScript(menuButtons: HTMLElement[]): void {
     // Remove all previously created remove buttons.
     createdElements.forEach(element => element.remove());
 
@@ -107,7 +107,7 @@ Browser.runtime.onMessage.addListener((message) => {
                 .findAll(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
             if (!!menuButtons) {
                 runningInterval.stop();
-                main(menuButtons);
+                initContentScript(menuButtons);
             }
         })
     }

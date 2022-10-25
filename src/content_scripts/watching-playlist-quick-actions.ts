@@ -41,7 +41,7 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
     return button;
 }
 
-function main(playlistPanelVideoRendererItems: HTMLElement[]): void {
+function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void {
     const ytMenuIconButtons = playlistPanelVideoRendererItems
         .map(element => HtmlTreeNavigator.startFrom(element)
             .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
@@ -71,7 +71,7 @@ Browser.runtime.onMessage.addListener(message => {
 
             if (!!playlistPanelVideoRendererItems) {
                 runningInterval.stop();
-                main(playlistPanelVideoRendererItems);
+                initContentScript(playlistPanelVideoRendererItems);
             }
         });
     }

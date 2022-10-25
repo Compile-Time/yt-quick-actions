@@ -49,7 +49,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
     return watchLaterButton;
 }
 
-function main(homePageVideos: HTMLElement[]): void {
+function initContentScript(homePageVideos: HTMLElement[]): void {
     // Home page videos are lazily loaded on scrolling, therefore, we need to observe them.
     const homePageVideoElementsObserver = new MutationObserver((mutations) => {
         for (const mutation of mutations) {
@@ -89,7 +89,7 @@ Browser.runtime.onMessage.addListener(message => {
                 .findAll(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW));
             if (homePageVideos.length > 0) {
                 runningInterval.stop();
-                main(homePageVideos);
+                initContentScript(homePageVideos);
             }
         });
     }
