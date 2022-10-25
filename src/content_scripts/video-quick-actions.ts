@@ -28,17 +28,12 @@ const createdElements: HTMLElement[] = [];
 function clickSaveToWatchLaterOption(popupTrigger: HTMLElement): void {
     const popupReadyObserver = new MutationObserver((mutations, observer) => {
         for (const mutation of mutations) {
-            const target = mutation.target;
-            if (target.nodeName.toLowerCase() === Tags.YT_FORMATTED_STRING
-                && target.textContent === TextContent.WATCH_LATER
+            const popupWatchLaterEntry = mutation.target as HTMLElement;
+            if (popupWatchLaterEntry.nodeName.toLowerCase() === Tags.YT_FORMATTED_STRING
+                && popupWatchLaterEntry.textContent === TextContent.WATCH_LATER
+                && popupWatchLaterEntry.id === Ids.LABEL
                 && (mutation.oldValue === '' || mutation.oldValue === TextContent.WATCH_LATER)) {
 
-                // FIXME: Why not just cast `target` to a HTMLElement and perform a click on it?
-                const popupWatchLaterEntry = HtmlTreeNavigator.startFrom(document.body)
-                    .filter(new TagNavigationFilter(Tags.YTD_ADD_TO_PLAYLIST_RENDERER))
-                    .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_ADD_TO_OPTION_RENDERER))
-                    .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_CHECKBOX, Ids.CHECKBOX))
-                    .findFirst(new IdAndTextContentNavigationFilter(Tags.YT_FORMATTED_STRING, Ids.LABEL, TextContent.WATCH_LATER));
                 popupWatchLaterEntry.click();
                 // Close the playlist popup.
                 popupTrigger.click();
