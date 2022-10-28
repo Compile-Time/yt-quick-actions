@@ -1,6 +1,5 @@
 import {RuntimeMessage} from "./enums/runtime-message";
 import {OneshotObserver} from "./data/oneshot-observer";
-import {LogHelper} from "./log-helper";
 
 /**
  * Manage active mutation observers inside the same context.
@@ -37,7 +36,6 @@ export class ActiveObserversManager {
                 .filter(oneshotOb => !oneshotOb.equals(existingOneshotObserver));
         }
         this.oneshotObservers.push(oneshotObserver);
-        LogHelper.log('hello?', this.oneshotObservers);
         return oneshotObserver.observer;
     }
 
@@ -48,7 +46,6 @@ export class ActiveObserversManager {
     }
 
     disconnectAll(): void {
-        LogHelper.log('start', this.oneshotObservers);
         const observers: MutationObserver[] = [
             ...Array.from(this.runtimeMessageToObserversMap.values()).flat(),
             ...this.oneshotObservers.map(oneshotOb => oneshotOb.observer)
@@ -57,7 +54,6 @@ export class ActiveObserversManager {
 
         this.oneshotObservers = [];
         this.runtimeMessageToObserversMap = new Map<RuntimeMessage, MutationObserver[]>();
-        LogHelper.log('end', this.oneshotObservers);
     }
 }
 
