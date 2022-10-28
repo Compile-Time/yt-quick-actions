@@ -2,8 +2,12 @@ import {RuntimeMessage} from "./enums/runtime-message";
 import {OneshotObserver} from "./data/oneshot-observer";
 import {LogHelper} from "./log-helper";
 
-// TODO: Mention how this should only be used inside the same script context because background script
-//  calls for content script data do not work.
+/**
+ * Manage active mutation observers inside the same context.
+ *
+ * Mutation observers created in a content script can not be managed from a background script because
+ * content script and background scripts both run in separate contexts.
+ */
 export class ActiveObserversManager {
     private runtimeMessageToObserversMap: Map<RuntimeMessage, MutationObserver[]> = new Map<RuntimeMessage, MutationObserver[]>();
     private oneshotObservers: OneshotObserver[] = [];
