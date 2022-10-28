@@ -144,8 +144,8 @@ function initContentScript(moreOptionsButton: HTMLElement): void {
 }
 
 Browser.runtime.onMessage.addListener((message: TabMessage) => {
-    if (message.isVideoPage()) {
-        if (message.shouldDisconnectObservers()) {
+    if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_VIDEO) {
+        if (message.disconnectObservers) {
             activeObserversManager.disconnectAll();
         }
 

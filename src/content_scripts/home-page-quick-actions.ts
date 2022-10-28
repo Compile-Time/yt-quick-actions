@@ -92,8 +92,8 @@ function initContentScript(homePageVideos: HTMLElement[]): void {
 }
 
 Browser.runtime.onMessage.addListener((message: TabMessage) => {
-    if (message.isHomePage()) {
-        if (message.shouldDisconnectObservers()) {
+    if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_HOME_PAGE) {
+        if (message.disconnectObservers) {
             activeObserversManager.disconnectAll();
         }
 

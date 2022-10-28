@@ -75,8 +75,8 @@ function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void
 }
 
 Browser.runtime.onMessage.addListener((message: TabMessage) => {
-    if (message.isWatchingVideoInPlaylistPage()) {
-        if (message.shouldDisconnectObservers()) {
+    if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST) {
+        if (message.disconnectObservers) {
             activeObserversManager.disconnectAll();
         }
 
