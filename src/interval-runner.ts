@@ -12,9 +12,9 @@ export class IntervalRunner {
     start(interval: number, callback: (runningInterval: RunningInterval) => void): void {
         if (this.isNotRunning()) {
             this.timerId = setInterval(() => {
-                callback(new RunningInterval(this));
                 this.updatePassedIterations();
                 this.stopIfIterationLimitReached();
+                callback(new RunningInterval(this));
             }, interval);
         }
     }
@@ -41,7 +41,7 @@ export class IntervalRunner {
     }
 
     private stopIfIterationLimitReached(): void {
-        if (this.passedIterations === this.iterationLimit) {
+        if (this.passedIterations >= this.iterationLimit) {
             this.stop();
             this.iterationLimitReachedCallback();
         }
