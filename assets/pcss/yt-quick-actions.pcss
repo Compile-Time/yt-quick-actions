@@ -1,0 +1,29 @@
+/*
+This CSS file references variables used in the YouTube CSS. This makes the custom buttons added by this
+ extension fit the look and feel of YouTube.
+
+YouTube variables start with '--yt-spec'.
+*/
+
+.qa-btn {
+    color: var(--yt-spec-text-primary);
+    border: none;
+    background: transparent;
+}
+
+.qa-btn:hover {
+    color: red;
+    cursor: pointer;
+}
+
+.qa-btn-pill {
+    border-radius: 3em;
+    background-color: var(--yt-spec-badge-chip-background);
+    padding: 0.5em 0.7em;
+    margin-left: 0.5em;
+}
+
+.qa-btn-pill:hover {
+    background-color: var(--yt-spec-button-chip-background-hover);
+    color: inherit;
+}

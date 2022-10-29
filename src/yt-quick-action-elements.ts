@@ -1,13 +1,11 @@
 import {Ids, Tags} from "./html-navigation/element-data";
-import {StorageAccessor} from "./storage-accessor";
-import {Theme} from "./enums/theme";
 
 export class YtQuickActionsElements {
     static removeButton(): HTMLButtonElement {
         const button = document.createElement(Tags.BUTTON);
         button.id = Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON;
         button.innerHTML = `<i class="fa-solid fa-trash fa-lg"></i>`;
-        this.setButtonClass(button);
+        button.setAttribute('class', 'qa-btn');
         return button;
     }
 
@@ -15,7 +13,7 @@ export class YtQuickActionsElements {
         const button = document.createElement(Tags.BUTTON);
         button.id = Ids.YT_QUICK_ACTIONS_VIDEO_WATCH_LATER;
         button.innerHTML = `<i class="fa-solid fa-clock fa-lg"></i>`
-        this.setButtonClass(button, 'quick-actions-watch-later-under-video-button');
+        button.setAttribute('class', 'qa-btn qa-btn-pill');
         return button;
     }
 
@@ -23,28 +21,7 @@ export class YtQuickActionsElements {
         const button = document.createElement(Tags.BUTTON);
         button.id = Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER;
         button.innerHTML = `<i class="fa-solid fa-clock fa-lg"></i>`
-        this.setButtonClass(button);
+        button.setAttribute('class', 'qa-btn');
         return button;
-    }
-
-    private static setButtonClass(button: HTMLButtonElement, additionalCss: string = ''): void {
-        StorageAccessor.getTheme()
-            .then(theme => {
-                let cssClass;
-                switch (theme) {
-                    case Theme.LIGHT:
-                        cssClass = 'quick-actions-button-light'
-                        break;
-
-                    case Theme.DARK:
-                        cssClass = 'quick-actions-button-dark'
-                        break;
-
-                    default:
-                        cssClass = 'quick-actions-button';
-                        break;
-                }
-                button.setAttribute('class', cssClass + ' ' + additionalCss);
-            });
     }
 }

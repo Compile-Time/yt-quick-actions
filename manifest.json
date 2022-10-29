@@ -29,7 +29,7 @@
         "src/content_scripts/watching-playlist-quick-actions.ts"
       ],
       "css": [
-        "assets/scss/yt-quick-actions.scss",
+        "assets/pcss/yt-quick-actions.pcss",
         "assets/fontawesome/css/fontawesome.min.css",
         "assets/fontawesome/css/solid.min.css"
       ]

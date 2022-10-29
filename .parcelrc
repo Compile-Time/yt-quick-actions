@@ -1,10 +1,5 @@
 {
   "extends": [
     "@parcel/config-webextension"
-  ],
-  "transformers": {
-    "*.scss": [
-      "@parcel/transformer-sass"
-    ]
-  }
+  ]
 }
