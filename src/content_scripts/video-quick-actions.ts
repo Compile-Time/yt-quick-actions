@@ -4,10 +4,10 @@ import {RuntimeMessage} from "../enums/runtime-message";
 import {IntervalRunner} from "../interval-runner";
 import {Ids, Tags, TextContent} from "../html-navigation/element-data";
 import {
-    IdAndTextContentNavigationFilter,
     IdNavigationFilter,
     TagNavigationFilter,
-    TextContentContainsNavigationFilter
+    TextContentContainsNavigationFilter,
+    TextContentNavigationFilter
 } from "../html-navigation/navigation-filter";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {StorageAccessor} from "../storage-accessor";
@@ -37,15 +37,13 @@ const saveToFullScreenPopupReadyObserver = new MutationObserver((mutations, obse
 
             popupWatchLaterEntry.click();
 
-            // Close the playlist popup.
-            const saveButton = HtmlTreeNavigator.startFrom(document.body)
-                .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
-                .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
-                .filter(new IdNavigationFilter(Tags.DIV, Ids.ACTIONS))
-                .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
-                .filter(new TagNavigationFilter(Tags.YTD_BUTTON_RENDERER))
-                .findFirst(new IdAndTextContentNavigationFilter(Tags.YT_FORMATTED_STRING, Ids.TEXT, TextContent.SAVE));
-            saveButton.click();
+            const popupCloseButton = HtmlTreeNavigator.startFrom(document.body)
+                .filter(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+                .filter(new TagNavigationFilter(Tags.TP_YT_PAPER_DIALOG))
+                .filter(new IdNavigationFilter(Tags.DIV, Ids.HEADER))
+                .filter(new TagNavigationFilter(Tags.YT_ICON_BUTTON))
+                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.BUTTON));
+            popupCloseButton.click();
 
             observer.disconnect();
         }
@@ -117,7 +115,7 @@ function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElemen
 
         const saveButton = HtmlTreeNavigator.startFrom(ytdMenuRenderer)
             .filter(new TagNavigationFilter(Tags.YTD_BUTTON_RENDERER))
-            .findFirst(new IdAndTextContentNavigationFilter(Tags.YT_FORMATTED_STRING, Ids.TEXT, TextContent.SAVE));
+            .findFirst(new TextContentNavigationFilter(Tags.SPAN, TextContent.SAVE));
 
         if (!!saveButton) {
             clickSaveToWatchLaterOption(saveButton);
@@ -154,14 +152,14 @@ Browser.runtime.onMessage.addListener((message: TabMessage) => {
                 .logOperations('Find more options button ("...")', StorageAccessor.getLogMode())
                 .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
                 .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
-                .filter(new IdNavigationFilter(Tags.DIV, 'actions'))
+                .filter(new IdNavigationFilter(Tags.DIV, Ids.ACTIONS))
                 .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
                 .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
 
             const existingQuickActionsWatchLaterButton = HtmlTreeNavigator.startFrom(document.body)
                 .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
                 .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
-                .filter(new IdNavigationFilter(Tags.DIV, 'actions'))
+                .filter(new IdNavigationFilter(Tags.DIV, Ids.ACTIONS))
                 .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_VIDEO_WATCH_LATER));
 
             if (!!moreOptionsButton && !existingQuickActionsWatchLaterButton) {
