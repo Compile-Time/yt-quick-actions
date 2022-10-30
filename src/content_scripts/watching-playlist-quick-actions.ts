@@ -1,22 +1,16 @@
 import * as Browser from "webextension-polyfill";
 import {RuntimeMessage} from "../enums/runtime-message";
-import {IntervalRunner} from "../interval-runner";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
 import {IdNavigationFilter, TextContentNavigationFilter} from "../html-navigation/navigation-filter";
 import {AttributeNames, Ids, Tags, TextContent} from "../html-navigation/element-data";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {StorageAccessor} from "../storage-accessor";
-import {LogHelper} from "../log-helper";
 import {activeObserversManager} from "../active-observers-manager";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
-
-const globalPageReadyInterval = new IntervalRunner(5);
-globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
-    LogHelper.pageReadyIntervalLimitReached('watching-playlist-quick-actions');
-});
+import {ElementReadyWatcher} from "../element-ready-watcher";
 
 /*
 Wait for the menu popup to update so the correct video is removed.
@@ -80,15 +74,14 @@ Browser.runtime.onMessage.addListener((message: TabMessage) => {
             activeObserversManager.disconnectAll();
         }
 
-        globalPageReadyInterval.start(1000, runningInterval => {
+        ElementReadyWatcher.watch(message.runtimeMessage, () => HtmlTreeNavigator.startFrom(document.body)
+            .logOperations('Find all playlist items', StorageAccessor.getLogMode())
+            .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+        ).then(() => {
             const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
                 .logOperations('Find all playlist items', StorageAccessor.getLogMode())
                 .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
-
-            if (!!playlistPanelVideoRendererItems) {
-                runningInterval.stop();
-                initContentScript(playlistPanelVideoRendererItems);
-            }
+            initContentScript(playlistPanelVideoRendererItems);
         });
     }
 });

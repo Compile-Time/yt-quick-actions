@@ -1,7 +1,6 @@
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import * as Browser from "webextension-polyfill";
 import {RuntimeMessage} from "../enums/runtime-message";
-import {IntervalRunner} from "../interval-runner";
 import {Ids, Tags, TextContent} from "../html-navigation/element-data";
 import {
     IdNavigationFilter,
@@ -17,11 +16,8 @@ import {activeObserversManager} from "../active-observers-manager";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
+import {ElementReadyWatcher} from "../element-ready-watcher";
 
-const globalPageReadyInterval = new IntervalRunner(5);
-globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
-    LogHelper.pageReadyIntervalLimitReached('video-quick-actions');
-});
 const createdElements: HTMLElement[] = [];
 
 /*
@@ -141,37 +137,26 @@ function initContentScript(moreOptionsButton: HTMLElement): void {
     moreOptionsButton.parentElement.insertBefore(quickActionsWatchLater, moreOptionsButton);
 }
 
+function getMoreOptionsButton(): HTMLElement {
+    return HtmlTreeNavigator.startFrom(document.body)
+        .logOperations('Find more options button ("...")', StorageAccessor.getLogMode())
+        .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
+        .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
+        .filter(new IdNavigationFilter(Tags.DIV, Ids.ACTIONS))
+        .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
+        .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
+}
+
 Browser.runtime.onMessage.addListener((message: TabMessage) => {
     if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_VIDEO) {
         if (message.disconnectObservers) {
             activeObserversManager.disconnectAll();
         }
 
-        globalPageReadyInterval.start(1000, runningInterval => {
-            const moreOptionsButton = HtmlTreeNavigator.startFrom(document.body)
-                .logOperations('Find more options button ("...")', StorageAccessor.getLogMode())
-                .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
-                .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
-                .filter(new IdNavigationFilter(Tags.DIV, Ids.ACTIONS))
-                .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
-                .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
-
-            const existingQuickActionsWatchLaterButton = HtmlTreeNavigator.startFrom(document.body)
-                .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
-                .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
-                .filter(new IdNavigationFilter(Tags.DIV, Ids.ACTIONS))
-                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_VIDEO_WATCH_LATER));
-
-            if (!!moreOptionsButton && !existingQuickActionsWatchLaterButton) {
+        ElementReadyWatcher.watch(message.runtimeMessage, () => getMoreOptionsButton())
+            .then(() => {
+                const moreOptionsButton = getMoreOptionsButton();
                 initContentScript(moreOptionsButton);
-            }
-
-            // On half-window sizes our custom HTMl gets inserted but is them removed due to updates
-            // performed on the YouTube page. To fix this we stop the interval only when we know that our
-            // custom element exists.
-            if (!!existingQuickActionsWatchLaterButton) {
-                runningInterval.stop();
-            }
-        })
+            });
     }
 });

@@ -2,7 +2,6 @@ import * as Browser from "webextension-polyfill";
 import {Ids, Tags, TextContent} from "../html-navigation/element-data";
 import {RuntimeMessage} from "../enums/runtime-message";
 import {YtQuickActionsElements} from "../yt-quick-action-elements";
-import {IntervalRunner, RunningInterval} from "../interval-runner";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
 import {
     IdNavigationFilter,
@@ -12,15 +11,11 @@ import {
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {activeObserversManager} from "../active-observers-manager";
 import {StorageAccessor} from "../storage-accessor";
-import {LogHelper} from "../log-helper";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
+import {ElementReadyWatcher} from "../element-ready-watcher";
 
-const globalPageReadyInterval = new IntervalRunner(5);
-globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
-    LogHelper.pageReadyIntervalLimitReached('watch-later-quick-actions');
-});
 const createdElements: HTMLElement[] = [];
 
 /*
@@ -38,6 +33,25 @@ const menuUpdatedObserver = new MutationObserver((mutations, observer) => {
             observer.disconnect();
         }
     })
+});
+
+/*
+Register an observer to add the remove button to new playlist items loaded afterwards. This only
+ occurs in long playlists.
+ */
+const playlistLoadingNewEntriesObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+        const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(mutation.target as HTMLElement)
+            .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER));
+        const ytIconButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
+            .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
+
+        const existingRemoveButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
+            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON));
+        if (!!ytdPlaylistVideoRenderer && !existingRemoveButton) {
+            appendRemoveButton(ytIconButton, ytdPlaylistVideoRenderer);
+        }
+    }
 });
 
 function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
@@ -83,25 +97,7 @@ function initContentScript(menuButtons: HTMLElement[]): void {
 
     const ytdPlaylistVideoListRenderer = HtmlParentNavigator.startFrom(firstMenuButton)
         .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER));
-    // Register an observer to add the remove button to new playlist items loaded afterwards. This only
-    // occurs in long playlists. Sadly, an observer can not be used on initial page load to detect the
-    // playlist items, therefore, we need both an interval and an observer.
-    const loadingNewEntriesObserver = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-            const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(mutation.target as HTMLElement)
-                .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER));
-            const ytIconButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
-                .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
-
-            const existingRemoveButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
-                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON));
-            if (!!ytdPlaylistVideoRenderer && !existingRemoveButton) {
-                appendRemoveButton(ytIconButton, ytdPlaylistVideoRenderer);
-            }
-        }
-    });
-
-    activeObserversManager.addForPage(RuntimeMessage.NAVIGATED_TO_PLAYLIST, loadingNewEntriesObserver)
+    activeObserversManager.addForPage(RuntimeMessage.NAVIGATED_TO_PLAYLIST, playlistLoadingNewEntriesObserver)
         .observe(ytdPlaylistVideoListRenderer, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
         })
@@ -114,15 +110,16 @@ Browser.runtime.onMessage.addListener((message: TabMessage) => {
             activeObserversManager.disconnectAll();
         }
 
-        globalPageReadyInterval.start(1000, (runningInterval: RunningInterval) => {
+        ElementReadyWatcher.watch(message.runtimeMessage, () => HtmlTreeNavigator.startFrom(document.body)
+            .logOperations('Find all menu buttons of each playlist item', StorageAccessor.getLogMode())
+            .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
+            .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+        ).then(() => {
             const menuButtons: HTMLElement[] = HtmlTreeNavigator.startFrom(document.body)
                 .logOperations('Find all menu buttons of each playlist item', StorageAccessor.getLogMode())
                 .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
                 .findAll(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
-            if (!!menuButtons) {
-                runningInterval.stop();
-                initContentScript(menuButtons);
-            }
-        })
+            initContentScript(menuButtons);
+        });
     }
 })

@@ -1,6 +1,5 @@
 import * as Browser from "webextension-polyfill";
 import {RuntimeMessage} from "../enums/runtime-message";
-import {IntervalRunner} from "../interval-runner";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
 import {
     IdNavigationFilter,
@@ -12,15 +11,10 @@ import {YtQuickActionsElements} from "../yt-quick-action-elements";
 import {activeObserversManager} from "../active-observers-manager";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {StorageAccessor} from "../storage-accessor";
-import {LogHelper} from "../log-helper";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
-
-const globalPageReadyInterval = new IntervalRunner(5);
-globalPageReadyInterval.registerIterationLimitReachedCallback(() => {
-    LogHelper.pageReadyIntervalLimitReached('home-page-quick-actions')
-});
+import {ElementReadyWatcher} from "../element-ready-watcher";
 
 /*
 Observer to wait for the "Save to Watch later" option to update for the relevant video.
@@ -97,15 +91,20 @@ Browser.runtime.onMessage.addListener((message: TabMessage) => {
             activeObserversManager.disconnectAll();
         }
 
-        globalPageReadyInterval.start(1000, runningInterval => {
+        ElementReadyWatcher.watch(message.runtimeMessage, () => HtmlTreeNavigator.startFrom(document.body)
+            .logOperations('Check if first grid rows exists', StorageAccessor.getLogMode())
+            .filter(new TagNavigationFilter(Tags.YTD_APP))
+            .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
+            .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
+            .findFirst(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW))
+        ).then(() => {
             const homePageVideos = HtmlTreeNavigator.startFrom(document.body)
-                .logOperations('Find all videos containing grid rows', StorageAccessor.getLogMode())
+                .logOperations('Find all currently available grid rows in the DOM', StorageAccessor.getLogMode())
                 .filter(new TagNavigationFilter(Tags.YTD_APP))
                 .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
                 .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
                 .findAll(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW));
             if (homePageVideos.length > 0) {
-                runningInterval.stop();
                 initContentScript(homePageVideos);
             }
         });
