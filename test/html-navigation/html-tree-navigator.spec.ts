@@ -4,7 +4,7 @@ import {
     TagNavigationFilter,
     TextContentNavigationFilter
 } from "../../src/html-navigation/navigation-filter";
-import {Tags} from "../../src/html-navigation/element-data";
+import {Tags} from "../../src/html-element-processing/element-data";
 
 describe('HtmlTreeNavigator', () => {
     it('should return the only element present on matching filters', () => {

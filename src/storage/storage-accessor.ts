@@ -1,10 +1,11 @@
 import * as Browser from "webextension-polyfill";
-import {LogMode, LogModeMapper} from "./enums/log-mode";
+import {LogLevel, LogLevelMapper} from "../enums/log-level";
+import {SettingsData} from "./settings-data";
 
 export class StorageAccessor {
-    static getLogMode(): Promise<LogMode> {
-        return Browser.storage.local.get('logMode')
-            .then(storage => LogModeMapper.fromStr(storage.logMode));
+    static getLogLevel(): Promise<LogLevel> {
+        return Browser.storage.local.get(SettingsData.LOG_LEVEL_ATTR)
+            .then((storage: SettingsData) => LogLevelMapper.fromStrOrDefault(storage.logLevel));
     }
 
     static getTheme(): Promise<string | null> {

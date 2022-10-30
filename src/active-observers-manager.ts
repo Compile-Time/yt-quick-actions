@@ -61,4 +61,5 @@ export class ActiveObserversManager {
     }
 }
 
+// FIXME: Should be setup separately for each script content (background/content).
 export const activeObserversManager: ActiveObserversManager = new ActiveObserversManager();

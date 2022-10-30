@@ -1,7 +1,7 @@
-import {YtQuickActionsElements} from "../yt-quick-action-elements";
+import {YtQuickActionsElements} from "../html-element-processing/yt-quick-action-elements";
 import * as Browser from "webextension-polyfill";
 import {RuntimeMessage} from "../enums/runtime-message";
-import {Ids, Tags, TextContent} from "../html-navigation/element-data";
+import {Ids, Tags, TextContent} from "../html-element-processing/element-data";
 import {
     IdNavigationFilter,
     TagNavigationFilter,
@@ -9,16 +9,17 @@ import {
     TextContentNavigationFilter
 } from "../html-navigation/navigation-filter";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
-import {StorageAccessor} from "../storage-accessor";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
-import {LogHelper} from "../log-helper";
 import {activeObserversManager} from "../active-observers-manager";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
-import {ElementReadyWatcher} from "../element-ready-watcher";
+import {ElementReadyWatcher} from "../html-element-processing/element-ready-watcher";
+import {StorageAccessor} from "../storage/storage-accessor";
+import {contentLogProvider} from "./init-globals";
 
 const createdElements: HTMLElement[] = [];
+const logger = contentLogProvider.getVideoQuickActionsLogger();
 
 /*
 Wait for the "Save to" popup to be ready and then check the "Watch later" entry.
@@ -39,7 +40,12 @@ const saveToFullScreenPopupReadyObserver = new MutationObserver((mutations, obse
                 .filter(new IdNavigationFilter(Tags.DIV, Ids.HEADER))
                 .filter(new TagNavigationFilter(Tags.YT_ICON_BUTTON))
                 .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.BUTTON));
-            popupCloseButton.click();
+
+            if (!!popupCloseButton) {
+                popupCloseButton.click();
+            } else {
+                logger.error('Could not find popup close button');
+            }
 
             observer.disconnect();
         }
@@ -70,6 +76,11 @@ function clickSaveToWatchLaterOption(popupTrigger: HTMLElement): void {
     const popupContainer = HtmlTreeNavigator.startFrom(document.body)
         .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER));
 
+    if (!popupContainer) {
+        logger.error('Could not find popup container for full screen size');
+        return;
+    }
+
     activeObserversManager.upsertOneshotObserver(new OneshotObserver(
         OneshotId.SAVE_TO_FULL_SCREEN_POPUP_READY,
         RuntimeMessage.NAVIGATED_TO_VIDEO,
@@ -91,6 +102,11 @@ function clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton: HTMLEle
     const popupContainer = HtmlTreeNavigator.startFrom(document.body)
         .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
 
+    if (!popupContainer) {
+        logger.error('Could not find popup container for half screen size');
+        return;
+    }
+
     activeObserversManager.upsertOneshotObserver(new OneshotObserver(
         OneshotId.SAVE_TO_HALF_SCREEN_POPUP_READY,
         RuntimeMessage.NAVIGATED_TO_VIDEO,
@@ -109,6 +125,12 @@ function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElemen
         const ytdMenuRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
             .find(new TagNavigationFilter(Tags.YTD_MENU_RENDERER));
 
+        if (!ytdMenuRenderer) {
+            logger.error('Could not find ytd-menu-renderer as a parent');
+            return;
+        }
+
+        // On half-screen size this element is hidden in the more options button ("...").
         const saveButton = HtmlTreeNavigator.startFrom(ytdMenuRenderer)
             .filter(new TagNavigationFilter(Tags.YTD_BUTTON_RENDERER))
             .findFirst(new TextContentNavigationFilter(Tags.SPAN, TextContent.SAVE));
@@ -122,7 +144,7 @@ function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElemen
             if (!!moreOptionsButton) {
                 clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton);
             } else {
-                LogHelper.error('Could not find HTML elements for action "Save to" or "... > Save"');
+                logger.error('Could not find HTML elements for action "Save to" or "... > Save"');
             }
         }
     };
@@ -139,7 +161,6 @@ function initContentScript(moreOptionsButton: HTMLElement): void {
 
 function getMoreOptionsButton(): HTMLElement {
     return HtmlTreeNavigator.startFrom(document.body)
-        .logOperations('Find more options button ("...")', StorageAccessor.getLogMode())
         .filter(new TagNavigationFilter(Tags.YTD_WATCH_FLEXY))
         .filter(new TagNavigationFilter(Tags.YTD_WATCH_METADATA))
         .filter(new IdNavigationFilter(Tags.DIV, Ids.ACTIONS))
@@ -147,16 +168,25 @@ function getMoreOptionsButton(): HTMLElement {
         .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
 }
 
-Browser.runtime.onMessage.addListener((message: TabMessage) => {
+async function processRuntimeMessage(message: TabMessage): Promise<void> {
+    const level = await StorageAccessor.getLogLevel();
+    logger.setLevel(level);
+
     if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_VIDEO) {
         if (message.disconnectObservers) {
             activeObserversManager.disconnectAll();
         }
 
-        ElementReadyWatcher.watch(message.runtimeMessage, () => getMoreOptionsButton())
+        ElementReadyWatcher.watch(message.runtimeMessage, logger, () => getMoreOptionsButton())
             .then(() => {
                 const moreOptionsButton = getMoreOptionsButton();
-                initContentScript(moreOptionsButton);
+                if (!!moreOptionsButton) {
+                    initContentScript(moreOptionsButton);
+                } else {
+                    logger.error('Could not find more options button under video');
+                }
             });
     }
-});
+}
+
+Browser.runtime.onMessage.addListener(processRuntimeMessage);

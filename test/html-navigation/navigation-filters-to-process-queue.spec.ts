@@ -1,6 +1,6 @@
 import {NavigationFiltersToProcessQueue} from "../../src/html-navigation/navigation-filters-to-process-queue";
 import {TagNavigationFilter} from "../../src/html-navigation/navigation-filter";
-import {Tags} from "../../src/html-navigation/element-data";
+import {Tags} from "../../src/html-element-processing/element-data";
 
 describe('NavigationFilterQueue', () => {
     it('should return first filter when no filters are marked as processed', () => {

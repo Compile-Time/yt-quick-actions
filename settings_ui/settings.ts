@@ -1,23 +1,18 @@
 import * as Browser from "webextension-polyfill";
-import {LogMode} from "../src/enums/log-mode";
+import {LogLevel, LogLevelMapper} from "../src/enums/log-level";
 import {Theme} from "../src/enums/theme";
-import {LogHelper} from "../src/log-helper";
+import {SettingsData} from "../src/storage/settings-data";
+import {LogProvider} from "../src/logging/log-provider";
 
-function getFormLogMode(): string {
-    let selectedValue = document.querySelector('input[name="log-mode"]:checked')
-        .getAttribute('value');
+const settingsLogProvider = new LogProvider();
+const logger = settingsLogProvider.getSettingsPageLogger();
 
-    switch (selectedValue) {
-        case LogMode.DEFAULT:
-        case LogMode.DEBUG:
-            break;
+const settingsData = new SettingsData();
 
-        default:
-            LogHelper.error(`Selected log mode value does not match enum LogMode: ${selectedValue}`);
-            return;
-    }
+function updateLogLevel(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    settingsData.logLevel = LogLevelMapper.fromStr(select.options[select.selectedIndex].value);
 
-    return selectedValue;
 }
 
 function getFormTheme(): string {
@@ -31,26 +26,27 @@ function getFormTheme(): string {
             break;
 
         default:
-            LogHelper.error(`Selected theme value does not match enum Theme: ${selectedValue}`);
+            logger.error(`Selected theme value does not match enum Theme: ${selectedValue}`);
             return;
     }
 
     return selectedValue;
 }
 
-function initLogMode(): void {
-    Browser.storage.local.get('logMode')
+function initLogLevel(): void {
+    Browser.storage.local.get(SettingsData.LOG_LEVEL_ATTR)
         .then(
             storage => {
-                if (!!storage.logMode) {
-                    document.querySelector(`#log-mode-${storage.logMode}`)
-                        .setAttribute('checked', 'true');
+                logger.log(storage);
+                const select = document.querySelector('#log-level') as HTMLSelectElement;
+                if (!!storage.logLevel) {
+                    const logLevel = LogLevelMapper.fromStr(storage.logLevel);
+                    select.selectedIndex = LogLevelMapper.toNumber(logLevel);
                 } else {
-                    document.querySelector(`#log-mode-${LogMode.DEFAULT}`)
-                        .setAttribute('checked', 'true');
+                    select.selectedIndex = LogLevelMapper.toNumber(LogLevel.WARN);
                 }
             },
-            error => LogHelper.error(`Could not retrieve log mode value from storage API: ${error}`)
+            error => logger.error(`Could not retrieve log level from storage API: ${error}`)
         );
 }
 
@@ -66,7 +62,7 @@ function initTheme(): void {
                         .setAttribute('checked', 'true');
                 }
             },
-            error => LogHelper.error(`Could not retrieve theme value from storage API: ${error}`)
+            error => logger.error(`Could not retrieve theme value from storage API: ${error}`)
         )
 }
 
@@ -90,18 +86,17 @@ function onThemeChange(event: Event): void {
 
 function saveOptions(e): void {
     e.preventDefault();
-    Browser.storage.local.set({
-        logMode: getFormLogMode(),
-        theme: getFormTheme()
-    });
+    Browser.storage.local.set(settingsData);
 }
 
 function init(): void {
-    initLogMode();
+    initLogLevel();
     initTheme();
 }
 
 document.addEventListener('DOMContentLoaded', init);
+document.querySelector('#log-level')
+    .addEventListener('change', updateLogLevel);
 document.querySelector('form').addEventListener('submit', saveOptions);
 document.querySelectorAll('[name="theme"]')
     .forEach(element => element.addEventListener('change', onThemeChange))

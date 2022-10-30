@@ -1,40 +1,17 @@
 import {NavigationFilter} from "./navigation-filter";
 import {NavigationFiltersToProcessQueue} from "./navigation-filters-to-process-queue";
-import {NavigationFilterToProcess} from "./navigation-filter-to-process";
-import {LogMode} from "../enums/log-mode";
-import {LogHelper} from "../log-helper";
 
 /**
  * Builder-like class for HTML tree navigation.
  */
 export class HtmlTreeNavigator {
-    private logModePromise: Promise<LogMode> = null;
     private initialFilterQueue: NavigationFiltersToProcessQueue = new NavigationFiltersToProcessQueue();
-    private debugContext: string;
-    private debugFiltersToProcessMap: Map<NavigationFilter, NavigationFilterToProcess> =
-        new Map<NavigationFilter, NavigationFilterToProcess>();
 
     constructor(private element: HTMLElement) {
     }
 
     static startFrom(element: HTMLElement): HtmlTreeNavigator {
         return new HtmlTreeNavigator(element);
-    }
-
-    /**
-     * Write debug messages to the console depending on if log mode is set to debug.
-     *
-     * This method takes a promise that returns the current log mode. If the log mode is set to debug the
-     * extension will write out information regarding filter results out to the console on the debug
-     * level. Additionally, a context string must be provided that is used to group the debug messages.
-     *
-     * @param context - A context string used to group the resulting debug messages
-     * @param logModePromise - A promise returning the currently enabled log mode
-     */
-    logOperations(context: string, logModePromise: Promise<LogMode>): HtmlTreeNavigator {
-        this.debugContext = context;
-        this.logModePromise = logModePromise;
-        return this;
     }
 
     /**
@@ -64,28 +41,7 @@ export class HtmlTreeNavigator {
      */
     findAll(targetElementFilter: NavigationFilter): HTMLElement[] {
         this.filter(targetElementFilter);
-        this.initialFilterQueue.getFilters().forEach(filterToProcess => {
-            this.debugFiltersToProcessMap.set(filterToProcess.getFilter(), filterToProcess);
-        })
-        const foundElement = this.navigateTree(this.initialFilterQueue, this.element.children);
-
-        if (!!this.logModePromise) {
-            this.logModePromise.then(logMode => {
-                if (logMode === LogMode.DEBUG) {
-                    LogHelper.group(this.debugContext);
-                    this.debugFiltersToProcessMap.forEach((filterToProcess) => {
-                        if (filterToProcess.isProcessed()) {
-                            LogHelper.debug(`Filter ${filterToProcess.getFilter()} result: found element`);
-                        } else {
-                            LogHelper.debug(`Filter ${filterToProcess.getFilter()} result: element not found!`);
-                        }
-                    })
-                    LogHelper.groupEnd();
-                }
-            })
-        }
-
-        return foundElement;
+        return this.navigateTree(this.initialFilterQueue, this.element.children);
     }
 
     /**
@@ -113,17 +69,15 @@ export class HtmlTreeNavigator {
     }
 
     private navigateTree(filterQueue: NavigationFiltersToProcessQueue, htmlCollection: HTMLCollection): HTMLElement[] {
+        const filterToProcess = filterQueue.getCurrentOrNextUnprocessedFilter();
+        const filter = filterToProcess.getFilter();
         if (htmlCollection.length === 0) {
             return [];
         }
 
-        const filterToProcess = filterQueue.getCurrentOrNextUnprocessedFilter();
-        const filter = filterToProcess.getFilter();
         const foundElements: HTMLElement[] = filter.apply(htmlCollection);
-
         if (foundElements.length > 0) {
             filterToProcess.markProcessed();
-            this.debugFiltersToProcessMap.set(filter, filterToProcess);
             if (filterQueue.areAllFiltersProcessed()) {
                 return foundElements;
             }

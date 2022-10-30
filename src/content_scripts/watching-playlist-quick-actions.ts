@@ -1,16 +1,19 @@
 import * as Browser from "webextension-polyfill";
 import {RuntimeMessage} from "../enums/runtime-message";
-import {YtQuickActionsElements} from "../yt-quick-action-elements";
+import {YtQuickActionsElements} from "../html-element-processing/yt-quick-action-elements";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
 import {IdNavigationFilter, TextContentNavigationFilter} from "../html-navigation/navigation-filter";
-import {AttributeNames, Ids, Tags, TextContent} from "../html-navigation/element-data";
+import {AttributeNames, Ids, Tags, TextContent} from "../html-element-processing/element-data";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
-import {StorageAccessor} from "../storage-accessor";
 import {activeObserversManager} from "../active-observers-manager";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
-import {ElementReadyWatcher} from "../element-ready-watcher";
+import {ElementReadyWatcher} from "../html-element-processing/element-ready-watcher";
+import {StorageAccessor} from "../storage/storage-accessor";
+import {contentLogProvider} from "./init-globals";
+
+const logger = contentLogProvider.getWatchingPlaylistLogger();
 
 /*
 Wait for the menu popup to update so the correct video is removed.
@@ -32,6 +35,11 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
         element.click();
         const popupMenu = HtmlTreeNavigator.startFrom(document.body)
             .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS));
+
+        if (!popupMenu) {
+            logger.error('Could not find popup menu trigger');
+            return;
+        }
 
         activeObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotId.REMOVE_POPUP_ENTRY_READY,
@@ -68,20 +76,27 @@ function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void
     }
 }
 
-Browser.runtime.onMessage.addListener((message: TabMessage) => {
+async function processRuntimeMessage(message: TabMessage): Promise<void> {
+    const level = await StorageAccessor.getLogLevel();
+    logger.setLevel(level);
+
     if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST) {
         if (message.disconnectObservers) {
             activeObserversManager.disconnectAll();
         }
 
-        ElementReadyWatcher.watch(message.runtimeMessage, () => HtmlTreeNavigator.startFrom(document.body)
-            .logOperations('Find all playlist items', StorageAccessor.getLogMode())
+        ElementReadyWatcher.watch(message.runtimeMessage, logger, () => HtmlTreeNavigator.startFrom(document.body)
             .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
         ).then(() => {
             const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
-                .logOperations('Find all playlist items', StorageAccessor.getLogMode())
                 .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
-            initContentScript(playlistPanelVideoRendererItems);
+            if (!!playlistPanelVideoRendererItems) {
+                initContentScript(playlistPanelVideoRendererItems);
+            } else {
+                logger.error('Could not find ytd-playlist-panel-video-renderer elements');
+            }
         });
     }
-});
+}
+
+Browser.runtime.onMessage.addListener(processRuntimeMessage);

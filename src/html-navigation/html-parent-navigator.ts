@@ -1,9 +1,6 @@
 import {NavigationFilter} from "./navigation-filter";
-import {LogHelper} from "../log-helper";
 
 export class HtmlParentNavigator {
-    private debug: boolean = false;
-
     private constructor(private element: HTMLElement) {
     }
 
@@ -11,24 +8,15 @@ export class HtmlParentNavigator {
         return new HtmlParentNavigator(element)
     }
 
-    debugNavigation(): HtmlParentNavigator {
-        this.debug = true;
-        return this;
-    }
-
-    find(filter: NavigationFilter): HTMLElement | undefined {
+    find(filter: NavigationFilter): HTMLElement | null {
         return this.navigateToParent(this.element, filter);
     }
 
-    private navigateToParent(element: HTMLElement, filter: NavigationFilter): HTMLElement | undefined {
+    private navigateToParent(element: HTMLElement, filter: NavigationFilter): HTMLElement | null {
         const foundElement = filter.applySingle(element);
 
-        if (this.debug) {
-            LogHelper.debug(`Found the following element for filter ${filter}: ${foundElement.tagName}`)
-        }
-
         if (!foundElement && !element.parentElement) {
-            return undefined;
+            return null;
         }
 
         return !!foundElement ? foundElement : this.navigateToParent(element.parentElement, filter);

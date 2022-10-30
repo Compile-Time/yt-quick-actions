@@ -6,15 +6,18 @@ import {
     TagNavigationFilter,
     TextContentNavigationFilter
 } from "../html-navigation/navigation-filter";
-import {Ids, Tags, TextContent} from "../html-navigation/element-data";
-import {YtQuickActionsElements} from "../yt-quick-action-elements";
+import {Ids, Tags, TextContent} from "../html-element-processing/element-data";
+import {YtQuickActionsElements} from "../html-element-processing/yt-quick-action-elements";
 import {activeObserversManager} from "../active-observers-manager";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
-import {StorageAccessor} from "../storage-accessor";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
-import {ElementReadyWatcher} from "../element-ready-watcher";
+import {ElementReadyWatcher} from "../html-element-processing/element-ready-watcher";
+import {StorageAccessor} from "../storage/storage-accessor";
+import {contentLogProvider} from "./init-globals";
+
+const logger = contentLogProvider.getHomePageLogger();
 
 /*
 Observer to wait for the "Save to Watch later" option to update for the relevant video.
@@ -27,7 +30,13 @@ const saveToWatchLaterPopupEntryReadyObserver = new MutationObserver((mutations,
             const watchLaterButton = HtmlTreeNavigator.startFrom(document.body)
                 .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
                 .findFirst(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.SAVE_TO_WATCH_LATER));
-            watchLaterButton.click();
+
+            if (!!watchLaterButton) {
+                watchLaterButton.click();
+            } else {
+                logger.error('Could not find watch later button to click');
+            }
+
             observer.disconnect();
         }
     }
@@ -49,6 +58,11 @@ const homePageVideosLoadingObserver = new MutationObserver((mutations) => {
             const divMenu = HtmlParentNavigator.startFrom(menuButton)
                 .find(new IdNavigationFilter(Tags.DIV, Ids.MENU));
 
+            if (!divMenu) {
+                logger.error('Could not find div menu (more options button)');
+                return;
+            }
+
             const existingWatchLaterButton = HtmlTreeNavigator.startFrom(divMenu.parentElement)
                 .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER));
             if (!existingWatchLaterButton) {
@@ -64,6 +78,11 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
         videoMenuButton.click();
         const popupContainer = HtmlTreeNavigator.startFrom(document.body)
             .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER));
+
+        if (!popupContainer) {
+            logger.error('Could not find popup container');
+            return;
+        }
 
         activeObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
@@ -85,28 +104,36 @@ function initContentScript(homePageVideos: HTMLElement[]): void {
         })
 }
 
-Browser.runtime.onMessage.addListener((message: TabMessage) => {
+async function processRuntimeMessage(message: TabMessage): Promise<void> {
+    const level = await StorageAccessor.getLogLevel();
+    logger.setLevel(level);
+
     if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_HOME_PAGE) {
         if (message.disconnectObservers) {
+            // TODO: Rename to contentScriptsObserversManager
             activeObserversManager.disconnectAll();
         }
 
-        ElementReadyWatcher.watch(message.runtimeMessage, () => HtmlTreeNavigator.startFrom(document.body)
-            .logOperations('Check if first grid rows exists', StorageAccessor.getLogMode())
+        logger.debug('Watch for first home page video grid row');
+        // TODO: Rename to ElementExistsWatcher
+        ElementReadyWatcher.watch(message.runtimeMessage, logger, () => HtmlTreeNavigator.startFrom(document.body)
             .filter(new TagNavigationFilter(Tags.YTD_APP))
             .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
             .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
             .findFirst(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW))
         ).then(() => {
-            const homePageVideos = HtmlTreeNavigator.startFrom(document.body)
-                .logOperations('Find all currently available grid rows in the DOM', StorageAccessor.getLogMode())
+            const homePageVideoGridRows = HtmlTreeNavigator.startFrom(document.body)
                 .filter(new TagNavigationFilter(Tags.YTD_APP))
                 .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
                 .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
                 .findAll(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW));
-            if (homePageVideos.length > 0) {
-                initContentScript(homePageVideos);
+            if (homePageVideoGridRows.length > 0) {
+                initContentScript(homePageVideoGridRows);
+            } else {
+                logger.error('Could not find home page video grid rows');
             }
         });
     }
-});
+}
+
+Browser.runtime.onMessage.addListener(processRuntimeMessage);

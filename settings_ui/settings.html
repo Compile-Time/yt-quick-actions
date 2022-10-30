@@ -5,15 +5,66 @@
     <title>YouTube Quick Actions</title>
     <meta charset="utf-8"/>
     <link href="settings.pcss" rel="stylesheet">
+    <script locals>
+        module.exports = {
+            logLevels: [
+                {
+                    value: "silent",
+                    displayName: "Silent"
+                },
+                {
+                    value: "error",
+                    displayName: "Error"
+                },
+                {
+                    value: "warn",
+                    displayName: "Warn"
+                },
+                {
+                    value: "info",
+                    displayName: "Info"
+                },
+                {
+                    value: "debug",
+                    displayName: "Debug"
+                },
+                {
+                    value: "trace",
+                    displayName: "Trace"
+                }
+            ]
+        };
+    </script>
 </head>
-
 <body>
 
+<div class="container max-w-full mx-auto bg-base-200 text-base-content pb-8">
+    <div class="max-w-sm mx-auto grid grid-cols-1 justify-items-center">
+        <h1 class="text-2xl font-bold p-4">Log Level</h1>
+        <form class="grid grid-cols-1 gap-y-4 justify-items-center">
+            <select class="select text-center w-36" id="log-level" name="log-level">
+                <each loop="logLevel in logLevels">
+                    <if condition="logLevel.value === 'warn'">
+                        <option selected value="{{logLevel.value}}">{{logLevel.displayName}}</option>
+                    </if>
+                    <else>
+                        <option value="{{logLevel.value}}">{{logLevel.displayName}}</option>
+                    </else>
+                </each>
+            </select>
+
+            <button class="btn btn-primary w-24" type="submit">Save</button>
+        </form>
+    </div>
+</div>
+
 <form>
+
     <div class="container max-w-max mx-auto">
         <div class="card text-base-content bg-base-100 shadow-xl w-50 border-2 border-primary my-4">
             <div class="card-body items-center text-center">
-                <h2 class="card-title">Log Mode</h2>
+                <h2 class="card-title">Log Level</h2>
+
 
                 <div class="form-control w-24">
                     <label class="label cursor-pointer">
@@ -73,7 +124,5 @@
 </form>
 
 <script src="settings.ts" type="module"></script>
-
 </body>
-
 </html>

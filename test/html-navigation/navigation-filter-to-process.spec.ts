@@ -1,6 +1,6 @@
 import {NavigationFilterToProcess} from "../../src/html-navigation/navigation-filter-to-process";
 import {TagNavigationFilter} from "../../src/html-navigation/navigation-filter";
-import {Tags} from "../../src/html-navigation/element-data";
+import {Tags} from "../../src/html-element-processing/element-data";
 
 describe('NavigationFilterToProcess', () => {
     it('should mark filter as processed', () => {
