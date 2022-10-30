@@ -12,7 +12,7 @@ export class ActiveObserversManager {
     private oneshotObservers: OneshotObserver[] = [];
 
     constructor() {
-        Object.values(RuntimeMessage).forEach(value => this.runtimeMessageToObserversMap.set(value, []));
+        this.resetRuntimeMessageObserversMap();
     }
 
     /**
@@ -53,7 +53,11 @@ export class ActiveObserversManager {
         observers.forEach(observer => observer.disconnect());
 
         this.oneshotObservers = [];
-        this.runtimeMessageToObserversMap = new Map<RuntimeMessage, MutationObserver[]>();
+        this.resetRuntimeMessageObserversMap();
+    }
+
+    private resetRuntimeMessageObserversMap(): void {
+        Object.values(RuntimeMessage).forEach(value => this.runtimeMessageToObserversMap.set(value, []));
     }
 }
 
