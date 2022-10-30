@@ -103,7 +103,6 @@ function initContentScript(menuButtons: HTMLElement[]): void {
         })
 }
 
-// TODO: Rename this content script to "playlist-quick-actions".
 Browser.runtime.onMessage.addListener((message: TabMessage) => {
     if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_PLAYLIST) {
         if (message.disconnectObservers) {
