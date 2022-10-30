@@ -1,5 +1,5 @@
-import {activeObserversManager} from "./active-observers-manager";
-import {RuntimeMessage} from "./enums/runtime-message";
+import {activeObserversManager} from "../active-observers-manager";
+import {RuntimeMessage} from "../enums/runtime-message";
 
 export class ElementReadyWatcher {
 

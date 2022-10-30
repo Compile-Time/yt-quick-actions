@@ -1,4 +1,4 @@
-import {Ids, Tags} from "./html-navigation/element-data";
+import {Ids, Tags} from "./element-data";
 
 export class YtQuickActionsElements {
     static removeButton(): HTMLButtonElement {
