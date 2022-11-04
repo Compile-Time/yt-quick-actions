@@ -51,6 +51,9 @@ const saveToFullScreenPopupReadyObserver = new MutationObserver((mutations, obse
     }
 });
 
+/*
+Wait for the more options popup to be ready and then delegate to the normal save to click process.
+ */
 const saveToHalfScreenObserver = new MutationObserver((mutations, observer) => {
     for (const mutation of mutations) {
         const target = mutation.target as HTMLElement;
@@ -94,6 +97,10 @@ function clickSaveToWatchLaterOption(popupTrigger: HTMLElement): void {
 /**
  * Wait for the more options popup ("...") to be ready and click the "Save" entry then delegate to
  * {@link clickSaveToWatchLaterOption}.
+ *
+ * On half-screen sizes some video actions are hidden into the more options button. This includes the
+ * "Save" action. Because the "Save" action only exists in either the more options popup or directly under
+ * the video both cases need to be handled.
  *
  * @param moreOptionsButton - The HTML element which represents the more options menu ("...")
  */
