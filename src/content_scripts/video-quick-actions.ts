@@ -10,13 +10,12 @@ import {
 } from "../html-navigation/navigation-filter";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
-import {activeObserversManager} from "../active-observers-manager";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
 import {ElementReadyWatcher} from "../html-element-processing/element-ready-watcher";
 import {StorageAccessor} from "../storage/storage-accessor";
-import {contentLogProvider} from "./init-globals";
+import {contentLogProvider, contentScriptObserversManager} from "./init-globals";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getVideoQuickActionsLogger();
@@ -81,7 +80,7 @@ function clickSaveToWatchLaterOption(popupTrigger: HTMLElement): void {
         return;
     }
 
-    activeObserversManager.upsertOneshotObserver(new OneshotObserver(
+    contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
         OneshotId.SAVE_TO_FULL_SCREEN_POPUP_READY,
         RuntimeMessage.NAVIGATED_TO_VIDEO,
         saveToFullScreenPopupReadyObserver
@@ -107,7 +106,7 @@ function clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton: HTMLEle
         return;
     }
 
-    activeObserversManager.upsertOneshotObserver(new OneshotObserver(
+    contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
         OneshotId.SAVE_TO_HALF_SCREEN_POPUP_READY,
         RuntimeMessage.NAVIGATED_TO_VIDEO,
         saveToHalfScreenObserver
@@ -174,7 +173,7 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
 
     if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_VIDEO) {
         if (message.disconnectObservers) {
-            activeObserversManager.disconnectAll();
+            contentScriptObserversManager.disconnectAll();
         }
 
         ElementReadyWatcher.watch(message.runtimeMessage, logger, () => getMoreOptionsButton())

@@ -40,12 +40,11 @@ describe('ActiveObserversManager', () => {
         manager.addForPage(RuntimeMessage.NAVIGATED_TO_VIDEO, mockObserver3);
         manager.addForPage(RuntimeMessage.NAVIGATED_TO_HOME_PAGE, mockObserver4);
 
-        // TODO: test disconnectAll
-        // manager.disconnectAllForPage(RuntimeMessage.NAVIGATED_TO_VIDEO);
+        manager.disconnectAll();
 
         expect(mockObserver1.disconnect).toHaveBeenCalled();
-        expect(mockObserver2.disconnect).not.toHaveBeenCalled();
+        expect(mockObserver2.disconnect).toHaveBeenCalled();
         expect(mockObserver3.disconnect).toHaveBeenCalled();
-        expect(mockObserver4.disconnect).not.toHaveBeenCalled();
+        expect(mockObserver4.disconnect).toHaveBeenCalled();
     });
 });

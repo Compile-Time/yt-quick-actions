@@ -60,6 +60,3 @@ export class ActiveObserversManager {
         Object.values(RuntimeMessage).forEach(value => this.runtimeMessageToObserversMap.set(value, []));
     }
 }
-
-// FIXME: Should be setup separately for each script content (background/content).
-export const activeObserversManager: ActiveObserversManager = new ActiveObserversManager();

@@ -1,6 +1,6 @@
-import {activeObserversManager} from "../active-observers-manager";
 import {RuntimeMessage} from "../enums/runtime-message";
 import {Logger} from "loglevel";
+import {contentScriptObserversManager} from "../content_scripts/init-globals";
 
 export class ElementReadyWatcher {
 
@@ -25,7 +25,7 @@ export class ElementReadyWatcher {
                 }
             });
 
-            activeObserversManager.addForPage(runtimeMessage, domChangeObserver)
+            contentScriptObserversManager.addForPage(runtimeMessage, domChangeObserver)
                 .observe(document.body, {
                     childList: true,
                     subtree: true

@@ -8,14 +8,13 @@ import {
 } from "../html-navigation/navigation-filter";
 import {Ids, Tags, TextContent} from "../html-element-processing/element-data";
 import {YtQuickActionsElements} from "../html-element-processing/yt-quick-action-elements";
-import {activeObserversManager} from "../active-observers-manager";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
 import {ElementReadyWatcher} from "../html-element-processing/element-ready-watcher";
 import {StorageAccessor} from "../storage/storage-accessor";
-import {contentLogProvider} from "./init-globals";
+import {contentLogProvider, contentScriptObserversManager} from "./init-globals";
 
 const logger = contentLogProvider.getHomePageLogger();
 
@@ -84,7 +83,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
             return;
         }
 
-        activeObserversManager.upsertOneshotObserver(new OneshotObserver(
+        contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
             RuntimeMessage.NAVIGATED_TO_HOME_PAGE,
             saveToWatchLaterPopupEntryReadyObserver
@@ -98,7 +97,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
 
 function initContentScript(homePageVideos: HTMLElement[]): void {
     const firstHomePageVideo = homePageVideos[0];
-    activeObserversManager.addForPage(RuntimeMessage.NAVIGATED_TO_HOME_PAGE, homePageVideosLoadingObserver)
+    contentScriptObserversManager.addForPage(RuntimeMessage.NAVIGATED_TO_HOME_PAGE, homePageVideosLoadingObserver)
         .observe(firstHomePageVideo.parentElement, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
         })
@@ -111,7 +110,7 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
     if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_HOME_PAGE) {
         if (message.disconnectObservers) {
             // TODO: Rename to contentScriptsObserversManager
-            activeObserversManager.disconnectAll();
+            contentScriptObserversManager.disconnectAll();
         }
 
         logger.debug('Watch for first home page video grid row');

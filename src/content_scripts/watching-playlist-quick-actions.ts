@@ -5,13 +5,12 @@ import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
 import {IdNavigationFilter, TextContentNavigationFilter} from "../html-navigation/navigation-filter";
 import {AttributeNames, Ids, Tags, TextContent} from "../html-element-processing/element-data";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
-import {activeObserversManager} from "../active-observers-manager";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
 import {ElementReadyWatcher} from "../html-element-processing/element-ready-watcher";
 import {StorageAccessor} from "../storage/storage-accessor";
-import {contentLogProvider} from "./init-globals";
+import {contentLogProvider, contentScriptObserversManager} from "./init-globals";
 
 const logger = contentLogProvider.getWatchingPlaylistLogger();
 
@@ -41,7 +40,7 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
             return;
         }
 
-        activeObserversManager.upsertOneshotObserver(new OneshotObserver(
+        contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotId.REMOVE_POPUP_ENTRY_READY,
             RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST,
             removePopupEntryReadyObserver
@@ -82,7 +81,7 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
 
     if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST) {
         if (message.disconnectObservers) {
-            activeObserversManager.disconnectAll();
+            contentScriptObserversManager.disconnectAll();
         }
 
         ElementReadyWatcher.watch(message.runtimeMessage, logger, () => HtmlTreeNavigator.startFrom(document.body)

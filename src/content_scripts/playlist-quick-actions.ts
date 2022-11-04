@@ -9,13 +9,12 @@ import {
     TextContentContainsNavigationFilter
 } from "../html-navigation/navigation-filter";
 import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
-import {activeObserversManager} from "../active-observers-manager";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
 import {ElementReadyWatcher} from "../html-element-processing/element-ready-watcher";
 import {StorageAccessor} from "../storage/storage-accessor";
-import {contentLogProvider} from "./init-globals";
+import {contentLogProvider, contentScriptObserversManager} from "./init-globals";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getPlaylistQuickActionsLogger();
@@ -81,7 +80,7 @@ function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
             return;
         }
 
-        activeObserversManager.upsertOneshotObserver(new OneshotObserver(
+        contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotId.MENU_UPDATED_OBSERVER,
             RuntimeMessage.NAVIGATED_TO_PLAYLIST,
             menuUpdatedObserver
@@ -124,7 +123,7 @@ function initContentScript(menuButtons: HTMLElement[]): void {
         return;
     }
 
-    activeObserversManager.addForPage(RuntimeMessage.NAVIGATED_TO_PLAYLIST, playlistLoadingNewEntriesObserver)
+    contentScriptObserversManager.addForPage(RuntimeMessage.NAVIGATED_TO_PLAYLIST, playlistLoadingNewEntriesObserver)
         .observe(ytdPlaylistVideoListRenderer, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
         })
@@ -136,7 +135,7 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
 
     if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_PLAYLIST) {
         if (message.disconnectObservers) {
-            activeObserversManager.disconnectAll();
+            contentScriptObserversManager.disconnectAll();
         }
 
         ElementReadyWatcher.watch(message.runtimeMessage, logger, () => HtmlTreeNavigator.startFrom(document.body)
