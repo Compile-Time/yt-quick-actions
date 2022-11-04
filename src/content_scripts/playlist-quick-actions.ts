@@ -138,6 +138,7 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
             contentScriptObserversManager.disconnectAll();
         }
 
+        logger.debug('Watch for the first menu button in a playlist');
         ElementExistsWatcher.watch(message.runtimeMessage, logger, () => HtmlTreeNavigator.startFrom(document.body)
             .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
             .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))

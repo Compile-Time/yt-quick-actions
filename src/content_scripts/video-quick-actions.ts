@@ -176,6 +176,7 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
             contentScriptObserversManager.disconnectAll();
         }
 
+        logger.debug('Watch for the more options button under a video');
         ElementExistsWatcher.watch(message.runtimeMessage, logger, () => getMoreOptionsButton())
             .then(() => {
                 const moreOptionsButton = getMoreOptionsButton();

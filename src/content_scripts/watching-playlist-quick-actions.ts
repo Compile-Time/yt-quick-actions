@@ -84,6 +84,7 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
             contentScriptObserversManager.disconnectAll();
         }
 
+        logger.debug('Watch for first playlist item under or next to a video');
         ElementExistsWatcher.watch(message.runtimeMessage, logger, () => HtmlTreeNavigator.startFrom(document.body)
             .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
         ).then(() => {
