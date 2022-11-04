@@ -4,5 +4,4 @@ export class SettingsData {
     static readonly LOG_LEVEL_ATTR = 'logLevel';
 
     logLevel: LogLevel = LogLevel.WARN;
-    theme: string = '';
 }
