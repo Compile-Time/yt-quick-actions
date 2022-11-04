@@ -85,17 +85,28 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
         }
 
         logger.debug('Watch for first playlist item under or next to a video');
-        ElementExistsWatcher.watch(message.runtimeMessage, logger, () => HtmlTreeNavigator.startFrom(document.body)
-            .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
-        ).then(() => {
-            const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
-                .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
-            if (!!playlistPanelVideoRendererItems) {
-                initContentScript(playlistPanelVideoRendererItems);
-            } else {
-                logger.error('Could not find ytd-playlist-panel-video-renderer elements');
-            }
-        });
+        ElementExistsWatcher.build()
+            .queryFn(() => HtmlTreeNavigator.startFrom(document.body)
+                .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+            )
+            .observeFn(observer =>
+                contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+                    .observe(document.body, {
+                        childList: true,
+                        subtree: true
+                    })
+            )
+            .run()
+            .then(() => {
+                logger.debug('First playlist item was found!');
+                const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
+                    .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
+                if (!!playlistPanelVideoRendererItems) {
+                    initContentScript(playlistPanelVideoRendererItems);
+                } else {
+                    logger.error('Could not find ytd-playlist-panel-video-renderer elements');
+                }
+            })
     }
 }
 

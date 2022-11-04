@@ -184,15 +184,25 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
         }
 
         logger.debug('Watch for the more options button under a video');
-        ElementExistsWatcher.watch(message.runtimeMessage, logger, () => getMoreOptionsButton())
+        ElementExistsWatcher.build()
+            .queryFn(getMoreOptionsButton)
+            .observeFn(observer =>
+                contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+                    .observe(document.body, {
+                        childList: true,
+                        subtree: true
+                    })
+            )
+            .run()
             .then(() => {
+                logger.debug('More options button was found!');
                 const moreOptionsButton = getMoreOptionsButton();
                 if (!!moreOptionsButton) {
                     initContentScript(moreOptionsButton);
                 } else {
                     logger.error('Could not find more options button under video');
                 }
-            });
+            })
     }
 }
 

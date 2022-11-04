@@ -1,35 +1,48 @@
-import {RuntimeMessage} from "../enums/runtime-message";
-import {Logger} from "loglevel";
-import {contentScriptObserversManager} from "../content_scripts/init-globals";
-
 export class ElementExistsWatcher {
+    private elementQueryFn: () => HTMLElement;
+    private mutationObserverFn: (observer) => void;
 
-    static watch(runtimeMessage: RuntimeMessage,
-                 logger: Logger,
-                 elementQueryCallback: () => HTMLElement): Promise<HTMLElement> {
+    private constructor() {
+    }
+
+    static build(): ElementExistsWatcher {
+        return new ElementExistsWatcher();
+    }
+
+    queryFn(elementQueryFn: () => HTMLElement): ElementExistsWatcher {
+        this.elementQueryFn = elementQueryFn;
+        return this;
+    }
+
+    observeFn(mutationObserverFn: (observer: MutationObserver) => void): ElementExistsWatcher {
+        this.mutationObserverFn = mutationObserverFn;
+        return this;
+    }
+
+    run(): Promise<HTMLElement> {
+        if (!this.queryFn) {
+            throw new Error('No query function was provided');
+        }
+        if (!this.observeFn) {
+            throw new Error('No observe function was provided');
+        }
+
         return new Promise(resolve => {
-            logger.debug('Checking if element to watch is ready');
-            const initialCheck: HTMLElement = elementQueryCallback();
+            const initialElementQuery: HTMLElement = this.elementQueryFn();
 
-            if (initialCheck) {
-                logger.debug('Element to watch is ready!');
-                return resolve(initialCheck);
+            if (initialElementQuery) {
+                return resolve(initialElementQuery);
             }
 
             const domChangeObserver = new MutationObserver((_, observer) => {
-                const element: HTMLElement = elementQueryCallback();
+                const element: HTMLElement = this.elementQueryFn();
                 if (element) {
-                    logger.debug('Element to watch is ready!');
                     resolve(element);
                     observer.disconnect();
                 }
             });
 
-            contentScriptObserversManager.addForPage(runtimeMessage, domChangeObserver)
-                .observe(document.body, {
-                    childList: true,
-                    subtree: true
-                });
+            this.mutationObserverFn(domChangeObserver);
         });
     }
 

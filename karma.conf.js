@@ -23,8 +23,7 @@ module.exports = function (config) {
         exclude: [
             'src/background_scripts/**/*.ts',
             'src/content_scripts/**/*.ts',
-            'src/storage-accessor.ts',
-            'src/yt-quick-action-elements.ts'
+            'src/storage/**/*.ts'
         ],
 
 

@@ -139,19 +139,31 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
         }
 
         logger.debug('Watch for the first menu button in a playlist');
-        ElementExistsWatcher.watch(message.runtimeMessage, logger, () => HtmlTreeNavigator.startFrom(document.body)
-            .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
-            .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
-        ).then(() => {
-            const menuButtons: HTMLElement[] = HtmlTreeNavigator.startFrom(document.body)
-                .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
-                .findAll(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
-            if (menuButtons.length > 0) {
-                initContentScript(menuButtons);
-            } else {
-                logger.error('Could not find menu buttons of playlist items');
-            }
-        });
+        ElementExistsWatcher.build()
+            .queryFn(() =>
+                HtmlTreeNavigator.startFrom(document.body)
+                    .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
+                    .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+            )
+            .observeFn(observer =>
+                contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+                    .observe(document.body, {
+                        childList: true,
+                        subtree: true
+                    })
+            )
+            .run()
+            .then(() => {
+                logger.debug('First menu button was found!');
+                const menuButtons: HTMLElement[] = HtmlTreeNavigator.startFrom(document.body)
+                    .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
+                    .findAll(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
+                if (menuButtons.length > 0) {
+                    initContentScript(menuButtons);
+                } else {
+                    logger.error('Could not find menu buttons of playlist items');
+                }
+            })
     }
 }
 
