@@ -109,7 +109,6 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
 
     if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_HOME_PAGE) {
         if (message.disconnectObservers) {
-            // TODO: Rename to contentScriptsObserversManager
             contentScriptObserversManager.disconnectAll();
         }
 
