@@ -32,7 +32,7 @@ describe('ActiveObserversManager', () => {
         expect(mockObserver2.disconnect).not.toHaveBeenCalled();
     });
 
-    it('should disconnect all observers for a given runtime message', () => {
+    it('should disconnect all observers', () => {
         const manager = new ActiveObserversManager();
 
         manager.upsertOneshotObserver(new OneshotObserver('test', RuntimeMessage.NAVIGATED_TO_VIDEO, mockObserver1));
