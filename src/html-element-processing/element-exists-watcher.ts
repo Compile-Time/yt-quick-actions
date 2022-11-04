@@ -2,7 +2,7 @@ import {RuntimeMessage} from "../enums/runtime-message";
 import {Logger} from "loglevel";
 import {contentScriptObserversManager} from "../content_scripts/init-globals";
 
-export class ElementReadyWatcher {
+export class ElementExistsWatcher {
 
     static watch(runtimeMessage: RuntimeMessage,
                  logger: Logger,

@@ -12,7 +12,7 @@ import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
-import {ElementReadyWatcher} from "../html-element-processing/element-ready-watcher";
+import {ElementExistsWatcher} from "../html-element-processing/element-exists-watcher";
 import {StorageAccessor} from "../storage/storage-accessor";
 import {contentLogProvider, contentScriptObserversManager} from "./init-globals";
 
@@ -138,7 +138,7 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
             contentScriptObserversManager.disconnectAll();
         }
 
-        ElementReadyWatcher.watch(message.runtimeMessage, logger, () => HtmlTreeNavigator.startFrom(document.body)
+        ElementExistsWatcher.watch(message.runtimeMessage, logger, () => HtmlTreeNavigator.startFrom(document.body)
             .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
             .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
         ).then(() => {
