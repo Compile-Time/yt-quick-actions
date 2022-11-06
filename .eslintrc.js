@@ -3,13 +3,14 @@ module.exports = {
     browser: true,
     es6: true
   },
-  extends: 'standard-with-typescript',
-  overrides: [
-  ],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
+  parser: '@typescript-eslint/parser',
+  plugins: ['@typescript-eslint'],
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module'
   },
   rules: {
+    "@typescript-eslint/no-explicit-any": "error"
   }
 }
