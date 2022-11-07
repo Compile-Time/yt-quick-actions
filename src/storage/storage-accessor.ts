@@ -5,6 +5,6 @@ import {SettingsData} from "./settings-data";
 export class StorageAccessor {
     static getLogLevel(): Promise<LogLevel> {
         return Browser.storage.local.get(SettingsData.LOG_LEVEL_ATTR)
-            .then((storage: SettingsData) => LogLevelMapper.fromStrOrDefault(storage.logLevel));
+            .then((storage: Record<string, any>) => LogLevelMapper.fromStrOrDefault(storage.logLevel));
     }
 }

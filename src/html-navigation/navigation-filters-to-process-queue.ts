@@ -4,8 +4,8 @@ import {NavigationFilter} from "./navigation-filter";
 /**
  * Class representing a queue of filters to be processed.
  *
- * This class provides methods for determining the overall state of the filters and is designed with
- * recursion usage in mind.
+ * This class provides methods for determining the overall state of given filters to be queued and is designed
+ * with recursion usage in mind.
  */
 export class NavigationFiltersToProcessQueue {
     private readonly filtersToProcess: NavigationFilterToProcess[] = [];
@@ -24,7 +24,7 @@ export class NavigationFiltersToProcessQueue {
                 return filterToProcess;
             }
         }
-        return undefined;
+        return null;
     }
 
     addFilter(filter: NavigationFilter): void {
@@ -42,9 +42,5 @@ export class NavigationFiltersToProcessQueue {
             .filter(toProcess => !toProcess.isProcessed())
             .map(toProcess => toProcess.clone())
         )
-    }
-
-    getFilters(): NavigationFilterToProcess[] {
-        return this.filtersToProcess;
     }
 }

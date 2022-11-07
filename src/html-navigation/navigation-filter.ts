@@ -4,10 +4,7 @@ export abstract class NavigationFilter {
         for (let i = 0; i < htmlCollection.length; i++) {
             const element: HTMLElement = htmlCollection[i] as HTMLElement;
 
-            // element.tagName is in UPPERCASE.
-            const lowercaseElementTagName = element.tagName.toLowerCase();
-
-            if (this.applyCondition(element, lowercaseElementTagName)) {
+            if (this.applyCondition(element)) {
                 filteredElements.push(element)
             }
         }
@@ -16,7 +13,7 @@ export abstract class NavigationFilter {
     }
 
     applySingle(element: HTMLElement): HTMLElement | undefined {
-        return this.applyCondition(element, element.tagName.toLowerCase()) ? element : undefined;
+        return this.applyCondition(element) ? element : undefined;
     }
 
     toString(): string {
@@ -25,18 +22,19 @@ export abstract class NavigationFilter {
 
     abstract equals(other: NavigationFilter): boolean;
 
-    protected abstract applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean;
+    protected abstract applyCondition(element: HTMLElement): boolean;
 
 }
 
 export class IdNavigationFilter extends NavigationFilter {
-    constructor(private tagName: string,
-                private id: string) {
+    constructor(private readonly tagName: string,
+                private readonly id: string) {
         super();
+        this.tagName = tagName.toUpperCase();
     }
 
-    applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
-        return element.id === this.id && lowercaseElementTagName === this.tagName;
+    applyCondition(element: HTMLElement): boolean {
+        return element.id === this.id && element.tagName === this.tagName;
     }
 
     equals(other: IdNavigationFilter): boolean {
@@ -47,12 +45,13 @@ export class IdNavigationFilter extends NavigationFilter {
 
 
 export class TagNavigationFilter extends NavigationFilter {
-    constructor(private tagName: string) {
+    constructor(private readonly tagName: string) {
         super();
+        this.tagName = tagName.toUpperCase();
     }
 
-    applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
-        return lowercaseElementTagName === this.tagName;
+    applyCondition(element: HTMLElement): boolean {
+        return element.tagName === this.tagName;
     }
 
     equals(other: TagNavigationFilter): boolean {
@@ -61,13 +60,14 @@ export class TagNavigationFilter extends NavigationFilter {
 }
 
 export class TextContentNavigationFilter extends NavigationFilter {
-    constructor(protected tagName: string,
-                protected textContent: string) {
+    constructor(protected readonly tagName: string,
+                protected readonly textContent: string) {
         super();
+        this.tagName = tagName.toUpperCase();
     }
 
-    applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
-        return element.textContent === this.textContent && lowercaseElementTagName === this.tagName;
+    applyCondition(element: HTMLElement): boolean {
+        return element.textContent === this.textContent && element.tagName === this.tagName;
     }
 
     equals(other: TextContentNavigationFilter): boolean {
@@ -77,29 +77,31 @@ export class TextContentNavigationFilter extends NavigationFilter {
 }
 
 export class TextContentContainsNavigationFilter extends TextContentNavigationFilter {
-    constructor(protected tagName: string,
-                protected textContent: string) {
+    constructor(protected readonly tagName: string,
+                protected readonly textContent: string) {
         super(tagName, textContent);
     }
 
 
-    applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
-        return element.textContent.toLowerCase().includes(this.textContent.toLowerCase())
-            && lowercaseElementTagName === this.tagName;
+    applyCondition(element: HTMLElement): boolean {
+        return !!element.textContent
+            && element.textContent.toLowerCase().includes(this.textContent.toLowerCase())
+            && element.tagName === this.tagName;
     }
 }
 
 export class IdAndTextContentNavigationFilter extends NavigationFilter {
-    constructor(private tagName: string,
-                private id: string,
-                private textContent: string) {
+    constructor(private readonly tagName: string,
+                private readonly id: string,
+                private readonly textContent: string) {
         super();
+        this.tagName = tagName.toUpperCase();
     }
 
-    applyCondition(element: HTMLElement, lowercaseElementTagName: string): boolean {
+    applyCondition(element: HTMLElement): boolean {
         return element.id === this.id
             && element.textContent === this.textContent
-            && lowercaseElementTagName === this.tagName;
+            && element.tagName === this.tagName;
     }
 
     equals(other: IdAndTextContentNavigationFilter): boolean {

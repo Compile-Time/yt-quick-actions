@@ -48,9 +48,9 @@ describe('NavigationFilter', () => {
 
         it('should filter single HTMLElement', () => {
             const filter = new TagNavigationFilter('p');
-            const htmlElement = document.createElement('p');
+            const htmlElement: HTMLElement = document.createElement('p');
 
-            const result: Element = filter.applySingle(htmlElement);
+            const result = filter.applySingle(htmlElement);
             expect(result).toEqual(htmlElement);
         })
     });
@@ -67,9 +67,9 @@ describe('NavigationFilter', () => {
 
         it('should filter single HTMLElement', () => {
             const filter = new TagNavigationFilter('p');
-            const htmlElement = document.createElement('p');
+            const htmlElement: HTMLElement = document.createElement('p');
 
-            const result: Element = filter.applySingle(htmlElement);
+            const result = filter.applySingle(htmlElement);
             expect(result).toEqual(htmlElement);
         })
     });
@@ -86,9 +86,9 @@ describe('NavigationFilter', () => {
 
         it('should filter single HTMLElement', () => {
             const filter = new TagNavigationFilter('p');
-            const htmlElement = document.createElement('p');
+            const htmlElement: HTMLElement = document.createElement('p');
 
-            const result: Element = filter.applySingle(htmlElement);
+            const result = filter.applySingle(htmlElement);
             expect(result).toEqual(htmlElement);
         })
     });
@@ -105,9 +105,9 @@ describe('NavigationFilter', () => {
 
         it('should filter single HTMLElement', () => {
             const filter = new TagNavigationFilter('p');
-            const htmlElement = document.createElement('p');
+            const htmlElement: HTMLElement = document.createElement('p');
 
-            const result: Element = filter.applySingle(htmlElement);
+            const result = filter.applySingle(htmlElement);
             expect(result).toEqual(htmlElement);
         })
     });

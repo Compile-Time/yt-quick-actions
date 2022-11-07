@@ -51,7 +51,7 @@ export class HtmlTreeNavigator {
      *
      * @param filter - The filter defining the final element to look for
      */
-    findFirst(filter: NavigationFilter): HTMLElement | null {
+    findFirst(filter: NavigationFilter): HTMLElement {
         const foundElements = this.findAll(filter);
         return foundElements.length > 0 ? foundElements[0] : null;
     }
@@ -63,17 +63,21 @@ export class HtmlTreeNavigator {
      *
      * @param filter - The filter defining the final element to look for
      */
-    findLast(filter: NavigationFilter): HTMLElement | null {
+    findLast(filter: NavigationFilter): HTMLElement {
         const foundElements = this.findAll(filter);
         return foundElements.length > 0 ? foundElements[foundElements.length - 1] : null;
     }
 
     private navigateTree(filterQueue: NavigationFiltersToProcessQueue, htmlCollection: HTMLCollection): HTMLElement[] {
-        const filterToProcess = filterQueue.getCurrentOrNextUnprocessedFilter();
-        const filter = filterToProcess.getFilter();
         if (htmlCollection.length === 0) {
             return [];
         }
+
+        const filterToProcess = filterQueue.getCurrentOrNextUnprocessedFilter();
+        if (!filterToProcess) {
+            return [];
+        }
+        const filter = filterToProcess.getFilter();
 
         const foundElements: HTMLElement[] = filter.apply(htmlCollection);
         if (foundElements.length > 0) {

@@ -30,8 +30,8 @@ function initLogLevel(): void {
         );
 }
 
-function saveOptions(e): void {
-    e.preventDefault();
+function saveOptions(event: Event): void {
+    event.preventDefault();
     Browser.storage.local.set(settingsData);
 }
 

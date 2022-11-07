@@ -13,14 +13,11 @@ describe('ActiveObserversManager', () => {
         }) as MutationObserver;
     }
 
-    const mockObserver1 = mockObserver();
-    const mockObserver2 = mockObserver();
-    const mockObserver3 = mockObserver();
-    const mockObserver4 = mockObserver();
-
     it('should disconnect previous oneshot observer for same id', () => {
         const doc = document.createElement('div');
         const manager = new ActiveObserversManager();
+        const mockObserver1 = mockObserver();
+        const mockObserver2 = mockObserver();
 
         manager.upsertOneshotObserver(new OneshotObserver('test', RuntimeMessage.NAVIGATED_TO_VIDEO, mockObserver1))
             .observe(doc, {attributes: true});
@@ -34,6 +31,10 @@ describe('ActiveObserversManager', () => {
 
     it('should disconnect all observers', () => {
         const manager = new ActiveObserversManager();
+        const mockObserver1 = mockObserver();
+        const mockObserver2 = mockObserver();
+        const mockObserver3 = mockObserver();
+        const mockObserver4 = mockObserver();
 
         manager.upsertOneshotObserver(new OneshotObserver('test', RuntimeMessage.NAVIGATED_TO_VIDEO, mockObserver1));
         manager.upsertOneshotObserver(new OneshotObserver('test2', RuntimeMessage.NAVIGATED_TO_HOME_PAGE, mockObserver2));

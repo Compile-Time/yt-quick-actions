@@ -46,7 +46,7 @@ Home page videos are lazily loaded on scrolling, therefore, we need to observe t
  by the ActiveObserversManager and url-change-watcher background script when switching to a different page
   on YouTube.
  */
-const homePageVideosLoadingObserver = new MutationObserver((mutations) => {
+const homePageVideosLoadingObserver = new MutationObserver(mutations => {
     for (const mutation of mutations) {
         const target = mutation.target as HTMLElement;
         const ytdRichGridRow = HtmlParentNavigator.startFrom(target)
@@ -57,15 +57,11 @@ const homePageVideosLoadingObserver = new MutationObserver((mutations) => {
             const divMenu = HtmlParentNavigator.startFrom(menuButton)
                 .find(new IdNavigationFilter(Tags.DIV, Ids.MENU));
 
-            if (!divMenu) {
-                logger.error('Could not find div menu (more options button)');
-                return;
-            }
-
-            const existingWatchLaterButton = HtmlTreeNavigator.startFrom(divMenu.parentElement)
+            const divDetails = divMenu.parentElement;
+            const existingWatchLaterButton = HtmlTreeNavigator.startFrom(divDetails)
                 .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER));
             if (!existingWatchLaterButton) {
-                divMenu.parentElement.insertBefore(setupWatchLaterButton(menuButton), divMenu);
+                divDetails.insertBefore(setupWatchLaterButton(menuButton), divMenu);
             }
         }
     }
@@ -97,8 +93,10 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
 
 function initContentScript(homePageVideos: HTMLElement[]): void {
     const firstHomePageVideo = homePageVideos[0];
+    const divContents = firstHomePageVideo.parentElement;
+
     contentScriptObserversManager.addForPage(RuntimeMessage.NAVIGATED_TO_HOME_PAGE, homePageVideosLoadingObserver)
-        .observe(firstHomePageVideo.parentElement, {
+        .observe(divContents, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
         })
 }

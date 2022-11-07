@@ -5,6 +5,7 @@ import {TabMessage} from "../data/tab-message";
 import {StorageAccessor} from "../storage/storage-accessor";
 import {LogProvider} from "../logging/log-provider";
 import Tab = Tabs.Tab;
+import OnUpdatedChangeInfoType = Tabs.OnUpdatedChangeInfoType;
 
 const backgroundLogProvider = new LogProvider();
 const logger = backgroundLogProvider.getUrlChangeWatcherLogger();
@@ -18,26 +19,29 @@ function sendMessage(tabId: number, tab: Tab, message: TabMessage): void {
         });
 }
 
-async function processYoutubeTabUpdate(tabId, changeInfo, tab): Promise<void> {
+async function processYoutubeTabUpdate(tabId: number, changeInfo: OnUpdatedChangeInfoType, tab: Tab): Promise<void> {
     const level = await StorageAccessor.getLogLevel();
     logger.setLevel(level);
 
-    if (!!changeInfo.status && tab.url.includes('watch') && tab.url.includes('list') && tab.status === 'complete') {
-        const runtimeMessages = [
-            new TabMessage(RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST, true),
-            new TabMessage(RuntimeMessage.NAVIGATED_TO_VIDEO, false)
-        ];
-        runtimeMessages.forEach(message => sendMessage(tabId, tab, message));
-    } else if (!!changeInfo.status && tab.url.includes('watch') && tab.status === 'complete') {
-        const message = new TabMessage(RuntimeMessage.NAVIGATED_TO_VIDEO, true);
-        sendMessage(tabId, tab, message);
-    } else if (!!changeInfo.status && tab.url.includes('playlist') && tab.status === 'complete') {
-        const message = new TabMessage(RuntimeMessage.NAVIGATED_TO_PLAYLIST, true);
-        sendMessage(tabId, tab, message);
-    } else if (!!changeInfo.status && tab.url === 'https://www.youtube.com/' && tab.status === 'complete') {
-        const message = new TabMessage(RuntimeMessage.NAVIGATED_TO_HOME_PAGE, true);
-        sendMessage(tabId, tab, message);
+    if (!!changeInfo.status) {
+        if (tab.url.includes('watch') && tab.url.includes('list') && tab.status === 'complete') {
+            const runtimeMessages = [
+                new TabMessage(RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST, true),
+                new TabMessage(RuntimeMessage.NAVIGATED_TO_VIDEO, false)
+            ];
+            runtimeMessages.forEach(message => sendMessage(tabId, tab, message));
+        } else if (tab.url.includes('watch') && tab.status === 'complete') {
+            const message = new TabMessage(RuntimeMessage.NAVIGATED_TO_VIDEO, true);
+            sendMessage(tabId, tab, message);
+        } else if (tab.url.includes('playlist') && tab.status === 'complete') {
+            const message = new TabMessage(RuntimeMessage.NAVIGATED_TO_PLAYLIST, true);
+            sendMessage(tabId, tab, message);
+        } else if (tab.url === 'https://www.youtube.com/' && tab.status === 'complete') {
+            const message = new TabMessage(RuntimeMessage.NAVIGATED_TO_HOME_PAGE, true);
+            sendMessage(tabId, tab, message);
+        }
     }
+
 }
 
 Browser.tabs.onUpdated.addListener(processYoutubeTabUpdate, {urls: ['*://*.youtube.com/*']});

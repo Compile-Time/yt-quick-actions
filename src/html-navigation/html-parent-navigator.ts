@@ -8,18 +8,18 @@ export class HtmlParentNavigator {
         return new HtmlParentNavigator(element)
     }
 
-    find(filter: NavigationFilter): HTMLElement | null {
+    find(filter: NavigationFilter): HTMLElement {
         return this.navigateToParent(this.element, filter);
     }
 
-    private navigateToParent(element: HTMLElement, filter: NavigationFilter): HTMLElement | null {
+    private navigateToParent(element: HTMLElement, filter: NavigationFilter): HTMLElement {
         const foundElement = filter.applySingle(element);
 
-        if (!foundElement && !element.parentElement) {
-            return null;
+        if (!!foundElement) {
+            return foundElement;
+        } else {
+            return !element.parentElement ? null : this.navigateToParent(element.parentElement, filter);
         }
-
-        return !!foundElement ? foundElement : this.navigateToParent(element.parentElement, filter);
     }
 
 }
