@@ -80,12 +80,12 @@ export class TextContentContainsNavigationFilter extends TextContentNavigationFi
     constructor(protected readonly tagName: string,
                 protected readonly textContent: string) {
         super(tagName, textContent);
+        this.tagName = tagName.toUpperCase();
     }
 
 
     applyCondition(element: HTMLElement): boolean {
-        return !!element.textContent
-            && element.textContent.toLowerCase().includes(this.textContent.toLowerCase())
+        return element.textContent.toLowerCase().includes(this.textContent.toLowerCase())
             && element.tagName === this.tagName;
     }
 }
