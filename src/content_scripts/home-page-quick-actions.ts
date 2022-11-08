@@ -30,7 +30,7 @@ const saveToWatchLaterPopupEntryReadyObserver = new MutationObserver((mutations,
                 .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
                 .findFirst(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.SAVE_TO_WATCH_LATER));
 
-            if (!!watchLaterButton) {
+            if (watchLaterButton) {
                 watchLaterButton.click();
             } else {
                 logger.error('Could not find watch later button to click');

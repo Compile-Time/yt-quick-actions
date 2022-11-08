@@ -2,6 +2,8 @@ export class ElementExistsWatcher {
     private elementQueryFn: (() => HTMLElement | null) | undefined;
     private mutationObserverFn: ((observer: MutationObserver) => void) | undefined;
 
+    // Hide constructor due to builder pattern.
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     private constructor() {
     }
 

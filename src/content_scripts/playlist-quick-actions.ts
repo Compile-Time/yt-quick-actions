@@ -28,7 +28,7 @@ const menuUpdatedObserver = new MutationObserver((mutations, observer) => {
         if (mutation.oldValue === '') {
             const ytFormattedText = HtmlTreeNavigator.startFrom(mutation.target as HTMLElement)
                 .findFirst(new TextContentContainsNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_LOWERCASE));
-            if (!!ytFormattedText) {
+            if (ytFormattedText) {
                 ytFormattedText.click();
             } else {
                 logger.error('Could not find remove option in popup');

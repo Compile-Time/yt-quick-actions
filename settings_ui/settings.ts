@@ -19,7 +19,7 @@ function initLogLevel(): void {
             storage => {
                 logger.log(storage);
                 const select = document.querySelector('#log-level') as HTMLSelectElement;
-                if (!!storage.logLevel) {
+                if (storage.logLevel) {
                     const logLevel = LogLevelMapper.fromStr(storage.logLevel);
                     select.selectedIndex = LogLevelMapper.toNumber(logLevel);
                 } else {

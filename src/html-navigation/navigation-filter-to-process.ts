@@ -10,7 +10,7 @@ export class NavigationFilterToProcess {
     private processed: boolean;
 
     constructor(filter: NavigationFilter,
-                processed: boolean = false) {
+                processed = false) {
         this.filter = filter;
         this.processed = processed;
     }

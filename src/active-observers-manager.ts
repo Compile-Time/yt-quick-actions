@@ -30,7 +30,7 @@ export class ActiveObserversManager {
     upsertOneshotObserver(oneshotObserver: OneshotObserver): MutationObserver {
         const existingOneshotObserver = this.oneshotObservers
             .find(oneshotOb => oneshotOb.equals(oneshotObserver));
-        if (!!existingOneshotObserver) {
+        if (existingOneshotObserver) {
             existingOneshotObserver.observer.disconnect();
             this.oneshotObservers = this.oneshotObservers
                 .filter(oneshotOb => !oneshotOb.equals(existingOneshotObserver));

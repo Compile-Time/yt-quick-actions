@@ -101,7 +101,7 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
                 logger.debug('First playlist item was found!');
                 const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
                     .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
-                if (!!playlistPanelVideoRendererItems) {
+                if (playlistPanelVideoRendererItems) {
                     initContentScript(playlistPanelVideoRendererItems);
                 } else {
                     logger.error('Could not find ytd-playlist-panel-video-renderer elements');

@@ -15,7 +15,7 @@ export class HtmlParentNavigator {
     private navigateToParent(element: HTMLElement, filter: NavigationFilter): HTMLElement {
         const foundElement = filter.applySingle(element);
 
-        if (!!foundElement) {
+        if (foundElement) {
             return foundElement;
         } else {
             return !element.parentElement ? null : this.navigateToParent(element.parentElement, filter);

@@ -40,7 +40,7 @@ const saveToFullScreenPopupReadyObserver = new MutationObserver((mutations, obse
                 .filter(new TagNavigationFilter(Tags.YT_ICON_BUTTON))
                 .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.BUTTON));
 
-            if (!!popupCloseButton) {
+            if (popupCloseButton) {
                 popupCloseButton.click();
             } else {
                 logger.error('Could not find popup close button');
@@ -141,13 +141,13 @@ function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElemen
             .filter(new TagNavigationFilter(Tags.YTD_BUTTON_RENDERER))
             .findFirst(new TextContentNavigationFilter(Tags.SPAN, TextContent.SAVE));
 
-        if (!!saveButton) {
+        if (saveButton) {
             clickSaveToWatchLaterOption(saveButton);
         } else {
             const moreOptionsButton = HtmlTreeNavigator.startFrom(ytdMenuRenderer)
                 .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
 
-            if (!!moreOptionsButton) {
+            if (moreOptionsButton) {
                 clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton);
             } else {
                 logger.error('Could not find HTML elements for action "Save to" or "... > Save"');
@@ -197,7 +197,7 @@ async function processRuntimeMessage(message: TabMessage): Promise<void> {
             .then(() => {
                 logger.debug('More options button was found!');
                 const moreOptionsButton = getMoreOptionsButton();
-                if (!!moreOptionsButton) {
+                if (moreOptionsButton) {
                     initContentScript(moreOptionsButton);
                 } else {
                     logger.error('Could not find more options button under video');

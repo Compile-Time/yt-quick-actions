@@ -23,7 +23,7 @@ async function processYoutubeTabUpdate(tabId: number, changeInfo: OnUpdatedChang
     const level = await StorageAccessor.getLogLevel();
     logger.setLevel(level);
 
-    if (!!changeInfo.status) {
+    if (changeInfo.status) {
         if (tab.url.includes('watch') && tab.url.includes('list') && tab.status === 'complete') {
             const runtimeMessages = [
                 new TabMessage(RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST, true),
