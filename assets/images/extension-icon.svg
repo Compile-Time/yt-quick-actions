@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+        width="48"
+        height="48"
+        viewBox="0 0 48 48"
+        version="1.1"
+        id="svg14733"
+        xmlns="http://www.w3.org/2000/svg"
+>
+  <defs
+          id="defs14730"/>
+  <g
+          id="bottom">
+    <path
+            style="fill:#b3b3b3;fill-opacity:1;stroke:#b3b3b3;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+            d="M 2,15 3,47 H 45 L 46,15 Z"
+            id="path15423"/>
+    <path
+            style="fill:none;stroke:#900000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+            d="M 7.0789956,18 V 44 Z"
+            id="bin-line-left"/>
+    <path
+            style="fill:none;stroke:#900000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+            d="M 40.921004,18 V 44 Z"
+            id="bin-line-right"/>
+  </g>
+  <g
+     id="clock"
+     style="display:inline"
+     transform="matrix(0.93333333,0,0,0.93333333,1.6000001,2.0666668)">
+    <circle
+            style="opacity:1;fill:#ff6b6b;fill-opacity:1;fill-rule:evenodd;stroke:#900000;stroke-width:2;stroke-dasharray:none;stroke-opacity:1"
+            id="clock-bg"
+            cx="24"
+            cy="31"
+            r="14"/>
+    <rect
+            style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke-width:1.94257"
+            id="clock-handle"
+            width="2"
+            height="13.021119"
+            x="23"
+            y="18.978882"/>
+    <rect
+            style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke-width:1.70857"
+            id="rect1141"
+            width="2"
+            height="10.072974"
+            x="-1.2308763"
+            y="-49.473476"
+            transform="matrix(-0.80038104,0.59949161,-0.59937289,-0.80046995,0,0)"/>
+  </g>
+  <g
+          id="top">
+    <path
+            style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#ff6b6b;stroke-width:3;stroke-dasharray:none;stroke-opacity:1"
+            id="handle"
+            d="m 37.697292,-8.9276868 a 14,6 0 0 1 -5.761311,6.1838501 14,6 0 0 1 -15.53505,0.096306 14,6 0 0 1 -6.176243,-6.1098461"
+            transform="scale(1,-1)"/>
+    <path
+            style="fill:#ff6b6b;fill-opacity:1;stroke:#ff6b6b;stroke-width:1.96542;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+            d="M 11.532243,4.9827525 0.98271332,6.9966738 V 10.017556 H 47.017023 V 6.9966738 L 36.467493,4.9827525 32.631301,6.9966738 H 15.368435 Z"
+            id="handle-base"/>
+  </g>
+</svg>
