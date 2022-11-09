@@ -10,7 +10,7 @@ import {
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
-import {OneshotId} from "../../enums/oneshot-id";
+import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
@@ -83,7 +83,7 @@ function clickSaveToWatchLaterOption(popupTrigger: HTMLElement): void {
     }
 
     contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
-        OneshotId.SAVE_TO_FULL_SCREEN_POPUP_READY,
+        OneshotObserverId.SAVE_TO_FULL_SCREEN_POPUP_READY,
         PageEvent.NAVIGATED_TO_VIDEO,
         saveToFullScreenPopupReadyObserver
     )).observe(popupContainer, {
@@ -113,7 +113,7 @@ function clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton: HTMLEle
     }
 
     contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
-        OneshotId.SAVE_TO_HALF_SCREEN_POPUP_READY,
+        OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
         PageEvent.NAVIGATED_TO_VIDEO,
         saveToHalfScreenObserver
     )).observe(popupContainer, {

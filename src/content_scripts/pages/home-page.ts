@@ -9,7 +9,7 @@ import {Ids, Tags, TextContent} from "../../html-element-processing/element-data
 import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
-import {OneshotId} from "../../enums/oneshot-id";
+import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
@@ -79,7 +79,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
         }
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
-            OneshotId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
+            OneshotObserverId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
             PageEvent.NAVIGATED_TO_HOME_PAGE,
             saveToWatchLaterPopupEntryReadyObserver
         )).observe(popupContainer, {

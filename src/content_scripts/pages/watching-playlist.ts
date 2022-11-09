@@ -5,7 +5,7 @@ import {IdNavigationFilter, TextContentNavigationFilter} from "../../html-naviga
 import {AttributeNames, Ids, Tags, TextContent} from "../../html-element-processing/element-data";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
-import {OneshotId} from "../../enums/oneshot-id";
+import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
@@ -40,7 +40,7 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
         }
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
-            OneshotId.REMOVE_POPUP_ENTRY_READY,
+            OneshotObserverId.REMOVE_POPUP_ENTRY_READY,
             PageEvent.NAVIGATED_TO_VIDEO_IN_PLAYLIST,
             removePopupEntryReadyObserver
         )).observe(popupMenu, {
