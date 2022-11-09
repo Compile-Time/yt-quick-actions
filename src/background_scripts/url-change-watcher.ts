@@ -1,6 +1,6 @@
 import * as Browser from "webextension-polyfill";
 import {Tabs} from "webextension-polyfill";
-import {RuntimeMessage} from "../enums/runtime-message";
+import {PageEvent} from "../enums/page-event";
 import {TabMessage} from "../data/tab-message";
 import {StorageAccessor} from "../storage/storage-accessor";
 import {LogProvider} from "../logging/log-provider";
@@ -26,18 +26,18 @@ async function processYoutubeTabUpdate(tabId: number, changeInfo: OnUpdatedChang
     if (changeInfo.status) {
         if (tab.url.includes('watch') && tab.url.includes('list') && tab.status === 'complete') {
             const runtimeMessages = [
-                new TabMessage(RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST, true),
-                new TabMessage(RuntimeMessage.NAVIGATED_TO_VIDEO, false)
+                new TabMessage(PageEvent.NAVIGATED_TO_VIDEO_IN_PLAYLIST, true),
+                new TabMessage(PageEvent.NAVIGATED_TO_VIDEO, false)
             ];
             runtimeMessages.forEach(message => sendMessage(tabId, tab, message));
         } else if (tab.url.includes('watch') && tab.status === 'complete') {
-            const message = new TabMessage(RuntimeMessage.NAVIGATED_TO_VIDEO, true);
+            const message = new TabMessage(PageEvent.NAVIGATED_TO_VIDEO, true);
             sendMessage(tabId, tab, message);
         } else if (tab.url.includes('playlist') && tab.status === 'complete') {
-            const message = new TabMessage(RuntimeMessage.NAVIGATED_TO_PLAYLIST, true);
+            const message = new TabMessage(PageEvent.NAVIGATED_TO_PLAYLIST, true);
             sendMessage(tabId, tab, message);
         } else if (tab.url === 'https://www.youtube.com/' && tab.status === 'complete') {
-            const message = new TabMessage(RuntimeMessage.NAVIGATED_TO_HOME_PAGE, true);
+            const message = new TabMessage(PageEvent.NAVIGATED_TO_HOME_PAGE, true);
             sendMessage(tabId, tab, message);
         }
     }

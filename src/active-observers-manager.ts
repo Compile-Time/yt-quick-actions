@@ -1,4 +1,4 @@
-import {RuntimeMessage} from "./enums/runtime-message";
+import {PageEvent} from "./enums/page-event";
 import {OneshotObserver} from "./data/oneshot-observer";
 
 /**
@@ -8,7 +8,9 @@ import {OneshotObserver} from "./data/oneshot-observer";
  * content script and background scripts both run in separate contexts.
  */
 export class ActiveObserversManager {
-    private runtimeMessageToObserversMap: Map<RuntimeMessage, MutationObserver[]> = new Map<RuntimeMessage, MutationObserver[]>();
+    // TODO: The differentiation between page has become unnecessary since all observers are cleared on page
+    //  change. Therefore, all references to RuntimeMesssage can be removed here.
+    private runtimeMessageToObserversMap: Map<PageEvent, MutationObserver[]> = new Map<PageEvent, MutationObserver[]>();
     private oneshotObservers: OneshotObserver[] = [];
 
     constructor() {
@@ -39,7 +41,7 @@ export class ActiveObserversManager {
         return oneshotObserver.observer;
     }
 
-    addForPage(runtimeMessage: RuntimeMessage, observer: MutationObserver): MutationObserver {
+    addForPage(runtimeMessage: PageEvent, observer: MutationObserver): MutationObserver {
         const existingObservers = this.runtimeMessageToObserversMap.get(runtimeMessage);
         this.runtimeMessageToObserversMap.set(runtimeMessage, [...existingObservers, observer]);
         return observer;
@@ -57,6 +59,6 @@ export class ActiveObserversManager {
     }
 
     private resetRuntimeMessageObserversMap(): void {
-        Object.values(RuntimeMessage).forEach(value => this.runtimeMessageToObserversMap.set(value, []));
+        Object.values(PageEvent).forEach(value => this.runtimeMessageToObserversMap.set(value, []));
     }
 }

@@ -1,4 +1,4 @@
-import {RuntimeMessage} from "../../enums/runtime-message";
+import {PageEvent} from "../../enums/page-event";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {
     IdNavigationFilter,
@@ -80,7 +80,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
-            RuntimeMessage.NAVIGATED_TO_HOME_PAGE,
+            PageEvent.NAVIGATED_TO_HOME_PAGE,
             saveToWatchLaterPopupEntryReadyObserver
         )).observe(popupContainer, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
@@ -94,7 +94,7 @@ function initContentScript(homePageVideos: HTMLElement[]): void {
     const firstHomePageVideo = homePageVideos[0];
     const divContents = firstHomePageVideo.parentElement;
 
-    contentScriptObserversManager.addForPage(RuntimeMessage.NAVIGATED_TO_HOME_PAGE, homePageVideosLoadingObserver)
+    contentScriptObserversManager.addForPage(PageEvent.NAVIGATED_TO_HOME_PAGE, homePageVideosLoadingObserver)
         .observe(divContents, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
         })

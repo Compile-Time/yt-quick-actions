@@ -1,8 +1,8 @@
-import {RuntimeMessage} from "../enums/runtime-message";
+import {PageEvent} from "../enums/page-event";
 
 export class OneshotObserver {
     constructor(readonly id: string,
-                readonly runtimeMessage: RuntimeMessage,
+                readonly runtimeMessage: PageEvent,
                 readonly observer: MutationObserver) {
     }
 

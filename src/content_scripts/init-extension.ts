@@ -3,7 +3,7 @@ import {ActiveObserversManager} from "../active-observers-manager";
 import {TabMessage} from "../data/tab-message";
 import {StorageAccessor} from "../storage/storage-accessor";
 import * as Browser from "webextension-polyfill";
-import {RuntimeMessage} from "../enums/runtime-message";
+import {PageEvent} from "../enums/page-event";
 import {runHomePageScriptIfTargetElementExists} from "./pages/home-page";
 import {runVideoScriptIfTargetElementExists} from "./pages/video";
 import {runPlaylistScriptIfTargetElementExists} from "./pages/playlist";
@@ -21,19 +21,19 @@ async function processMessage(message: TabMessage): Promise<void> {
     }
 
     switch (message.runtimeMessage) {
-        case RuntimeMessage.NAVIGATED_TO_HOME_PAGE:
+        case PageEvent.NAVIGATED_TO_HOME_PAGE:
             runHomePageScriptIfTargetElementExists(message);
             break;
 
-        case RuntimeMessage.NAVIGATED_TO_VIDEO:
+        case PageEvent.NAVIGATED_TO_VIDEO:
             runVideoScriptIfTargetElementExists(message);
             break;
 
-        case RuntimeMessage.NAVIGATED_TO_PLAYLIST:
+        case PageEvent.NAVIGATED_TO_PLAYLIST:
             runPlaylistScriptIfTargetElementExists(message);
             break;
 
-        case RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST:
+        case PageEvent.NAVIGATED_TO_VIDEO_IN_PLAYLIST:
             runWatchingPlaylistScriptIfTargetElementExists(message);
             break;
 

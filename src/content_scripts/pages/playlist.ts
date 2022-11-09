@@ -1,5 +1,5 @@
 import {Ids, Tags, TextContent} from "../../html-element-processing/element-data";
-import {RuntimeMessage} from "../../enums/runtime-message";
+import {PageEvent} from "../../enums/page-event";
 import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {
@@ -81,7 +81,7 @@ function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotId.MENU_UPDATED_OBSERVER,
-            RuntimeMessage.NAVIGATED_TO_PLAYLIST,
+            PageEvent.NAVIGATED_TO_PLAYLIST,
             menuUpdatedObserver
         )).observe(popupMenu, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
@@ -122,7 +122,7 @@ function initContentScript(menuButtons: HTMLElement[]): void {
         return;
     }
 
-    contentScriptObserversManager.addForPage(RuntimeMessage.NAVIGATED_TO_PLAYLIST, playlistLoadingNewEntriesObserver)
+    contentScriptObserversManager.addForPage(PageEvent.NAVIGATED_TO_PLAYLIST, playlistLoadingNewEntriesObserver)
         .observe(ytdPlaylistVideoListRenderer, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
         })

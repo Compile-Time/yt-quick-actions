@@ -1,4 +1,4 @@
-import {RuntimeMessage} from "../../enums/runtime-message";
+import {PageEvent} from "../../enums/page-event";
 import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {IdNavigationFilter, TextContentNavigationFilter} from "../../html-navigation/navigation-filter";
@@ -41,7 +41,7 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotId.REMOVE_POPUP_ENTRY_READY,
-            RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST,
+            PageEvent.NAVIGATED_TO_VIDEO_IN_PLAYLIST,
             removePopupEntryReadyObserver
         )).observe(popupMenu, {
             subtree: true,

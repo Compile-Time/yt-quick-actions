@@ -1,7 +1,7 @@
-import {RuntimeMessage} from "../enums/runtime-message";
+import {PageEvent} from "../enums/page-event";
 
 export class TabMessage {
-    constructor(readonly runtimeMessage: RuntimeMessage,
+    constructor(readonly runtimeMessage: PageEvent,
                 readonly disconnectObservers: boolean) {
     }
 }
