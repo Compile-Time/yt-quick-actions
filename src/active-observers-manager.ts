@@ -1,24 +1,22 @@
-import {PageEvent} from "./enums/page-event";
 import {OneshotObserver} from "./data/oneshot-observer";
 
 /**
- * Manage active mutation observers inside the same context.
+ * Manage active mutation observers inside the same page context.
  *
- * Mutation observers created in a content script can not be managed from a background script because
- * content script and background scripts both run in separate contexts.
+ * Because of how YouTube is designed the DOM changes very little when navigating between pages. This can
+ * cause mutation observers of one page to still be active in a different page. To prevent such an event
+ * this is designed to keep track of all observer instances and provide an option to disconnect them all.
+ *
+ * Usage note: Mutation observers created in a content script can not be managed from a background script
+ * because content script and background scripts both run in separate contexts. Therefore, an instance of
+ * this manager must be created for both the content script and background script.
  */
 export class ActiveObserversManager {
-    // TODO: The differentiation between page has become unnecessary since all observers are cleared on page
-    //  change. Therefore, all references to RuntimeMesssage can be removed here.
-    private runtimeMessageToObserversMap: Map<PageEvent, MutationObserver[]> = new Map<PageEvent, MutationObserver[]>();
+    private backgroundObservers: MutationObserver[] = [];
     private oneshotObservers: OneshotObserver[] = [];
 
-    constructor() {
-        this.resetRuntimeMessageObserversMap();
-    }
-
     /**
-     * Start an observer as an oneshot observer.
+     * Track a mutation observer as an oneshot observer.
      *
      * An oneshot observer is an observer that runs under a specific condition and disconnects after the
      * condition has been fulfilled. An example usage might be to determine if the content of a dialog has
@@ -41,24 +39,33 @@ export class ActiveObserversManager {
         return oneshotObserver.observer;
     }
 
-    addForPage(runtimeMessage: PageEvent, observer: MutationObserver): MutationObserver {
-        const existingObservers = this.runtimeMessageToObserversMap.get(runtimeMessage);
-        this.runtimeMessageToObserversMap.set(runtimeMessage, [...existingObservers, observer]);
+    /**
+     * Track a mutation observer as a background observer.
+     *
+     * Background observers are long-running mutation observers watching specific DOM elements inside a
+     * page context.
+     *
+     * @param observer - The mutation observer to track as a background observer
+     */
+    addBackgroundObserver(observer: MutationObserver): MutationObserver {
+        this.backgroundObservers.push(observer);
         return observer;
     }
 
+    /**
+     * Disconnect all currently tracked oneshot and background observers.
+     *
+     * Before running the next content script ensure that this method gets called before to stop any
+     * existing mutation observers.
+     */
     disconnectAll(): void {
         const observers: MutationObserver[] = [
-            ...Array.from(this.runtimeMessageToObserversMap.values()).flat(),
+            ...this.backgroundObservers,
             ...this.oneshotObservers.map(oneshotOb => oneshotOb.observer)
         ];
         observers.forEach(observer => observer.disconnect());
 
         this.oneshotObservers = [];
-        this.resetRuntimeMessageObserversMap();
-    }
-
-    private resetRuntimeMessageObserversMap(): void {
-        Object.values(PageEvent).forEach(value => this.runtimeMessageToObserversMap.set(value, []));
+        this.backgroundObservers = [];
     }
 }

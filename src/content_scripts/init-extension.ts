@@ -22,19 +22,19 @@ async function processMessage(message: TabMessage): Promise<void> {
 
     switch (message.runtimeMessage) {
         case PageEvent.NAVIGATED_TO_HOME_PAGE:
-            runHomePageScriptIfTargetElementExists(message);
+            runHomePageScriptIfTargetElementExists();
             break;
 
         case PageEvent.NAVIGATED_TO_VIDEO:
-            runVideoScriptIfTargetElementExists(message);
+            runVideoScriptIfTargetElementExists();
             break;
 
         case PageEvent.NAVIGATED_TO_PLAYLIST:
-            runPlaylistScriptIfTargetElementExists(message);
+            runPlaylistScriptIfTargetElementExists();
             break;
 
         case PageEvent.NAVIGATED_TO_VIDEO_IN_PLAYLIST:
-            runWatchingPlaylistScriptIfTargetElementExists(message);
+            runWatchingPlaylistScriptIfTargetElementExists();
             break;
 
     }

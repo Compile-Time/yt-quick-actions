@@ -1,4 +1,3 @@
-import {PageEvent} from "../../enums/page-event";
 import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {IdNavigationFilter, TextContentNavigationFilter} from "../../html-navigation/navigation-filter";
@@ -6,7 +5,6 @@ import {AttributeNames, Ids, Tags, TextContent} from "../../html-element-process
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
 import {LogProvider} from "../../logging/log-provider";
@@ -41,7 +39,6 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotObserverId.REMOVE_POPUP_ENTRY_READY,
-            PageEvent.NAVIGATED_TO_VIDEO_IN_PLAYLIST,
             removePopupEntryReadyObserver
         )).observe(popupMenu, {
             subtree: true,
@@ -74,14 +71,14 @@ function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void
     }
 }
 
-export function runWatchingPlaylistScriptIfTargetElementExists(message: TabMessage): void {
+export function runWatchingPlaylistScriptIfTargetElementExists(): void {
     logger.debug('Watch for first playlist item under or next to a video');
     ElementExistsWatcher.build()
         .queryFn(() => HtmlTreeNavigator.startFrom(document.body)
             .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
         )
         .observeFn(observer =>
-            contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+            contentScriptObserversManager.addBackgroundObserver(observer)
                 .observe(document.body, {
                     childList: true,
                     subtree: true

@@ -1,5 +1,4 @@
 import {Ids, Tags, TextContent} from "../../html-element-processing/element-data";
-import {PageEvent} from "../../enums/page-event";
 import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {
@@ -10,7 +9,6 @@ import {
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
 import {LogProvider} from "../../logging/log-provider";
@@ -81,7 +79,6 @@ function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotObserverId.MENU_UPDATED_OBSERVER,
-            PageEvent.NAVIGATED_TO_PLAYLIST,
             menuUpdatedObserver
         )).observe(popupMenu, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
@@ -122,13 +119,13 @@ function initContentScript(menuButtons: HTMLElement[]): void {
         return;
     }
 
-    contentScriptObserversManager.addForPage(PageEvent.NAVIGATED_TO_PLAYLIST, playlistLoadingNewEntriesObserver)
+    contentScriptObserversManager.addBackgroundObserver(playlistLoadingNewEntriesObserver)
         .observe(ytdPlaylistVideoListRenderer, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
         })
 }
 
-export function runPlaylistScriptIfTargetElementExists(message: TabMessage): void {
+export function runPlaylistScriptIfTargetElementExists(): void {
     logger.debug('Watch for the first menu button in a playlist');
     ElementExistsWatcher.build()
         .queryFn(() =>
@@ -137,7 +134,7 @@ export function runPlaylistScriptIfTargetElementExists(message: TabMessage): voi
                 .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
         )
         .observeFn(observer =>
-            contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+            contentScriptObserversManager.addBackgroundObserver(observer)
                 .observe(document.body, {
                     childList: true,
                     subtree: true

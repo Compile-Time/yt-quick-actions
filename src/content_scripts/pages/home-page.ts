@@ -1,4 +1,3 @@
-import {PageEvent} from "../../enums/page-event";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {
     IdNavigationFilter,
@@ -10,7 +9,6 @@ import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-act
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
 import {LogProvider} from "../../logging/log-provider";
@@ -80,7 +78,6 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement 
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotObserverId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
-            PageEvent.NAVIGATED_TO_HOME_PAGE,
             saveToWatchLaterPopupEntryReadyObserver
         )).observe(popupContainer, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
@@ -94,13 +91,13 @@ function initContentScript(homePageVideos: HTMLElement[]): void {
     const firstHomePageVideo = homePageVideos[0];
     const divContents = firstHomePageVideo.parentElement;
 
-    contentScriptObserversManager.addForPage(PageEvent.NAVIGATED_TO_HOME_PAGE, homePageVideosLoadingObserver)
+    contentScriptObserversManager.addBackgroundObserver(homePageVideosLoadingObserver)
         .observe(divContents, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
         })
 }
 
-export function runHomePageScriptIfTargetElementExists(message: TabMessage): void {
+export function runHomePageScriptIfTargetElementExists(): void {
     logger.debug('Watch for first home page video grid row');
     ElementExistsWatcher.build()
         .queryFn(() =>
@@ -111,7 +108,7 @@ export function runHomePageScriptIfTargetElementExists(message: TabMessage): voi
                 .findFirst(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW))
         )
         .observeFn(observer =>
-            contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+            contentScriptObserversManager.addBackgroundObserver(observer)
                 .observe(document.body, {
                     childList: true,
                     subtree: true

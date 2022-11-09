@@ -1,5 +1,4 @@
 import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
-import {PageEvent} from "../../enums/page-event";
 import {Ids, Tags, TextContent} from "../../html-element-processing/element-data";
 import {
     IdNavigationFilter,
@@ -11,7 +10,6 @@ import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
 import {LogProvider} from "../../logging/log-provider";
@@ -84,7 +82,6 @@ function clickSaveToWatchLaterOption(popupTrigger: HTMLElement): void {
 
     contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
         OneshotObserverId.SAVE_TO_FULL_SCREEN_POPUP_READY,
-        PageEvent.NAVIGATED_TO_VIDEO,
         saveToFullScreenPopupReadyObserver
     )).observe(popupContainer, {
         subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
@@ -114,7 +111,6 @@ function clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton: HTMLEle
 
     contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
         OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
-        PageEvent.NAVIGATED_TO_VIDEO,
         saveToHalfScreenObserver
     )).observe(popupContainer, {
         subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
@@ -173,12 +169,12 @@ function getMoreOptionsButton(): HTMLElement {
         .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
 }
 
-export function runVideoScriptIfTargetElementExists(message: TabMessage): void {
+export function runVideoScriptIfTargetElementExists(): void {
     logger.debug('Watch for the more options button under a video');
     ElementExistsWatcher.build()
         .queryFn(getMoreOptionsButton)
         .observeFn(observer =>
-            contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+            contentScriptObserversManager.addBackgroundObserver(observer)
                 .observe(document.body, {
                     childList: true,
                     subtree: true
