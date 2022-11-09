@@ -9,8 +9,9 @@ import {OneshotId} from "../../enums/oneshot-id";
 import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
+import {LogProvider} from "../../logging/log-provider";
 
-const logger = contentLogProvider.getWatchingPlaylistLogger();
+const logger = contentLogProvider.getLogger(LogProvider.WATCHING_PLAYLIST);
 
 /*
 Wait for the menu popup to update so the correct video is removed.

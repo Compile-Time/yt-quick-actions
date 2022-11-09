@@ -13,9 +13,10 @@ import {OneshotId} from "../../enums/oneshot-id";
 import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
+import {LogProvider} from "../../logging/log-provider";
 
 const createdElements: HTMLElement[] = [];
-const logger = contentLogProvider.getPlaylistQuickActionsLogger();
+const logger = contentLogProvider.getLogger(LogProvider.PLAYLIST);
 
 /*
 If we do not wait for the popup content to update, the first entry in the playlist is deleted due to the

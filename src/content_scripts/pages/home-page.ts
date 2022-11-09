@@ -13,8 +13,9 @@ import {OneshotId} from "../../enums/oneshot-id";
 import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
+import {LogProvider} from "../../logging/log-provider";
 
-const logger = contentLogProvider.getHomePageLogger();
+const logger = contentLogProvider.getLogger(LogProvider.HOME_PAGE);
 
 /*
 Observer to wait for the "Save to Watch later" option to update for the relevant video.

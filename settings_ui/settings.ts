@@ -4,13 +4,15 @@ import {SettingsData} from "../src/storage/settings-data";
 import {LogProvider} from "../src/logging/log-provider";
 
 const settingsLogProvider = new LogProvider();
-const logger = settingsLogProvider.getSettingsPageLogger();
+const logger = settingsLogProvider.getLogger(LogProvider.SETTINGS_PAGE);
 
 const settingsData = new SettingsData();
 
 function updateLogLevel(event: Event) {
     const select = event.target as HTMLSelectElement;
-    settingsData.logLevel = LogLevelMapper.fromStr(select.options[select.selectedIndex].value);
+    const level = LogLevelMapper.fromStr(select.options[select.selectedIndex].value);
+    logger.setLevel(level);
+    settingsData.logLevel = level;
 }
 
 function initLogLevel(): void {

@@ -8,7 +8,7 @@ import Tab = Tabs.Tab;
 import OnUpdatedChangeInfoType = Tabs.OnUpdatedChangeInfoType;
 
 const backgroundLogProvider = new LogProvider();
-const logger = backgroundLogProvider.getUrlChangeWatcherLogger();
+const logger = backgroundLogProvider.getLogger(LogProvider.URL_CHANGE_WATCHER);
 
 function sendMessage(tabId: number, tab: Tab, message: TabMessage): void {
     logger.debug(`Sending following message from tab ${tab.title}`, message);

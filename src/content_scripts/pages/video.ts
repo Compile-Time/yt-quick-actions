@@ -14,9 +14,10 @@ import {OneshotId} from "../../enums/oneshot-id";
 import {TabMessage} from "../../data/tab-message";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
+import {LogProvider} from "../../logging/log-provider";
 
 const createdElements: HTMLElement[] = [];
-const logger = contentLogProvider.getVideoQuickActionsLogger();
+const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
 
 /*
 Wait for the "Save to" popup to be ready and then check the "Watch later" entry.
