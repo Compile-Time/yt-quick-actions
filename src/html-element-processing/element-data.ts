@@ -36,9 +36,6 @@ export enum Ids {
 }
 
 export enum TextContent {
-    // TODO: Remove this comment and decide if TextContentNavigation filter should work with contains by
-    //  default.
-    // The trailing whitespace is intentional and required!
     REMOVE_FROM_LOWERCASE = 'remove from',
     REMOVE_FROM_PLAYLIST = 'Remove from playlist',
     SAVE = 'Save',
