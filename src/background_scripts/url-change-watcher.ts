@@ -11,11 +11,11 @@ const backgroundLogProvider = new LogProvider();
 const logger = backgroundLogProvider.getLogger(LogProvider.URL_CHANGE_WATCHER);
 
 function sendMessage(tabId: number, tab: Tab, message: TabMessage): void {
-    logger.debug(`Sending following message from tab ${tab.title}`, message);
+    logger.debug(`Sending following message from tab "${tab.title}"`, message);
     Browser.tabs.sendMessage(tabId, message)
         .then()
         .catch(reason => {
-            logger.error(`Could not send navigate message in tab ${tab.title}`, reason);
+            logger.error(`Could not send navigate message in tab "${tab.title}"`, reason);
         });
 }
 

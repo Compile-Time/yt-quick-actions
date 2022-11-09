@@ -11,8 +11,8 @@ import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
-import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
 import {LogProvider} from "../../logging/log-provider";
+import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);

@@ -10,8 +10,8 @@ import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
-import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
 import {LogProvider} from "../../logging/log-provider";
+import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
 
 const logger = contentLogProvider.getLogger(LogProvider.HOME_PAGE);
 

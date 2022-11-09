@@ -10,7 +10,7 @@ import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
-import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
+import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
 import {LogProvider} from "../../logging/log-provider";
 
 const createdElements: HTMLElement[] = [];
@@ -126,6 +126,7 @@ function initContentScript(menuButtons: HTMLElement[]): void {
 }
 
 export function runPlaylistScriptIfTargetElementExists(): void {
+    console.log('test45');
     logger.debug('Watch for the first menu button in a playlist');
     ElementExistsWatcher.build()
         .queryFn(() =>
