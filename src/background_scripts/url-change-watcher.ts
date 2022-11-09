@@ -25,11 +25,11 @@ async function processYoutubeTabUpdate(tabId: number, changeInfo: OnUpdatedChang
 
     if (changeInfo.status) {
         if (tab.url.includes('watch') && tab.url.includes('list') && tab.status === 'complete') {
-            const runtimeMessages = [
+            const messages = [
                 new TabMessage(PageEvent.NAVIGATED_TO_VIDEO_IN_PLAYLIST, true),
                 new TabMessage(PageEvent.NAVIGATED_TO_VIDEO, false)
             ];
-            runtimeMessages.forEach(message => sendMessage(tabId, tab, message));
+            messages.forEach(message => sendMessage(tabId, tab, message));
         } else if (tab.url.includes('watch') && tab.status === 'complete') {
             const message = new TabMessage(PageEvent.NAVIGATED_TO_VIDEO, true);
             sendMessage(tabId, tab, message);

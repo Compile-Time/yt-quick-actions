@@ -6,7 +6,7 @@ export enum PageEvent {
 }
 
 export class PageEventUtils {
-    static getNotGivenValues(runtimeMessages: PageEvent[]): PageEvent[] {
-        return Object.values(PageEvent).filter(value => !runtimeMessages.includes(value));
+    static getNotGivenValues(pageEvents: PageEvent[]): PageEvent[] {
+        return Object.values(PageEvent).filter(value => !pageEvents.includes(value));
     }
 }
