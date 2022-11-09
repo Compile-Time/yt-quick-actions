@@ -1,4 +1,3 @@
-import * as Browser from "webextension-polyfill";
 import {RuntimeMessage} from "../enums/runtime-message";
 import {YtQuickActionsElements} from "../html-element-processing/yt-quick-action-elements";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
@@ -9,8 +8,7 @@ import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
 import {ElementExistsWatcher} from "../html-element-processing/element-exists-watcher";
-import {StorageAccessor} from "../storage/storage-accessor";
-import {contentLogProvider, contentScriptObserversManager} from "./init-globals";
+import {contentLogProvider, contentScriptObserversManager} from "./init-extension";
 
 const logger = contentLogProvider.getWatchingPlaylistLogger();
 
@@ -75,39 +73,28 @@ function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void
     }
 }
 
-async function processRuntimeMessage(message: TabMessage): Promise<void> {
-    const level = await StorageAccessor.getLogLevel();
-    logger.setLevel(level);
-
-    if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_VIDEO_IN_PLAYLIST) {
-        if (message.disconnectObservers) {
-            contentScriptObserversManager.disconnectAll();
-        }
-
-        logger.debug('Watch for first playlist item under or next to a video');
-        ElementExistsWatcher.build()
-            .queryFn(() => HtmlTreeNavigator.startFrom(document.body)
-                .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
-            )
-            .observeFn(observer =>
-                contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
-                    .observe(document.body, {
-                        childList: true,
-                        subtree: true
-                    })
-            )
-            .run()
-            .then(() => {
-                logger.debug('First playlist item was found!');
-                const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
-                    .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
-                if (playlistPanelVideoRendererItems) {
-                    initContentScript(playlistPanelVideoRendererItems);
-                } else {
-                    logger.error('Could not find ytd-playlist-panel-video-renderer elements');
-                }
-            })
-    }
+export function runWatchingPlaylistScriptIfTargetElementExists(message: TabMessage): void {
+    logger.debug('Watch for first playlist item under or next to a video');
+    ElementExistsWatcher.build()
+        .queryFn(() => HtmlTreeNavigator.startFrom(document.body)
+            .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+        )
+        .observeFn(observer =>
+            contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+                .observe(document.body, {
+                    childList: true,
+                    subtree: true
+                })
+        )
+        .run()
+        .then(() => {
+            logger.debug('First playlist item was found!');
+            const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
+                .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
+            if (playlistPanelVideoRendererItems) {
+                initContentScript(playlistPanelVideoRendererItems);
+            } else {
+                logger.error('Could not find ytd-playlist-panel-video-renderer elements');
+            }
+        })
 }
-
-Browser.runtime.onMessage.addListener(processRuntimeMessage);

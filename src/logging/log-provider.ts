@@ -13,7 +13,6 @@ export class LogProvider {
 
     constructor() {
         prefix.reg(logLevel);
-        logLevel.setDefaultLevel(LogLevel.WARN);
         prefix.apply(logLevel, {
             template: '[%t] [%l] [%n] -',
             levelFormatter: function (level) {
@@ -27,6 +26,11 @@ export class LogProvider {
             },
             format: undefined
         });
+        logLevel.setDefaultLevel(LogLevel.WARN);
+    }
+
+    setLogLevel(level: LogLevel): void {
+        logLevel.setLevel(level);
     }
 
     getHomePageLogger(): Logger {

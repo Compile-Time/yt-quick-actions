@@ -1,4 +1,3 @@
-import * as Browser from "webextension-polyfill";
 import {RuntimeMessage} from "../enums/runtime-message";
 import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
 import {
@@ -13,8 +12,7 @@ import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
 import {ElementExistsWatcher} from "../html-element-processing/element-exists-watcher";
-import {StorageAccessor} from "../storage/storage-accessor";
-import {contentLogProvider, contentScriptObserversManager} from "./init-globals";
+import {contentLogProvider, contentScriptObserversManager} from "./init-extension";
 
 const logger = contentLogProvider.getHomePageLogger();
 
@@ -101,46 +99,35 @@ function initContentScript(homePageVideos: HTMLElement[]): void {
         })
 }
 
-async function processRuntimeMessage(message: TabMessage): Promise<void> {
-    const level = await StorageAccessor.getLogLevel();
-    logger.setLevel(level);
-
-    if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_HOME_PAGE) {
-        if (message.disconnectObservers) {
-            contentScriptObserversManager.disconnectAll();
-        }
-
-        logger.debug('Watch for first home page video grid row');
-        ElementExistsWatcher.build()
-            .queryFn(() =>
-                HtmlTreeNavigator.startFrom(document.body)
-                    .filter(new TagNavigationFilter(Tags.YTD_APP))
-                    .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
-                    .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
-                    .findFirst(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW))
-            )
-            .observeFn(observer =>
-                contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
-                    .observe(document.body, {
-                        childList: true,
-                        subtree: true
-                    })
-            )
-            .run()
-            .then(() => {
-                logger.debug('First video grid row was found!');
-                const homePageVideoGridRows = HtmlTreeNavigator.startFrom(document.body)
-                    .filter(new TagNavigationFilter(Tags.YTD_APP))
-                    .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
-                    .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
-                    .findAll(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW));
-                if (homePageVideoGridRows.length > 0) {
-                    initContentScript(homePageVideoGridRows);
-                } else {
-                    logger.error('Could not find home page video grid rows');
-                }
-            });
-    }
+export function runHomePageScriptIfTargetElementExists(message: TabMessage): void {
+    logger.debug('Watch for first home page video grid row');
+    ElementExistsWatcher.build()
+        .queryFn(() =>
+            HtmlTreeNavigator.startFrom(document.body)
+                .filter(new TagNavigationFilter(Tags.YTD_APP))
+                .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
+                .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
+                .findFirst(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW))
+        )
+        .observeFn(observer =>
+            contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+                .observe(document.body, {
+                    childList: true,
+                    subtree: true
+                })
+        )
+        .run()
+        .then(() => {
+            logger.debug('First video grid row was found!');
+            const homePageVideoGridRows = HtmlTreeNavigator.startFrom(document.body)
+                .filter(new TagNavigationFilter(Tags.YTD_APP))
+                .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
+                .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
+                .findAll(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW));
+            if (homePageVideoGridRows.length > 0) {
+                initContentScript(homePageVideoGridRows);
+            } else {
+                logger.error('Could not find home page video grid rows');
+            }
+        });
 }
-
-Browser.runtime.onMessage.addListener(processRuntimeMessage);

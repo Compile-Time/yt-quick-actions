@@ -1,4 +1,3 @@
-import * as Browser from "webextension-polyfill";
 import {Ids, Tags, TextContent} from "../html-element-processing/element-data";
 import {RuntimeMessage} from "../enums/runtime-message";
 import {YtQuickActionsElements} from "../html-element-processing/yt-quick-action-elements";
@@ -13,8 +12,7 @@ import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
 import {ElementExistsWatcher} from "../html-element-processing/element-exists-watcher";
-import {StorageAccessor} from "../storage/storage-accessor";
-import {contentLogProvider, contentScriptObserversManager} from "./init-globals";
+import {contentLogProvider, contentScriptObserversManager} from "./init-extension";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getPlaylistQuickActionsLogger();
@@ -129,42 +127,31 @@ function initContentScript(menuButtons: HTMLElement[]): void {
         })
 }
 
-async function processRuntimeMessage(message: TabMessage): Promise<void> {
-    const level = await StorageAccessor.getLogLevel();
-    logger.setLevel(level);
-
-    if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_PLAYLIST) {
-        if (message.disconnectObservers) {
-            contentScriptObserversManager.disconnectAll();
-        }
-
-        logger.debug('Watch for the first menu button in a playlist');
-        ElementExistsWatcher.build()
-            .queryFn(() =>
-                HtmlTreeNavigator.startFrom(document.body)
-                    .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
-                    .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
-            )
-            .observeFn(observer =>
-                contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
-                    .observe(document.body, {
-                        childList: true,
-                        subtree: true
-                    })
-            )
-            .run()
-            .then(() => {
-                logger.debug('First menu button was found!');
-                const menuButtons: HTMLElement[] = HtmlTreeNavigator.startFrom(document.body)
-                    .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
-                    .findAll(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
-                if (menuButtons.length > 0) {
-                    initContentScript(menuButtons);
-                } else {
-                    logger.error('Could not find menu buttons of playlist items');
-                }
-            })
-    }
+export function runPlaylistScriptIfTargetElementExists(message: TabMessage): void {
+    logger.debug('Watch for the first menu button in a playlist');
+    ElementExistsWatcher.build()
+        .queryFn(() =>
+            HtmlTreeNavigator.startFrom(document.body)
+                .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
+                .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+        )
+        .observeFn(observer =>
+            contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+                .observe(document.body, {
+                    childList: true,
+                    subtree: true
+                })
+        )
+        .run()
+        .then(() => {
+            logger.debug('First menu button was found!');
+            const menuButtons: HTMLElement[] = HtmlTreeNavigator.startFrom(document.body)
+                .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
+                .findAll(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
+            if (menuButtons.length > 0) {
+                initContentScript(menuButtons);
+            } else {
+                logger.error('Could not find menu buttons of playlist items');
+            }
+        })
 }
-
-Browser.runtime.onMessage.addListener(processRuntimeMessage);

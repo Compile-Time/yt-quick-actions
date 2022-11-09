@@ -1,5 +1,4 @@
 import {YtQuickActionsElements} from "../html-element-processing/yt-quick-action-elements";
-import * as Browser from "webextension-polyfill";
 import {RuntimeMessage} from "../enums/runtime-message";
 import {Ids, Tags, TextContent} from "../html-element-processing/element-data";
 import {
@@ -14,8 +13,7 @@ import {OneshotObserver} from "../data/oneshot-observer";
 import {OneshotId} from "../enums/oneshot-id";
 import {TabMessage} from "../data/tab-message";
 import {ElementExistsWatcher} from "../html-element-processing/element-exists-watcher";
-import {StorageAccessor} from "../storage/storage-accessor";
-import {contentLogProvider, contentScriptObserversManager} from "./init-globals";
+import {contentLogProvider, contentScriptObserversManager} from "./init-extension";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getVideoQuickActionsLogger();
@@ -174,36 +172,25 @@ function getMoreOptionsButton(): HTMLElement {
         .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
 }
 
-async function processRuntimeMessage(message: TabMessage): Promise<void> {
-    const level = await StorageAccessor.getLogLevel();
-    logger.setLevel(level);
-
-    if (message.runtimeMessage === RuntimeMessage.NAVIGATED_TO_VIDEO) {
-        if (message.disconnectObservers) {
-            contentScriptObserversManager.disconnectAll();
-        }
-
-        logger.debug('Watch for the more options button under a video');
-        ElementExistsWatcher.build()
-            .queryFn(getMoreOptionsButton)
-            .observeFn(observer =>
-                contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
-                    .observe(document.body, {
-                        childList: true,
-                        subtree: true
-                    })
-            )
-            .run()
-            .then(() => {
-                logger.debug('More options button was found!');
-                const moreOptionsButton = getMoreOptionsButton();
-                if (moreOptionsButton) {
-                    initContentScript(moreOptionsButton);
-                } else {
-                    logger.error('Could not find more options button under video');
-                }
-            })
-    }
+export function runVideoScriptIfTargetElementExists(message: TabMessage): void {
+    logger.debug('Watch for the more options button under a video');
+    ElementExistsWatcher.build()
+        .queryFn(getMoreOptionsButton)
+        .observeFn(observer =>
+            contentScriptObserversManager.addForPage(message.runtimeMessage, observer)
+                .observe(document.body, {
+                    childList: true,
+                    subtree: true
+                })
+        )
+        .run()
+        .then(() => {
+            logger.debug('More options button was found!');
+            const moreOptionsButton = getMoreOptionsButton();
+            if (moreOptionsButton) {
+                initContentScript(moreOptionsButton);
+            } else {
+                logger.error('Could not find more options button under video');
+            }
+        })
 }
-
-Browser.runtime.onMessage.addListener(processRuntimeMessage);
