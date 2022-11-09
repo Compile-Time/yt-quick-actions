@@ -1,18 +1,18 @@
-import {RuntimeMessage} from "../enums/runtime-message";
-import {HtmlParentNavigator} from "../html-navigation/html-parent-navigator";
+import {RuntimeMessage} from "../../enums/runtime-message";
+import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {
     IdNavigationFilter,
     TagNavigationFilter,
     TextContentNavigationFilter
-} from "../html-navigation/navigation-filter";
-import {Ids, Tags, TextContent} from "../html-element-processing/element-data";
-import {YtQuickActionsElements} from "../html-element-processing/yt-quick-action-elements";
-import {HtmlTreeNavigator} from "../html-navigation/html-tree-navigator";
-import {OneshotObserver} from "../data/oneshot-observer";
-import {OneshotId} from "../enums/oneshot-id";
-import {TabMessage} from "../data/tab-message";
-import {ElementExistsWatcher} from "../html-element-processing/element-exists-watcher";
-import {contentLogProvider, contentScriptObserversManager} from "./init-extension";
+} from "../../html-navigation/navigation-filter";
+import {Ids, Tags, TextContent} from "../../html-element-processing/element-data";
+import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
+import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
+import {OneshotObserver} from "../../data/oneshot-observer";
+import {OneshotId} from "../../enums/oneshot-id";
+import {TabMessage} from "../../data/tab-message";
+import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
+import {contentLogProvider, contentScriptObserversManager} from "../init-extension";
 
 const logger = contentLogProvider.getHomePageLogger();
 

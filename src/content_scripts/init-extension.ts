@@ -4,10 +4,10 @@ import {TabMessage} from "../data/tab-message";
 import {StorageAccessor} from "../storage/storage-accessor";
 import * as Browser from "webextension-polyfill";
 import {RuntimeMessage} from "../enums/runtime-message";
-import {runHomePageScriptIfTargetElementExists} from "./home-page-quick-actions";
-import {runVideoScriptIfTargetElementExists} from "./video-quick-actions";
-import {runPlaylistScriptIfTargetElementExists} from "./playlist-quick-actions";
-import {runWatchingPlaylistScriptIfTargetElementExists} from "./watching-playlist-quick-actions";
+import {runHomePageScriptIfTargetElementExists} from "./pages/home-page";
+import {runVideoScriptIfTargetElementExists} from "./pages/video";
+import {runPlaylistScriptIfTargetElementExists} from "./pages/playlist";
+import {runWatchingPlaylistScriptIfTargetElementExists} from "./pages/watching-playlist";
 
 export const contentLogProvider = new LogProvider();
 export const contentScriptObserversManager: ActiveObserversManager = new ActiveObserversManager();
