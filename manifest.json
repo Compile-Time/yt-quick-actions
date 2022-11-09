@@ -8,7 +8,6 @@
   },
   "permissions": [
     "*://*.youtube.com/*",
-    "tabs",
     "storage"
   ],
   "background": {
