@@ -5,7 +5,10 @@ import {
     TextContentNavigationFilter
 } from "../../html-navigation/navigation-filter";
 import {Ids, Tags, TextContent} from "../../html-element-processing/element-data";
-import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
+import {
+    QaButtonInContainer,
+    YtQuickActionsElements
+} from "../../html-element-processing/yt-quick-action-elements";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
@@ -51,22 +54,24 @@ const homePageVideosLoadingObserver = new MutationObserver(mutations => {
 
         if (target.nodeName.toLowerCase() === Tags.BUTTON && !!ytdRichGridRow) {
             const menuButton = target as HTMLButtonElement;
-            const divMenu = HtmlParentNavigator.startFrom(menuButton)
-                .find(new IdNavigationFilter(Tags.DIV, Ids.MENU));
+            const divDismissible = HtmlParentNavigator.startFrom(menuButton)
+                .find(new IdNavigationFilter(Tags.DIV, Ids.DISMISSIBLE));
+            // Set position relative so when 'position: absolute' is used in our elements the position of
+            // divDismissible is used as the position context.
+            divDismissible.setAttribute('style', 'position: relative')
 
-            const divDetails = divMenu.parentElement;
-            const existingWatchLaterButton = HtmlTreeNavigator.startFrom(divDetails)
+            const existingWatchLaterButton = HtmlTreeNavigator.startFrom(divDismissible)
                 .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER));
             if (!existingWatchLaterButton) {
-                divDetails.insertBefore(setupWatchLaterButton(menuButton), divMenu);
+                divDismissible.append(setupWatchLaterButton(menuButton).completeHtmlElement);
             }
         }
     }
 });
 
-function setupWatchLaterButton(videoMenuButton: HTMLElement): HTMLButtonElement {
+function setupWatchLaterButton(videoMenuButton: HTMLElement): QaButtonInContainer {
     const watchLaterButton = YtQuickActionsElements.watchLaterHomeVideoButton();
-    watchLaterButton.onclick = () => {
+    watchLaterButton.buttonElement.onclick = () => {
         videoMenuButton.click();
         const popupContainer = HtmlTreeNavigator.startFrom(document.body)
             .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER));
