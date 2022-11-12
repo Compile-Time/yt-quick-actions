@@ -2,6 +2,8 @@ import * as Browser from "webextension-polyfill";
 import {LogLevel, LogLevelMapper} from "../src/enums/log-level";
 import {SettingsData} from "../src/storage/settings-data";
 import {LogProvider} from "../src/logging/log-provider";
+import {HtmlTreeNavigator} from "../src/html-navigation/html-tree-navigator";
+import {IdNavigationFilter, TagNavigationFilter} from "../src/html-navigation/navigation-filter";
 
 const settingsLogProvider = new LogProvider();
 const logger = settingsLogProvider.getLogger(LogProvider.SETTINGS_PAGE);
@@ -37,11 +39,18 @@ function saveOptions(event: Event): void {
     Browser.storage.local.set(settingsData);
 }
 
+function registerEventListeners(): void {
+    HtmlTreeNavigator.startFrom(document.body)
+        .findFirst(new IdNavigationFilter('select', 'log-level'))
+        .addEventListener('change', updateLogLevel);
+    HtmlTreeNavigator.startFrom(document.body)
+        .findFirst(new TagNavigationFilter('form'))
+        .addEventListener('submit', saveOptions);
+}
+
 function init(): void {
+    registerEventListeners();
     initLogLevel();
 }
 
 document.addEventListener('DOMContentLoaded', init);
-document.querySelector('#log-level')
-    .addEventListener('change', updateLogLevel);
-document.querySelector('form').addEventListener('submit', saveOptions);
