@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "yt-quick-actions",
+  "version": "1.0.0",
+  "description": "Provide quick access to hidden YouTube actions.",
+  "icons": {
+    "48": "assets/images/extension-icon.svg",
+    "96": "assets/images/extension-icon.svg"
+  },
+  "host_permissions": [
+    "*://*.youtube.com/*"
+  ],
+  "permissions": [
+    "storage"
+  ],
+  "background": {
+    "service_worker": "src/background_scripts/url-change-watcher.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.youtube.com/*"
+      ],
+      "js": [
+        "src/content_scripts/init-extension.ts"
+      ],
+      "css": [
+        "assets/pcss/yt-quick-actions.pcss",
+        "assets/fontawesome/css/fontawesome.min.css",
+        "assets/fontawesome/css/solid.min.css"
+      ]
+    }
+  ],
+  "options_ui": {
+    "page": "settings_ui/settings.html"
+  }
+}
