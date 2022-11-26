@@ -11,7 +11,8 @@
     "*://*.youtube.com/*"
   ],
   "permissions": [
-    "storage"
+    "storage",
+    "tabs"
   ],
   "background": {
     "service_worker": "src/background_scripts/url-change-watcher.ts",
