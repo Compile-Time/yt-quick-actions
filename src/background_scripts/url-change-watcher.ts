@@ -44,4 +44,4 @@ async function processYoutubeTabUpdate(tabId: number, changeInfo: OnUpdatedChang
 
 }
 
-Browser.tabs.onUpdated.addListener(processYoutubeTabUpdate, {urls: ['*://*.youtube.com/*']});
+Browser.tabs.onUpdated.addListener(processYoutubeTabUpdate);
