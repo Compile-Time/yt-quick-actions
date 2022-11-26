@@ -10,6 +10,19 @@ const logger = settingsLogProvider.getLogger(LogProvider.SETTINGS_PAGE);
 
 const settingsData = new SettingsData();
 
+function generateLogLevelsForSelect(selectedOption: string): HTMLOptionElement[] {
+    return Object.values(LogLevel)
+        .map(level => {
+            const option = document.createElement('option');
+            option.innerText = level.toUpperCase();
+            option.setAttribute('value', level);
+            if (selectedOption === level) {
+                option.setAttribute('selected', '');
+            }
+            return option;
+        });
+}
+
 function updateLogLevel(event: Event) {
     const select = event.target as HTMLSelectElement;
     const level = LogLevelMapper.fromStr(select.options[select.selectedIndex].value);
@@ -21,14 +34,15 @@ function initLogLevel(): void {
     Browser.storage.local.get(SettingsData.LOG_LEVEL_ATTR)
         .then(
             storage => {
-                logger.log(storage);
                 const select = document.querySelector('#log-level') as HTMLSelectElement;
+                let logLevel: LogLevel;
                 if (storage.logLevel) {
-                    const logLevel = LogLevelMapper.fromStr(storage.logLevel);
-                    select.selectedIndex = LogLevelMapper.toNumber(logLevel);
+                    logLevel = LogLevelMapper.fromStr(storage.logLevel);
                 } else {
-                    select.selectedIndex = LogLevelMapper.toNumber(LogLevel.WARN);
+                    logLevel = LogLevel.WARN;
                 }
+                generateLogLevelsForSelect(logLevel)
+                    .forEach(option => select.append(option));
             },
             error => logger.error(`Could not retrieve log level from storage API: ${error}`)
         );
