@@ -2,60 +2,60 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="48"
-   height="48"
-   viewBox="0 0 48 48"
-   version="1.1"
-   id="svg14733"
-   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14, custom)"
-   sodipodi:docname="extension-icon-inkscape.svg"
-   inkscape:export-filename="extension-icon.svg"
-   inkscape:export-xdpi="96"
-   inkscape:export-ydpi="96"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview14735"
-     pagecolor="#505050"
-     bordercolor="#ffffff"
-     borderopacity="0.19607843"
-     inkscape:showpageshadow="false"
-     inkscape:pageopacity="0"
-     inkscape:pagecheckerboard="false"
-     inkscape:deskcolor="#505050"
-     inkscape:document-units="px"
-     showgrid="false"
-     inkscape:zoom="1"
-     inkscape:cx="24.5"
-     inkscape:cy="24.5"
-     inkscape:current-layer="clock"
-     showguides="true"
-     showborder="true"
-     borderlayer="false">
-    <inkscape:grid
-       type="xygrid"
-       id="grid14737"
-       originx="0"
-       originy="0" />
-  </sodipodi:namedview>
-  <defs
-     id="defs14730" />
-  <g
-     inkscape:label="#bottom"
-     inkscape:groupmode="layer"
-     id="bottom"
-     sodipodi:insensitive="true">
-    <path
-       style="fill:#b3b3b3;fill-opacity:1;stroke:#b3b3b3;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-       d="M 2,15 3,47 H 45 L 46,15 Z"
-       id="path15423"
-       inkscape:label="#container" />
-    <path
-       style="fill:none;stroke:#900000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-       d="M 7.0789956,18 V 44 Z"
-       id="bin-line-left"
+        xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+        xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+        width="48"
+        height="48"
+        viewBox="0 0 48 48"
+        version="1.1"
+        id="svg14733"
+        inkscape:version="1.2.1 (9c6d41e410, 2022-07-14, custom)"
+        sodipodi:docname="extension-icon-inkscape.svg"
+        inkscape:export-filename="extension-icon.svg"
+        inkscape:export-xdpi="96"
+        inkscape:export-ydpi="96"
+        xmlns="http://www.w3.org/2000/svg"
+>
+    <sodipodi:namedview
+            id="namedview14735"
+            pagecolor="#505050"
+            bordercolor="#ffffff"
+            borderopacity="0.19607843"
+            inkscape:showpageshadow="false"
+            inkscape:pageopacity="0"
+            inkscape:pagecheckerboard="false"
+            inkscape:deskcolor="#505050"
+            inkscape:document-units="px"
+            showgrid="false"
+            inkscape:zoom="1"
+            inkscape:cx="24.5"
+            inkscape:cy="24.5"
+            inkscape:current-layer="clock"
+            showguides="true"
+            showborder="true"
+            borderlayer="false">
+        <inkscape:grid
+                type="xygrid"
+                id="grid14737"
+                originx="0"
+                originy="0"/>
+    </sodipodi:namedview>
+    <defs
+            id="defs14730"/>
+    <g
+            inkscape:label="#bottom"
+            inkscape:groupmode="layer"
+            id="bottom"
+            sodipodi:insensitive="true">
+        <path
+                style="fill:#b3b3b3;fill-opacity:1;stroke:#b3b3b3;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+                d="M 2,15 3,47 H 45 L 46,15 Z"
+                id="path15423"
+                inkscape:label="#container"/>
+        <path
+                style="fill:none;stroke:#900000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+                d="M 7.0789956,18 V 44 Z"
+                id="bin-line-left"
        inkscape:label="#bin-line-left" />
     <path
        style="fill:none;stroke:#900000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"

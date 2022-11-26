@@ -4,8 +4,10 @@
   "version": "1.0.0",
   "description": "Provide quick access to hidden YouTube actions.",
   "icons": {
-    "48": "assets/images/extension-icon.svg",
-    "96": "assets/images/extension-icon.svg"
+    "16": "assets/extension-icons/chrome/icon16.png",
+    "32": "assets/extension-icons/chrome/icon32.png",
+    "48": "assets/extension-icons/chrome/icon48.png",
+    "128": "assets/extension-icons/chrome/icon128.png"
   },
   "host_permissions": [
     "https://www.youtube.com/*"

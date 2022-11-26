@@ -2,28 +2,28 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="48"
-   height="48"
-   viewBox="0 0 48 48"
-   version="1.1"
-   id="svg14733"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
+        width="48"
+        height="48"
+        viewBox="0 0 48 48"
+        version="1.1"
+        id="svg14733"
+        xmlns="http://www.w3.org/2000/svg"
+>
   <defs
-     id="defs14730" />
+          id="defs14730"/>
   <g
-     id="bottom">
+          id="bottom">
     <path
-       style="fill:#b3b3b3;fill-opacity:1;stroke:#b3b3b3;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-       d="M 2,15 3,47 H 45 L 46,15 Z"
-       id="path15423" />
+            style="fill:#b3b3b3;fill-opacity:1;stroke:#b3b3b3;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+            d="M 2,15 3,47 H 45 L 46,15 Z"
+            id="path15423"/>
     <path
-       style="fill:none;stroke:#900000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-       d="M 7.0789956,18 V 44 Z"
-       id="bin-line-left" />
+            style="fill:none;stroke:#900000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+            d="M 7.0789956,18 V 44 Z"
+            id="bin-line-left"/>
     <path
-       style="fill:none;stroke:#900000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-       d="M 40.921004,18 V 44 Z"
+            style="fill:none;stroke:#900000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+            d="M 40.921004,18 V 44 Z"
        id="bin-line-right" />
   </g>
   <g
