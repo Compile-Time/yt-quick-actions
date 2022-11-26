@@ -8,7 +8,7 @@
     "96": "assets/images/extension-icon.svg"
   },
   "host_permissions": [
-    "*://*.youtube.com/*"
+    "https://www.youtube.com/*"
   ],
   "permissions": [
     "storage",
@@ -21,19 +21,30 @@
   "content_scripts": [
     {
       "matches": [
-        "*://*.youtube.com/*"
+        "https://www.youtube.com/*"
       ],
       "js": [
         "src/content_scripts/init-extension.ts"
       ],
       "css": [
         "assets/pcss/yt-quick-actions.pcss",
-        "assets/fontawesome/css/fontawesome.min.css",
-        "assets/fontawesome/css/solid.min.css"
+        "assets/fontawesome-chrome/css/fontawesome.min.css",
+        "assets/fontawesome-chrome/css/solid.min.css"
       ]
     }
   ],
   "options_ui": {
     "page": "settings_ui/settings.html"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "/assets/fontawesome/webfonts/*"
+      ],
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "use_dynamic_url": true
+    }
+  ]
 }
