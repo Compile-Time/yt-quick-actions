@@ -27,8 +27,6 @@ const menuUpdatedObserver = new MutationObserver((mutations, observer) => {
                 .findFirst(new TextContentContainsNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_LOWERCASE));
             if (ytFormattedText) {
                 ytFormattedText.click();
-            } else {
-                logger.error('Could not find remove option in popup');
             }
             observer.disconnect();
         }
@@ -126,7 +124,6 @@ function initContentScript(menuButtons: HTMLElement[]): void {
 }
 
 export function runPlaylistScriptIfTargetElementExists(): void {
-    console.log('test45');
     logger.debug('Watch for the first menu button in a playlist');
     ElementExistsWatcher.build()
         .queryFn(() =>
