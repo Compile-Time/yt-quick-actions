@@ -11,7 +11,7 @@ describe('NavigationFilterQueue', () => {
 
         const receivedFilterToProcess = filterQueue.getCurrentOrNextUnprocessedFilter();
         expect(receivedFilterToProcess.getFilter()).toEqual(divFilter);
-        expect(receivedFilterToProcess.isProcessed()).toBeFalse();
+        expect(receivedFilterToProcess.isProcessed()).toBeFalsy();
     })
 
     it('should return second element when first element is marked as processed', () => {
@@ -24,14 +24,14 @@ describe('NavigationFilterQueue', () => {
 
         const filterToMarkProcessed = filterQueue.getCurrentOrNextUnprocessedFilter();
         expect(filterToMarkProcessed.getFilter()).toEqual(divFilter);
-        expect(filterToMarkProcessed.isProcessed()).toBeFalse();
+        expect(filterToMarkProcessed.isProcessed()).toBeFalsy();
 
         filterToMarkProcessed.markProcessed();
-        expect(filterToMarkProcessed.isProcessed()).toBeTrue();
+        expect(filterToMarkProcessed.isProcessed()).toBeTruthy();
 
         const receivedFilterToProcess = filterQueue.getCurrentOrNextUnprocessedFilter();
         expect(receivedFilterToProcess.getFilter()).toEqual(spanFilter);
-        expect(receivedFilterToProcess.isProcessed()).toBeFalse();
+        expect(receivedFilterToProcess.isProcessed()).toBeFalsy();
     });
 
     it('should return true when all filters are processed', () => {
@@ -46,7 +46,7 @@ describe('NavigationFilterQueue', () => {
             const filterToProcess = filterQueue.getCurrentOrNextUnprocessedFilter();
             filterToProcess.markProcessed();
         }
-        expect(filterQueue.areAllFiltersProcessed()).toBeTrue();
+        expect(filterQueue.areAllFiltersProcessed()).toBeTruthy();
     });
 
     it('should return false when not all filters are processed', () => {
@@ -59,7 +59,7 @@ describe('NavigationFilterQueue', () => {
 
         const filterToProcess = filterQueue.getCurrentOrNextUnprocessedFilter();
         filterToProcess.markProcessed();
-        expect(filterQueue.areAllFiltersProcessed()).toBeFalse();
+        expect(filterQueue.areAllFiltersProcessed()).toBeFalsy();
     });
 
     it('should correctly clone current filters', () => {
@@ -74,9 +74,9 @@ describe('NavigationFilterQueue', () => {
         filterQueue.getCurrentOrNextUnprocessedFilter().markProcessed();
         filterQueue.getCurrentOrNextUnprocessedFilter().markProcessed();
 
-        expect(filterQueue.areAllFiltersProcessed()).toBeTrue();
+        expect(filterQueue.areAllFiltersProcessed()).toBeTruthy();
 
         const clonedQueue = filterQueue.cloneWithoutProcessed();
-        expect(clonedQueue.areAllFiltersProcessed()).toBeTrue();
+        expect(clonedQueue.areAllFiltersProcessed()).toBeTruthy();
     });
 });

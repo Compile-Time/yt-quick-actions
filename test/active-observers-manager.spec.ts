@@ -1,28 +1,21 @@
 import {ActiveObserversManager} from "../src/active-observers-manager";
 import {OneshotObserver} from "../src/data/oneshot-observer";
-import createSpy = jasmine.createSpy;
-import createSpyObj = jasmine.createSpyObj;
+import {createSpyObj} from 'jest-createspyobj';
+
 
 describe('ActiveObserversManager', () => {
 
     function mockObserver(): MutationObserver {
-        return createSpyObj('MutationObserver', {
-            disconnect: createSpy('disconnect'),
-            observe: createSpy('observe')
-        }) as MutationObserver;
+        return createSpyObj('MutationObserver', ['disconnect', 'observer']) as unknown as MutationObserver;
     }
 
     it('should disconnect previous oneshot observer for same id', () => {
-        const doc = document.createElement('div');
         const manager = new ActiveObserversManager();
         const mockObserver1 = mockObserver();
         const mockObserver2 = mockObserver();
 
-        manager.upsertOneshotObserver(new OneshotObserver('test', mockObserver1))
-            .observe(doc, {attributes: true});
-
-        manager.upsertOneshotObserver(new OneshotObserver('test', mockObserver2))
-            .observe(doc, {attributes: true});
+        manager.upsertOneshotObserver(new OneshotObserver('test', mockObserver1));
+        manager.upsertOneshotObserver(new OneshotObserver('test', mockObserver2));
 
         expect(mockObserver1.disconnect).toHaveBeenCalled();
         expect(mockObserver2.disconnect).not.toHaveBeenCalled();

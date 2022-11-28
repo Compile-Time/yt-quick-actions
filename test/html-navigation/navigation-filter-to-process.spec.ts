@@ -7,19 +7,19 @@ describe('NavigationFilterToProcess', () => {
         const filterToProcess = new NavigationFilterToProcess(new TagNavigationFilter(Tags.DIV));
         filterToProcess.markProcessed();
 
-        expect(filterToProcess.isProcessed()).toBeTrue();
+        expect(filterToProcess.isProcessed()).toBeTruthy();
     });
 
     describe('isProcessed', () => {
         it('should return true when filter is processed', () => {
             const filterToProcess = new NavigationFilterToProcess(new TagNavigationFilter(Tags.DIV));
             filterToProcess.markProcessed();
-            expect(filterToProcess.isProcessed()).toBeTrue();
+            expect(filterToProcess.isProcessed()).toBeTruthy();
         })
 
         it('should return false when filter is not processed', () => {
             const filterToProcess = new NavigationFilterToProcess(new TagNavigationFilter(Tags.DIV));
-            expect(filterToProcess.isProcessed()).toBeFalse();
+            expect(filterToProcess.isProcessed()).toBeFalsy();
         })
     })
 });
