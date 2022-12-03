@@ -1,9 +1,9 @@
-# YT-Quick-Actions
+# YT Quick Actions
 
-YT-Quick-Actions is a web extension for YouTube making actions related to playlist management quicker
+YT Quick Actions is a web extension for YouTube making actions related to watch later playlist management quicker
 to access.
 
-Concretely, YT-Quick-Actions offers the following features:
+Concretely, YT Quick Actions offers the following features:
 
 - Add a remove button in playlists next to the more options button
 - Add a watch later button as an action under videos

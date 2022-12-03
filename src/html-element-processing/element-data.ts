@@ -31,10 +31,10 @@ export enum Ids {
     LABEL = 'label',
     MENU = 'menu',
     PLAYLIST_ITEMS = 'playlist-items',
-    QA_FLEX_CONTAINER = 'qa-flex-container',
-    YT_QUICK_ACTIONS_HOME_WATCH_LATER = 'yt-quick-actions-home-watch-later',
-    YT_QUICK_ACTIONS_REMOVE_BUTTON = 'yt-quick-actions-remove-button',
-    YT_QUICK_ACTIONS_VIDEO_WATCH_LATER = 'yt-quick-actions-video-watch-later',
+    QA_FLEX_CONTAINER = 'yt-qa-flex-container',
+    QA_HOME_WATCH_LATER = 'yt-qa-home-watch-later',
+    QA_REMOVE_BUTTON = 'yt-qa-remove-button',
+    QA_VIDEO_WATCH_LATER = 'yt-qa-video-watch-later',
 }
 
 export enum TextContent {

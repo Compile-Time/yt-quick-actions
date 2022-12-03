@@ -1,5 +1,5 @@
 import {Ids, Tags, TextContent} from "../../html-element-processing/element-data";
-import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
+import {QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {
     IdNavigationFilter,
@@ -56,7 +56,7 @@ const playlistLoadingNewEntriesObserver = new MutationObserver((mutations) => {
         }
 
         const existingRemoveButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
-            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON));
+            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON));
         if (!!ytdPlaylistVideoRenderer && !existingRemoveButton) {
             appendRemoveButton(ytIconButton, ytdPlaylistVideoRenderer);
         }
@@ -64,7 +64,7 @@ const playlistLoadingNewEntriesObserver = new MutationObserver((mutations) => {
 });
 
 function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
-    const removeButton = YtQuickActionsElements.removeButton();
+    const removeButton = QaHtmlElements.removeButton();
     removeButton.onclick = () => {
         menuButton.click();
         const popupMenu = HtmlTreeNavigator.startFrom(document.body)

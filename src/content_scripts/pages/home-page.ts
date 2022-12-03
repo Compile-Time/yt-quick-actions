@@ -5,10 +5,7 @@ import {
     TextContentNavigationFilter
 } from "../../html-navigation/navigation-filter";
 import {Ids, Tags, TextContent} from "../../html-element-processing/element-data";
-import {
-    QaButtonInContainer,
-    YtQuickActionsElements
-} from "../../html-element-processing/yt-quick-action-elements";
+import {QaButtonInContainer, QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
@@ -61,7 +58,7 @@ const homePageVideosLoadingObserver = new MutationObserver(mutations => {
             divDismissible.setAttribute('style', 'position: relative')
 
             const existingWatchLaterButton = HtmlTreeNavigator.startFrom(divDismissible)
-                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER));
+                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_HOME_WATCH_LATER));
             if (!existingWatchLaterButton) {
                 divDismissible.append(setupWatchLaterButton(menuButton).completeHtmlElement);
             }
@@ -70,7 +67,7 @@ const homePageVideosLoadingObserver = new MutationObserver(mutations => {
 });
 
 function setupWatchLaterButton(videoMenuButton: HTMLElement): QaButtonInContainer {
-    const watchLaterButton = YtQuickActionsElements.watchLaterHomeVideoButton();
+    const watchLaterButton = QaHtmlElements.watchLaterHomeVideoButton();
     watchLaterButton.buttonElement.onclick = () => {
         videoMenuButton.click();
         const popupContainer = HtmlTreeNavigator.startFrom(document.body)

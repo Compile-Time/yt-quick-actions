@@ -1,4 +1,4 @@
-import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
+import {QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {Ids, Tags, TextContent} from "../../html-element-processing/element-data";
 import {
     IdNavigationFilter,
@@ -120,7 +120,7 @@ function clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton: HTMLEle
 }
 
 function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElement {
-    const quickActionsWatchLater = YtQuickActionsElements.watchLaterUnderVideoButton();
+    const quickActionsWatchLater = QaHtmlElements.watchLaterUnderVideoButton();
     createdElements.push(quickActionsWatchLater);
     quickActionsWatchLater.onclick = () => {
         const ytdMenuRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)

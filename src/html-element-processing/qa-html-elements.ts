@@ -6,10 +6,10 @@ export class QaButtonInContainer {
     }
 }
 
-export class YtQuickActionsElements {
+export class QaHtmlElements {
     static removeButton(): HTMLButtonElement {
         const button = document.createElement(Tags.BUTTON);
-        button.id = Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON;
+        button.id = Ids.QA_REMOVE_BUTTON;
         button.innerHTML = `<i class="fa-solid fa-trash fa-lg"></i>`;
         button.setAttribute('class', 'qa-btn');
         return button;
@@ -17,7 +17,7 @@ export class YtQuickActionsElements {
 
     static watchLaterUnderVideoButton(): HTMLButtonElement {
         const button = document.createElement(Tags.BUTTON);
-        button.id = Ids.YT_QUICK_ACTIONS_VIDEO_WATCH_LATER;
+        button.id = Ids.QA_VIDEO_WATCH_LATER;
         button.innerHTML = `<i class="fa-solid fa-clock fa-lg"></i>`
         button.setAttribute('class', 'qa-btn qa-btn-pill');
         return button;
@@ -29,7 +29,7 @@ export class YtQuickActionsElements {
         flexContainer.setAttribute('class', 'qa-home-watch-later');
 
         const button = document.createElement(Tags.BUTTON);
-        button.id = Ids.YT_QUICK_ACTIONS_HOME_WATCH_LATER;
+        button.id = Ids.QA_HOME_WATCH_LATER;
         button.innerHTML = `<i class="fa-solid fa-clock fa-lg"></i>`
         button.setAttribute('class', 'qa-btn');
 

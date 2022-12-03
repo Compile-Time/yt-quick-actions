@@ -1,4 +1,4 @@
-import {YtQuickActionsElements} from "../../html-element-processing/yt-quick-action-elements";
+import {QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {IdNavigationFilter, TextContentNavigationFilter} from "../../html-navigation/navigation-filter";
 import {AttributeNames, Ids, Tags, TextContent} from "../../html-element-processing/element-data";
@@ -26,7 +26,7 @@ const removePopupEntryReadyObserver = new MutationObserver((mutations, observer)
 });
 
 function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
-    const button = YtQuickActionsElements.removeButton();
+    const button = QaHtmlElements.removeButton();
     button.onclick = () => {
         element.click();
         const popupMenu = HtmlTreeNavigator.startFrom(document.body)
@@ -64,7 +64,7 @@ function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void
             .find(new IdNavigationFilter(Tags.DIV, Ids.MENU));
 
         const existingRemoveButton = HtmlTreeNavigator.startFrom(playlistItem)
-            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.YT_QUICK_ACTIONS_REMOVE_BUTTON));
+            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON));
         if (!existingRemoveButton) {
             playlistItem.insertBefore(removeButton, divMenu);
         }

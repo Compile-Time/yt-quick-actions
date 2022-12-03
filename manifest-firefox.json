@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "yt-quick-actions",
+  "name": "YT Quick Actions",
   "version": "1.0.0",
   "description": "Provide quick access to hidden YouTube actions.",
   "icons": {
