@@ -4,11 +4,11 @@
   ],
   "scripts": {
     "start": "parcel watch --target firefox-dev --host localhost",
-    "start-ch": "parcel watch --target chrome-dev --host localhost --dist-dir=dist/dev-ch",
+    "start-ch": "parcel watch --target chrome-dev --host localhost",
     "start-no-hmr": "parcel watch --target firefox-dev --host localhost --no-hmr",
     "start-no-hmr-ch": "parcel watch --target chrome-dev --host localhost --no-hmr",
     "build": "parcel build --target firefox-prod",
-    "build-ch": "parcel build --target chrome-prod",
+    "build-ch": "parcel build --target chrome-prod --dist-dir=dist",
     "test": "jest"
   },
   "targets": {
