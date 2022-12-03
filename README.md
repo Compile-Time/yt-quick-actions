@@ -45,6 +45,10 @@ The following permissions are required for the extension to work:
 
 ![Remove button in watch later playlist](documentation/images/watch_later_remove_sample.png "Remove button in watch later playlist")
 
+### Remove button in currently playing playlist
+
+![Remove button in currently playing playlist](documentation/images/watching_playlist_remove_sample.png "Remove button in currently playing playlist")
+
 ## Building
 
 To build an unsigned extension with or without hot module reloading (MHR) for testing during development run the one of
