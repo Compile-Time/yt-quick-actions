@@ -14,6 +14,12 @@ Concretely, YT Quick Actions offers the following features:
 
 Version changes can be found here: [CHANGELOG.md](./CHANGELOG.md)
 
+## Installation
+
+* Firefox
+    * From addons.mozilla.org: [AMO](https://addons.mozilla.org/en-US/firefox/addon/yt-quick-actions/)
+    * From release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
+
 ## Permissions
 
 The following permissions are required for the extension to work:
