@@ -60,7 +60,7 @@ The following permissions are required for the extension to work:
 
 ## Building
 
-To build an unsigned extension with or without hot module reloading (MHR) for testing during development run the one of
+To build an unsigned extension with or without hot module reloading (HMR) for testing during development run the one of
 the `start` scripts.
 
 ```sh
