@@ -1,3 +1,5 @@
+import {Tags} from "../html-element-processing/element-data";
+
 export abstract class NavigationFilter {
     apply(htmlCollection: HTMLCollection): HTMLElement[] {
         const filteredElements: HTMLElement[] = [];
@@ -108,5 +110,23 @@ export class IdAndTextContentNavigationFilter extends NavigationFilter {
         return this.id === other.id
             && this.textContent === other.textContent
             && this.tagName === other.tagName;
+    }
+}
+
+export class SvgDrawPathNavigationFilter extends NavigationFilter {
+    private static readonly DRAW_PATH = 'd';
+
+    constructor(private readonly drawPath: string) {
+        super();
+        this.drawPath = drawPath;
+    }
+
+    protected applyCondition(element: HTMLElement): boolean {
+        return element.tagName === Tags.PATH.toUpperCase()
+            && element.getAttribute(SvgDrawPathNavigationFilter.DRAW_PATH) === this.drawPath;
+    }
+
+    equals(other: SvgDrawPathNavigationFilter): boolean {
+        return this.drawPath === other.drawPath;
     }
 }

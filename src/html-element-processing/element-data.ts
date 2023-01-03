@@ -2,6 +2,7 @@ export enum Tags {
     A = 'a',
     BUTTON = 'button',
     DIV = 'div',
+    PATH = 'path',
     SPAN = 'span',
     TP_YT_PAPER_DIALOG = 'tp-yt-paper-dialog',
     TP_YT_PAPER_LISTBOX = 'tp-yt-paper-listbox',
