@@ -33,8 +33,7 @@ export class NavigationFiltersToProcessQueue {
 
     areAllFiltersProcessed(): boolean {
         return this.filtersToProcess
-            .filter(filterProcessed => filterProcessed.isProcessed())
-            .length === this.filtersToProcess.length;
+            .every(filterProcessed => filterProcessed.isProcessed() === true)
     }
 
     cloneWithoutProcessed(): NavigationFiltersToProcessQueue {
