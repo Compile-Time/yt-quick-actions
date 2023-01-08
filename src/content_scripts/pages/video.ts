@@ -8,11 +8,12 @@ import {
 } from "../../html-navigation/navigation-filter";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
-import {OneshotObserver} from "../../data/oneshot-observer";
-import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
+import {MutationElementExistsWatcher} from "../../html-element-processing/mutation-element-exists-watcher";
 import {LogProvider} from "../../logging/log-provider";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
+import {OneshotObserverId} from "../../enums/oneshot-observer-id";
+import {OneshotObserver} from "../../data/oneshot-observer";
+import {TimeoutElementExistsWatcher} from "../../html-element-processing/timeout-element-exists-watcher";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
@@ -171,8 +172,8 @@ function getMoreOptionsButton(): HTMLElement {
 
 export function runVideoScriptIfTargetElementExists(): void {
     logger.debug('Watch for the more options button under a video');
-    ElementExistsWatcher.build()
-        .queryFn(getMoreOptionsButton)
+    MutationElementExistsWatcher.build()
+        .queryFn(() => ({moreOptions: getMoreOptionsButton()}))
         .observeFn(observer =>
             contentScriptObserversManager.addBackgroundObserver(observer)
                 .observe(document.body, {
@@ -180,11 +181,12 @@ export function runVideoScriptIfTargetElementExists(): void {
                     subtree: true
                 })
         )
-        .run()
-        .then(() => {
-            logger.debug('More options button was found!');
+        .start()
+        .then(elementWatcherResult => {
+            logger.debug(elementWatcherResult);
             const moreOptionsButton = getMoreOptionsButton();
             if (moreOptionsButton) {
+                logger.debug('More options button was found!');
                 initContentScript(moreOptionsButton);
             } else {
                 logger.error('Could not find more options button under video');

@@ -9,7 +9,7 @@ import {QaButtonInContainer, QaHtmlElements} from "../../html-element-processing
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
+import {MutationElementExistsWatcher} from "../../html-element-processing/mutation-element-exists-watcher";
 import {LogProvider} from "../../logging/log-provider";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
 
@@ -101,14 +101,15 @@ function initContentScript(homePageVideos: HTMLElement[]): void {
 
 export function runHomePageScriptIfTargetElementExists(): void {
     logger.debug('Watch for first home page video grid row');
-    ElementExistsWatcher.build()
-        .queryFn(() =>
-            HtmlTreeNavigator.startFrom(document.body)
+    MutationElementExistsWatcher.build()
+        .queryFn(() => {
+            const ytdRichGridRow = HtmlTreeNavigator.startFrom(document.body)
                 .filter(new TagNavigationFilter(Tags.YTD_APP))
                 .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
                 .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
                 .findFirst(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW))
-        )
+            return {ytdRichGridRow: ytdRichGridRow};
+        })
         .observeFn(observer =>
             contentScriptObserversManager.addBackgroundObserver(observer)
                 .observe(document.body, {
@@ -116,16 +117,16 @@ export function runHomePageScriptIfTargetElementExists(): void {
                     subtree: true
                 })
         )
-        .run()
+        .start()
         .then(() => {
             logger.debug('First video grid row was found!');
-            const homePageVideoGridRows = HtmlTreeNavigator.startFrom(document.body)
+            const ytdRichGridRows = HtmlTreeNavigator.startFrom(document.body)
                 .filter(new TagNavigationFilter(Tags.YTD_APP))
                 .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
                 .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
                 .findAll(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW));
-            if (homePageVideoGridRows.length > 0) {
-                initContentScript(homePageVideoGridRows);
+            if (ytdRichGridRows.length > 0) {
+                initContentScript(ytdRichGridRows);
             } else {
                 logger.error('Could not find home page video grid rows');
             }

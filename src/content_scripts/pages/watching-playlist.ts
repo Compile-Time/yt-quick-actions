@@ -5,7 +5,7 @@ import {AttributeNames, Ids, Tags, TextContent} from "../../html-element-process
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {ElementExistsWatcher} from "../../html-element-processing/element-exists-watcher";
+import {MutationElementExistsWatcher} from "../../html-element-processing/mutation-element-exists-watcher";
 import {LogProvider} from "../../logging/log-provider";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
 
@@ -73,9 +73,13 @@ function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void
 
 export function runWatchingPlaylistScriptIfTargetElementExists(): void {
     logger.debug('Watch for first playlist item under or next to a video');
-    ElementExistsWatcher.build()
-        .queryFn(() => HtmlTreeNavigator.startFrom(document.body)
-            .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+    MutationElementExistsWatcher.build()
+        .queryFn(() => {
+                const playlistItems = HtmlTreeNavigator.startFrom(document.body)
+                    .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+
+                return {playlistItems: playlistItems};
+            }
         )
         .observeFn(observer =>
             contentScriptObserversManager.addBackgroundObserver(observer)
@@ -84,7 +88,7 @@ export function runWatchingPlaylistScriptIfTargetElementExists(): void {
                     subtree: true
                 })
         )
-        .run()
+        .start()
         .then(() => {
             logger.debug('First playlist item was found!');
             const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
