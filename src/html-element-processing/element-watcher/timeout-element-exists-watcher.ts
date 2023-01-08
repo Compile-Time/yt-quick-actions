@@ -28,9 +28,7 @@ export class TimeoutElementExistsWatcher extends ElementWatcher<TimeoutElementEx
             }
 
             const elementQueryResult: ElementWatcherResult = this.elementQueryFn();
-            console.log('[yt-values', Object.values(elementQueryResult).every(element => !!element));
             if (Object.values(elementQueryResult).every(element => !!element)) {
-                console.log('[yt-data', elementQueryResult);
                 return resolve(elementQueryResult);
             } else {
                 return reject(new Error('Could not find element for provided query'))
