@@ -9,7 +9,7 @@ export class HtmlParentNavigator {
     }
 
     find(filter: NavigationFilter): HTMLElement {
-        return this.navigateToParent(this.element, filter);
+        return (!this.element) ? null : this.navigateToParent(this.element, filter);
     }
 
     private navigateToParent(element: HTMLElement, filter: NavigationFilter): HTMLElement {
