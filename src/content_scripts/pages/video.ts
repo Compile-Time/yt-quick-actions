@@ -7,12 +7,16 @@ import {
 } from "../../html-navigation/navigation-filter";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
-import {MutationElementExistsWatcher} from "../../html-element-processing/mutation-element-exists-watcher";
+import {
+    MutationElementExistsWatcher
+} from "../../html-element-processing/element-watcher/mutation-element-exists-watcher";
 import {LogProvider} from "../../logging/log-provider";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 import {OneshotObserver} from "../../data/oneshot-observer";
-import {TimeoutElementExistsWatcher} from "../../html-element-processing/timeout-element-exists-watcher";
+import {
+    TimeoutElementExistsWatcher
+} from "../../html-element-processing/element-watcher/timeout-element-exists-watcher";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);

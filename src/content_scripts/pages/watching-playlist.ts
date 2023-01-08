@@ -9,7 +9,9 @@ import {AttributeNames, Ids, SVG_DRAW_PATH, Tags} from "../../html-element-proce
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {MutationElementExistsWatcher} from "../../html-element-processing/mutation-element-exists-watcher";
+import {
+    MutationElementExistsWatcher
+} from "../../html-element-processing/element-watcher/mutation-element-exists-watcher";
 import {LogProvider} from "../../logging/log-provider";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
 

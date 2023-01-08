@@ -1,5 +1,5 @@
 import {ElementWatcher} from "./element-watcher";
-import {PromiseUtil} from "../util/promise-util";
+import {PromiseUtil} from "../../util/promise-util";
 import {ElementWatcherResult} from "./element-watcher-result";
 
 export class TimeoutElementExistsWatcher extends ElementWatcher<TimeoutElementExistsWatcher> {

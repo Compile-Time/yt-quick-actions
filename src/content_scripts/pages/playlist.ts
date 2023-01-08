@@ -9,7 +9,9 @@ import {
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {MutationElementExistsWatcher} from "../../html-element-processing/mutation-element-exists-watcher";
+import {
+    MutationElementExistsWatcher
+} from "../../html-element-processing/element-watcher/mutation-element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
 import {LogProvider} from "../../logging/log-provider";
 
