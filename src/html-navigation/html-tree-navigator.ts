@@ -40,6 +40,10 @@ export class HtmlTreeNavigator {
      * @returns {HTMLElement[]} - If any of the given filters do not match, an empty array is returned
      */
     findAll(targetElementFilter: NavigationFilter): HTMLElement[] {
+        if (!this.element) {
+            return [];
+        }
+
         this.filter(targetElementFilter);
         return this.navigateTree(this.initialFilterQueue, this.element.children);
     }
