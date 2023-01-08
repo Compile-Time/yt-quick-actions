@@ -1,5 +1,6 @@
 import {NavigationFilter} from "./navigation-filter";
 import {NavigationFiltersToProcessQueue} from "./navigation-filters-to-process-queue";
+import {HtmlParentNavigator} from "./html-parent-navigator";
 
 /**
  * Builder-like class for HTML tree navigation.
@@ -70,6 +71,11 @@ export class HtmlTreeNavigator {
     findLast(filter: NavigationFilter): HTMLElement {
         const foundElements = this.findAll(filter);
         return foundElements.length > 0 ? foundElements[foundElements.length - 1] : null;
+    }
+
+    findFirstToParentNavigator(filter: NavigationFilter): HtmlParentNavigator {
+        const foundElement = this.findFirst(filter);
+        return HtmlParentNavigator.startFrom(foundElement);
     }
 
     private navigateTree(filterQueue: NavigationFiltersToProcessQueue, htmlCollection: HTMLCollection): HTMLElement[] {
