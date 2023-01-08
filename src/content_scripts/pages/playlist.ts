@@ -1,10 +1,10 @@
-import {Ids, Tags, TextContent} from "../../html-element-processing/element-data";
+import {Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {
     IdNavigationFilter,
-    TagNavigationFilter,
-    TextContentContainsNavigationFilter
+    SvgDrawPathNavigationFilter,
+    TagNavigationFilter
 } from "../../html-navigation/navigation-filter";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
@@ -23,10 +23,13 @@ If we do not wait for the popup content to update, the first entry in the playli
 const menuUpdatedObserver = new MutationObserver((mutations, observer) => {
     mutations.forEach((mutation) => {
         if (mutation.oldValue === '') {
-            const ytFormattedText = HtmlTreeNavigator.startFrom(mutation.target as HTMLElement)
-                .findFirst(new TextContentContainsNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_LOWERCASE));
-            if (ytFormattedText) {
-                ytFormattedText.click();
+            const tpYtPaperListBox: HTMLElement = mutation.target as HTMLElement;
+            const removeMenuEntry = HtmlTreeNavigator.startFrom(tpYtPaperListBox)
+                .findFirstToParentNavigator(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
+                .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM));
+
+            if (removeMenuEntry) {
+                removeMenuEntry.click();
             }
             observer.disconnect();
         }
@@ -76,7 +79,7 @@ function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
         }
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
-            OneshotObserverId.MENU_UPDATED_OBSERVER,
+            OneshotObserverId.PLAYLIST_MENU_UPDATED_OBSERVER,
             menuUpdatedObserver
         )).observe(popupMenu, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
@@ -96,8 +99,8 @@ function initContentScript(menuButtons: HTMLElement[]): void {
     // Remove all previously created remove buttons.
     createdElements.forEach(element => element.remove());
 
-    // This causes the YouTube icon button menu HTML to be loaded, otherwise we can not find it by
-    // navigating the HTML tree.
+    // Initialize the playlist options menu. If this is not done, then the first click on any Quick Actions
+    // element will only open the menu.
     const firstMenuButton = menuButtons[0] as HTMLButtonElement;
     firstMenuButton.click();
     firstMenuButton.click();

@@ -1,10 +1,10 @@
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {
     IdNavigationFilter,
-    TagNavigationFilter,
-    TextContentNavigationFilter
+    SvgDrawPathNavigationFilter,
+    TagNavigationFilter
 } from "../../html-navigation/navigation-filter";
-import {Ids, Tags, TextContent} from "../../html-element-processing/element-data";
+import {Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {QaButtonInContainer, QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
@@ -20,19 +20,41 @@ Observer to wait for the "Save to Watch later" option to update for the relevant
  */
 const saveToWatchLaterPopupEntryReadyObserver = new MutationObserver((mutations, observer) => {
     for (const mutation of mutations) {
-        const target = mutation.target;
-        if (target.nodeName.toLowerCase() === Tags.YTD_MENU_SERVICE_ITEM_RENDERER
+        const ytdMenuServiceItemRenderer: HTMLElement = mutation.target as HTMLElement;
+        if (ytdMenuServiceItemRenderer.nodeName.toLowerCase() === Tags.YTD_MENU_SERVICE_ITEM_RENDERER
             && mutation.oldValue === '') {
-            const watchLaterButton = HtmlTreeNavigator.startFrom(document.body)
+            const watchLaterMenuEntry = HtmlTreeNavigator.startFrom(document.body)
+                .filter(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
                 .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
-                .findFirst(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.SAVE_TO_WATCH_LATER));
+                .filter(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+                .filter(new TagNavigationFilter(Tags.YT_ICON))
+                .findFirstToParentNavigator(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.WATCH_LATER))
+                .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM));
 
-            if (watchLaterButton) {
-                watchLaterButton.click();
+            if (watchLaterMenuEntry) {
+                watchLaterMenuEntry.click();
             } else {
                 logger.error('Could not find watch later button to click');
             }
 
+            observer.disconnect();
+        }
+    }
+});
+
+/*
+  Click the menu button on the first home page video to initialize the popup menu. If this is not done, then the
+   first press on a Quick Action element will only open the popup.
+ */
+const firstHomePageVideoMenuClickObserver = new MutationObserver((mutations, observer) => {
+    if (mutations.length > 0) {
+        const homePageVideoMoreOptionsButton = mutations[0].target as HTMLElement;
+        const ytdRichGridRow = HtmlParentNavigator.startFrom(homePageVideoMoreOptionsButton)
+            .find(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW));
+
+        if (homePageVideoMoreOptionsButton.nodeName.toLowerCase() === Tags.BUTTON && !!ytdRichGridRow) {
+            homePageVideoMoreOptionsButton.click();
+            homePageVideoMoreOptionsButton.click();
             observer.disconnect();
         }
     }
@@ -45,12 +67,12 @@ Home page videos are lazily loaded on scrolling, therefore, we need to observe t
  */
 const homePageVideosLoadingObserver = new MutationObserver(mutations => {
     for (const mutation of mutations) {
-        const target = mutation.target as HTMLElement;
-        const ytdRichGridRow = HtmlParentNavigator.startFrom(target)
+        const homePageVideoMoreOptionsButton = mutation.target as HTMLElement;
+        const ytdRichGridRow = HtmlParentNavigator.startFrom(homePageVideoMoreOptionsButton)
             .find(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW));
 
-        if (target.nodeName.toLowerCase() === Tags.BUTTON && !!ytdRichGridRow) {
-            const menuButton = target as HTMLButtonElement;
+        if (homePageVideoMoreOptionsButton.nodeName.toLowerCase() === Tags.BUTTON && !!ytdRichGridRow) {
+            const menuButton = homePageVideoMoreOptionsButton as HTMLButtonElement;
             const divDismissible = HtmlParentNavigator.startFrom(menuButton)
                 .find(new IdNavigationFilter(Tags.DIV, Ids.DISMISSIBLE));
             // Set position relative so when 'position: absolute' is used in our elements the position of
@@ -89,12 +111,19 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): QaButtonInContaine
     return watchLaterButton;
 }
 
-function initContentScript(homePageVideos: HTMLElement[]): void {
-    const firstHomePageVideo = homePageVideos[0];
-    const divContents = firstHomePageVideo.parentElement;
+function initContentScript(ytdRichGridRows: HTMLElement[]): void {
+    const firstYtdRichGridRow = ytdRichGridRows[0];
+    const divForYtdRichGridRows = firstYtdRichGridRow.parentElement;
+
+    contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
+        OneshotObserverId.HOME_PAGE_MENU_UPDATED_OBSERVER,
+        firstHomePageVideoMenuClickObserver
+    )).observe(divForYtdRichGridRows, {
+        subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
+    })
 
     contentScriptObserversManager.addBackgroundObserver(homePageVideosLoadingObserver)
-        .observe(divContents, {
+        .observe(divForYtdRichGridRows, {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
         })
 }

@@ -1,7 +1,11 @@
 import {QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
-import {IdNavigationFilter, TextContentNavigationFilter} from "../../html-navigation/navigation-filter";
-import {AttributeNames, Ids, Tags, TextContent} from "../../html-element-processing/element-data";
+import {
+    IdNavigationFilter,
+    SvgDrawPathNavigationFilter,
+    TagNavigationFilter
+} from "../../html-navigation/navigation-filter";
+import {AttributeNames, Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
@@ -16,10 +20,14 @@ Wait for the menu popup to update so the correct video is removed.
 */
 const removePopupEntryReadyObserver = new MutationObserver((mutations, observer) => {
     for (const mutation of mutations) {
-        const removeOption: HTMLElement = HtmlTreeNavigator.startFrom(mutation.target as HTMLElement)
-            .findFirst(new TextContentNavigationFilter(Tags.YT_FORMATTED_STRING, TextContent.REMOVE_FROM_PLAYLIST));
-        if (!!removeOption && mutation.oldValue === '') {
-            removeOption.click();
+        const ytdMenuServiceItemRenderer = mutation.target as HTMLElement;
+        const removeMenuEntry: HTMLElement = HtmlTreeNavigator.startFrom(ytdMenuServiceItemRenderer)
+            .filter(new TagNavigationFilter(Tags.YT_ICON))
+            .findFirstToParentNavigator(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
+            .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM));
+
+        if (!!removeMenuEntry && mutation.oldValue === '') {
+            removeMenuEntry.click();
             observer.disconnect();
         }
     }
@@ -55,18 +63,22 @@ function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void
         .map(element => HtmlTreeNavigator.startFrom(element)
             .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
         );
+
+    // Initialize the menu popup to prevent the first click on any Quick Action element to only show the popup.
+    const firstYtMenuIconButtons = ytMenuIconButtons[0];
+    firstYtMenuIconButtons.click();
+    firstYtMenuIconButtons.click();
+
     for (const ytMenuIconButton of ytMenuIconButtons) {
         const removeButton = setupRemoveButton(ytMenuIconButton);
 
         const playlistItem = HtmlParentNavigator.startFrom(ytMenuIconButton)
             .find(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
-        const divMenu = HtmlParentNavigator.startFrom(ytMenuIconButton)
-            .find(new IdNavigationFilter(Tags.DIV, Ids.MENU));
 
         const existingRemoveButton = HtmlTreeNavigator.startFrom(playlistItem)
             .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON));
         if (!existingRemoveButton) {
-            playlistItem.insertBefore(removeButton, divMenu);
+            playlistItem.append(removeButton);
         }
     }
 }
