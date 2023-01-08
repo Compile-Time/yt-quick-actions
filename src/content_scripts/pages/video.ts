@@ -55,7 +55,6 @@ const saveToFullScreenPopupReadyObserver = new MutationObserver((mutations, obse
 Wait for the more options popup to be ready and then delegate to the normal "Save to" click process.
  */
 const saveToHalfScreenObserver = new MutationObserver((mutations, observer) => {
-    logger.debug('half-screen mutations', mutations);
     for (const mutation of mutations) {
         const ytdMenuServiceItemRenderer = mutation.target as HTMLElement;
 
@@ -66,6 +65,7 @@ const saveToHalfScreenObserver = new MutationObserver((mutations, observer) => {
                     .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM));
                 return {popupTrigger: popupTrigger};
             })
+            // Delay the start to prevent an accidental click of other actions, such as "Transcript" or "Clip".
             .startDelayed(200)
             .then(elementWatcherResult => {
                 const popupTrigger = elementWatcherResult.popupTrigger;
@@ -75,11 +75,9 @@ const saveToHalfScreenObserver = new MutationObserver((mutations, observer) => {
                     clickSaveToWatchLaterOption(popupTrigger);
                     observer.disconnect();
                 }
-            })
-            .catch(error => {
-                logger.error(error);
-                observer.disconnect();
-            })
+            });
+        // Logging the "not found" code path causes to many false positives because the "found" code path might
+        // resolve to an element. This also applies to the mutation observer solutions in other content scripts as well.
     }
 });
 
