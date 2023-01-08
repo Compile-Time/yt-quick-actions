@@ -26,7 +26,7 @@ const removePopupEntryReadyObserver = new MutationObserver((mutations, observer)
 });
 
 function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
-    const button = QaHtmlElements.removeButton();
+    const button = QaHtmlElements.removeButtonInWatchingPlaylist();
     button.onclick = () => {
         element.click();
         const popupMenu = HtmlTreeNavigator.startFrom(document.body)

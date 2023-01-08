@@ -15,6 +15,14 @@ export class QaHtmlElements {
         return button;
     }
 
+    static removeButtonInWatchingPlaylist(): HTMLButtonElement {
+        const button = document.createElement(Tags.BUTTON);
+        button.id = Ids.QA_REMOVE_BUTTON;
+        button.innerHTML = `<i class="fa-solid fa-trash fa-lg"></i>`;
+        button.setAttribute('class', 'qa-btn qa-watching-playlist-remove');
+        return button;
+    }
+
     static watchLaterUnderVideoButton(): HTMLButtonElement {
         const button = document.createElement(Tags.BUTTON);
         button.id = Ids.QA_VIDEO_WATCH_LATER;
