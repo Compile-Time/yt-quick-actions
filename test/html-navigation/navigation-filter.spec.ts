@@ -1,10 +1,7 @@
 import {
-    IdAndTextContentNavigationFilter,
     IdNavigationFilter,
     SvgDrawPathNavigationFilter,
-    TagNavigationFilter,
-    TextContentContainsNavigationFilter,
-    TextContentNavigationFilter
+    TagNavigationFilter
 } from "../../src/html-navigation/navigation-filter";
 
 class FakeDocument {
@@ -112,68 +109,6 @@ describe('NavigationFilter', () => {
             const result = filter.applySingle(htmlElement);
             expect(result).toEqual(htmlElement);
         })
-    });
-
-    describe('TextContentNavigationFilter', () => {
-        it('should filter HTMLCollection by tag and text content', () => {
-            const filter = new TextContentNavigationFilter('span', 'span');
-            const htmlCollection = fakeDocument.getHtmlCollection();
-
-            const result: Element[] = filter.apply(htmlCollection);
-            expect(result.length).toEqual(1);
-            expect(result[0]).toEqual(fakeDocument.getElementById('span'));
-        })
-
-        it('should filter single HTMLElement', () => {
-            const filter = new TextContentNavigationFilter('span', 'span');
-            const htmlElement: HTMLElement = document.createElement('span');
-            htmlElement.textContent = 'span';
-
-            const result = filter.applySingle(htmlElement);
-            expect(result).toEqual(htmlElement);
-        })
-    });
-
-    describe('IdAndTextContentNavigationFilter', () => {
-        it('should filter HTMLCollection by tag and text content', () => {
-            const filter = new IdAndTextContentNavigationFilter('span', 'span2', 'span2');
-            const htmlCollection = fakeDocument.getHtmlCollection();
-
-            const result: Element[] = filter.apply(htmlCollection);
-            expect(result.length).toEqual(1);
-            expect(result[0]).toEqual(fakeDocument.getElementById('span2'));
-        });
-
-        it('should filter single HTMLElement', () => {
-            const filter = new IdAndTextContentNavigationFilter('span', 'span', 'span');
-            const htmlElement: HTMLElement = document.createElement('span');
-            htmlElement.id = 'span';
-            htmlElement.textContent = 'span';
-
-            const result = filter.applySingle(htmlElement);
-            expect(result).toEqual(htmlElement);
-        });
-    });
-
-    describe('TextContentContainsNavigationFilter', () => {
-        it('should filter HTML collection by tag and text content with a contains condition', () => {
-            const filter = new TextContentContainsNavigationFilter('span', 'dup');
-            const htmlCollection = fakeDocument.getHtmlCollection();
-
-            const result: Element[] = filter.apply(htmlCollection);
-            expect(result.length).toEqual(1);
-            expect(result[0]).toEqual(fakeDocument.getElementById('span2dup'));
-        });
-
-        it('should filter single HTMLElement', () => {
-            const filter = new TextContentContainsNavigationFilter('span', 'dup');
-            const htmlElement: HTMLElement = document.createElement('span');
-            htmlElement.id = 'span';
-            htmlElement.textContent = 'span dup text';
-
-            const result = filter.applySingle(htmlElement);
-            expect(result).toEqual(htmlElement);
-        });
     });
 
     describe('SvgDrawPathNavigationFilter', () => {

@@ -22,6 +22,14 @@ export abstract class NavigationFilter {
         return JSON.stringify(this);
     }
 
+    protected lowercaseEquals(normalString: string, lowercaseString: string): boolean {
+        return normalString.toLowerCase() === lowercaseString;
+    }
+
+    protected lowercaseContains(normalString: string, lowercaseString: string) {
+        return normalString.toLowerCase().includes(lowercaseString);
+    }
+
     abstract equals(other: NavigationFilter): boolean;
 
     protected abstract applyCondition(element: HTMLElement): boolean;
@@ -32,11 +40,11 @@ export class IdNavigationFilter extends NavigationFilter {
     constructor(private readonly tagName: string,
                 private readonly id: string) {
         super();
-        this.tagName = tagName.toUpperCase();
     }
 
     applyCondition(element: HTMLElement): boolean {
-        return element.id === this.id && element.tagName === this.tagName;
+        return element.id === this.id
+            && this.lowercaseEquals(element.tagName, this.tagName);
     }
 
     equals(other: IdNavigationFilter): boolean {
@@ -49,67 +57,14 @@ export class IdNavigationFilter extends NavigationFilter {
 export class TagNavigationFilter extends NavigationFilter {
     constructor(private readonly tagName: string) {
         super();
-        this.tagName = tagName.toUpperCase();
     }
 
     applyCondition(element: HTMLElement): boolean {
-        return element.tagName === this.tagName;
+        return this.lowercaseEquals(element.tagName, this.tagName);
     }
 
     equals(other: TagNavigationFilter): boolean {
         return this.tagName === other.tagName;
-    }
-}
-
-export class TextContentNavigationFilter extends NavigationFilter {
-    constructor(protected readonly tagName: string,
-                protected readonly textContent: string) {
-        super();
-        this.tagName = tagName.toUpperCase();
-    }
-
-    applyCondition(element: HTMLElement): boolean {
-        return element.textContent === this.textContent && element.tagName === this.tagName;
-    }
-
-    equals(other: TextContentNavigationFilter): boolean {
-        return this.textContent === other.textContent
-            && this.tagName === other.tagName;
-    }
-}
-
-export class TextContentContainsNavigationFilter extends TextContentNavigationFilter {
-    constructor(protected readonly tagName: string,
-                protected readonly textContent: string) {
-        super(tagName, textContent);
-        this.tagName = tagName.toUpperCase();
-    }
-
-
-    applyCondition(element: HTMLElement): boolean {
-        return element.textContent.toLowerCase().includes(this.textContent.toLowerCase())
-            && element.tagName === this.tagName;
-    }
-}
-
-export class IdAndTextContentNavigationFilter extends NavigationFilter {
-    constructor(private readonly tagName: string,
-                private readonly id: string,
-                private readonly textContent: string) {
-        super();
-        this.tagName = tagName.toUpperCase();
-    }
-
-    applyCondition(element: HTMLElement): boolean {
-        return element.id === this.id
-            && element.textContent === this.textContent
-            && element.tagName === this.tagName;
-    }
-
-    equals(other: IdAndTextContentNavigationFilter): boolean {
-        return this.id === other.id
-            && this.textContent === other.textContent
-            && this.tagName === other.tagName;
     }
 }
 
@@ -118,11 +73,10 @@ export class SvgDrawPathNavigationFilter extends NavigationFilter {
 
     constructor(private readonly drawPath: string) {
         super();
-        this.drawPath = drawPath;
     }
 
     protected applyCondition(element: HTMLElement): boolean {
-        return element.tagName === Tags.PATH.toUpperCase()
+        return this.lowercaseEquals(element.tagName, Tags.PATH)
             && element.getAttribute(SvgDrawPathNavigationFilter.DRAW_PATH) === this.drawPath;
     }
 
