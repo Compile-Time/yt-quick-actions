@@ -1,5 +1,5 @@
 import {HtmlTreeNavigator} from "../../src/html-navigation/html-tree-navigator";
-import {IdNavigationFilter, TagNavigationFilter,} from "../../src/html-navigation/navigation-filter";
+import {IdNavigationFilter, TagNavigationFilter,} from "../../src/html-navigation/filter/navigation-filter";
 import {Tags} from "../../src/html-element-processing/element-data";
 
 describe('HtmlTreeNavigator', () => {

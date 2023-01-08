@@ -1,5 +1,5 @@
-import {NavigationFiltersToProcessQueue} from "../../src/html-navigation/navigation-filters-to-process-queue";
-import {TagNavigationFilter} from "../../src/html-navigation/navigation-filter";
+import {NavigationFiltersToProcessQueue} from "../../src/html-navigation/filter/navigation-filters-to-process-queue";
+import {TagNavigationFilter} from "../../src/html-navigation/filter/navigation-filter";
 import {Tags} from "../../src/html-element-processing/element-data";
 
 describe('NavigationFilterQueue', () => {

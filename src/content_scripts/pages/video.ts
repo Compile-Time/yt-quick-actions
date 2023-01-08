@@ -4,7 +4,7 @@ import {
     IdNavigationFilter,
     SvgDrawPathNavigationFilter,
     TagNavigationFilter
-} from "../../html-navigation/navigation-filter";
+} from "../../html-navigation/filter/navigation-filter";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {

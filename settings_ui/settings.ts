@@ -3,7 +3,7 @@ import {LogLevel, LogLevelMapper} from "../src/enums/log-level";
 import {SettingsData} from "../src/storage/settings-data";
 import {LogProvider} from "../src/logging/log-provider";
 import {HtmlTreeNavigator} from "../src/html-navigation/html-tree-navigator";
-import {IdNavigationFilter, TagNavigationFilter} from "../src/html-navigation/navigation-filter";
+import {IdNavigationFilter, TagNavigationFilter} from "../src/html-navigation/filter/navigation-filter";
 
 const settingsLogProvider = new LogProvider();
 const logger = settingsLogProvider.getLogger(LogProvider.SETTINGS_PAGE);

@@ -1,4 +1,4 @@
-import {NavigationFilter} from "./navigation-filter";
+import {NavigationFilter} from "./filter/navigation-filter";
 
 export class HtmlParentNavigator {
     private constructor(private element: HTMLElement) {

@@ -1,4 +1,4 @@
-import {Tags} from "../html-element-processing/element-data";
+import {Tags} from "../../html-element-processing/element-data";
 
 export abstract class NavigationFilter {
     apply(htmlCollection: HTMLCollection): HTMLElement[] {

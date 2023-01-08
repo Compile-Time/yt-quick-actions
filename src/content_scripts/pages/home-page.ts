@@ -3,7 +3,7 @@ import {
     IdNavigationFilter,
     SvgDrawPathNavigationFilter,
     TagNavigationFilter
-} from "../../html-navigation/navigation-filter";
+} from "../../html-navigation/filter/navigation-filter";
 import {Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {QaButtonInContainer, QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";

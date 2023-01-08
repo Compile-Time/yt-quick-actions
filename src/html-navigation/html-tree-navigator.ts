@@ -1,5 +1,5 @@
-import {NavigationFilter} from "./navigation-filter";
-import {NavigationFiltersToProcessQueue} from "./navigation-filters-to-process-queue";
+import {NavigationFilter} from "./filter/navigation-filter";
+import {NavigationFiltersToProcessQueue} from "./filter/navigation-filters-to-process-queue";
 import {HtmlParentNavigator} from "./html-parent-navigator";
 
 /**

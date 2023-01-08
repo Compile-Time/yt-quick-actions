@@ -4,7 +4,7 @@ import {
     IdNavigationFilter,
     SvgDrawPathNavigationFilter,
     TagNavigationFilter
-} from "../../html-navigation/navigation-filter";
+} from "../../html-navigation/filter/navigation-filter";
 import {AttributeNames, Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver} from "../../data/oneshot-observer";

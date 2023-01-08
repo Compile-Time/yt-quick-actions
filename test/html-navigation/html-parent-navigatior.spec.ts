@@ -1,5 +1,5 @@
 import {HtmlParentNavigator} from "../../src/html-navigation/html-parent-navigator";
-import {TagNavigationFilter} from "../../src/html-navigation/navigation-filter";
+import {TagNavigationFilter} from "../../src/html-navigation/filter/navigation-filter";
 
 describe('HtmlParentNavigator', () => {
     it('should return the parent element filtered for', () => {

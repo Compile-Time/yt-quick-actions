@@ -1,5 +1,5 @@
-import {NavigationFilterToProcess} from "../../src/html-navigation/navigation-filter-to-process";
-import {TagNavigationFilter} from "../../src/html-navigation/navigation-filter";
+import {NavigationFilterToProcess} from "../../src/html-navigation/filter/navigation-filter-to-process";
+import {TagNavigationFilter} from "../../src/html-navigation/filter/navigation-filter";
 import {Tags} from "../../src/html-element-processing/element-data";
 
 describe('NavigationFilterToProcess', () => {
