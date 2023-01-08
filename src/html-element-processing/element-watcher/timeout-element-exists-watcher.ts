@@ -17,6 +17,10 @@ export class TimeoutElementExistsWatcher extends ElementWatcher<TimeoutElementEx
         return this;
     }
 
+    startDelayed(delayInMilliseconds: number): Promise<ElementWatcherResult> {
+        return PromiseUtil.delay(delayInMilliseconds, () => this.start());
+    }
+
     start(): Promise<ElementWatcherResult> {
         return PromiseUtil.retry<ElementWatcherResult>(() => this.runQuery(), 10, 100);
     }

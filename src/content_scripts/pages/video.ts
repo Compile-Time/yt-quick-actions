@@ -66,7 +66,7 @@ const saveToHalfScreenObserver = new MutationObserver((mutations, observer) => {
                     .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM));
                 return {popupTrigger: popupTrigger};
             })
-            .start()
+            .startDelayed(200)
             .then(elementWatcherResult => {
                 const popupTrigger = elementWatcherResult.popupTrigger;
                 if (mutation.oldValue === ''
