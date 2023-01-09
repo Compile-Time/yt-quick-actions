@@ -27,8 +27,10 @@ const menuUpdatedObserver = new MutationObserver((mutations, observer) => {
         if (mutation.oldValue === '') {
             const tpYtPaperListBox: HTMLElement = mutation.target as HTMLElement;
             const removeMenuEntry = HtmlTreeNavigator.startFrom(tpYtPaperListBox)
-                .findFirstToParentNavigator(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
-                .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM));
+                .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
+                .intoParentNavigator()
+                .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+                .consume();
 
             if (removeMenuEntry) {
                 removeMenuEntry.click();
@@ -45,7 +47,8 @@ Register an observer to add the remove button to new playlist items loaded after
 const playlistLoadingNewEntriesObserver = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
         const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(mutation.target as HTMLElement)
-            .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER));
+            .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
+            .consume();
 
         if (!ytdPlaylistVideoRenderer) {
             logger.error('Could not find ytd-playlist-video-renderer from mutation target');
@@ -53,7 +56,8 @@ const playlistLoadingNewEntriesObserver = new MutationObserver((mutations) => {
         }
 
         const ytIconButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
-            .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
+            .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+            .consume();
 
         if (!ytIconButton) {
             logger.error('Could not find yt-icon-button (more options) in ytd-playlist-video-renderer');
@@ -73,7 +77,8 @@ function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
     removeButton.onclick = () => {
         menuButton.click();
         const popupMenu = HtmlTreeNavigator.startFrom(document.body)
-            .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS));
+            .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
+            .consume();
 
         if (!popupMenu) {
             logger.error('Could not find popup menu');
@@ -109,12 +114,14 @@ function initContentScript(menuButtons: HTMLElement[]): void {
 
     for (const menuButton of menuButtons) {
         const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(menuButton)
-            .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER));
+            .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
+            .consume();
         appendRemoveButton(menuButton, ytdPlaylistVideoRenderer);
     }
 
     const ytdPlaylistVideoListRenderer = HtmlParentNavigator.startFrom(firstMenuButton)
-        .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER));
+        .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
+        .consume();
 
     if (!ytdPlaylistVideoListRenderer) {
         logger.error('Could not find ytd-playlist-video-list-renderer to setup quick actions for future' +
@@ -135,6 +142,7 @@ export function runPlaylistScriptIfTargetElementExists(): void {
             const ytIconButton = HtmlTreeNavigator.startFrom(document.body)
                 .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
                 .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+                .consume();
             return {ytIconButton: ytIconButton};
         })
         .observeFn(observer =>
@@ -149,11 +157,13 @@ export function runPlaylistScriptIfTargetElementExists(): void {
             logger.debug('First menu button was found!');
             const menuButtons: HTMLElement[] = HtmlTreeNavigator.startFrom(document.body)
                 .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
-                .findAll(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON));
+                .findAll(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+                .map(result => result.consume());
             if (menuButtons.length > 0) {
                 initContentScript(menuButtons);
             } else {
                 logger.error('Could not find menu buttons of playlist items');
             }
         })
+        .catch(err => logger.error(err));
 }

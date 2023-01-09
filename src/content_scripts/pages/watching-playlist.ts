@@ -25,8 +25,10 @@ const removePopupEntryReadyObserver = new MutationObserver((mutations, observer)
         const ytdMenuServiceItemRenderer = mutation.target as HTMLElement;
         const removeMenuEntry: HTMLElement = HtmlTreeNavigator.startFrom(ytdMenuServiceItemRenderer)
             .filter(new TagNavigationFilter(Tags.YT_ICON))
-            .findFirstToParentNavigator(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
-            .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM));
+            .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
+            .intoParentNavigator()
+            .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+            .consume();
 
         if (!!removeMenuEntry && mutation.oldValue === '') {
             removeMenuEntry.click();
@@ -40,7 +42,8 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
     button.onclick = () => {
         element.click();
         const popupMenu = HtmlTreeNavigator.startFrom(document.body)
-            .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS));
+            .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
+            .consume();
 
         if (!popupMenu) {
             logger.error('Could not find popup menu trigger');
@@ -64,6 +67,7 @@ function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void
     const ytMenuIconButtons = playlistPanelVideoRendererItems
         .map(element => HtmlTreeNavigator.startFrom(element)
             .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+            .consume()
         );
 
     // Initialize the menu popup to prevent the first click on any Quick Action element to only show the popup.
@@ -75,10 +79,12 @@ function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void
         const removeButton = setupRemoveButton(ytMenuIconButton);
 
         const playlistItem = HtmlParentNavigator.startFrom(ytMenuIconButton)
-            .find(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
+            .find(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+            .consume();
 
         const existingRemoveButton = HtmlTreeNavigator.startFrom(playlistItem)
-            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON));
+            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON))
+            .consume();
         if (!existingRemoveButton) {
             playlistItem.append(removeButton);
         }
@@ -91,6 +97,7 @@ export function runWatchingPlaylistScriptIfTargetElementExists(): void {
         .queryFn(() => {
                 const playlistItems = HtmlTreeNavigator.startFrom(document.body)
                     .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+                    .consume();
 
                 return {playlistItems: playlistItems};
             }
@@ -106,11 +113,13 @@ export function runWatchingPlaylistScriptIfTargetElementExists(): void {
         .then(() => {
             logger.debug('First playlist item was found!');
             const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
-                .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS));
+                .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+                .map(result => result.consume());
             if (playlistPanelVideoRendererItems) {
                 initContentScript(playlistPanelVideoRendererItems);
             } else {
                 logger.error('Could not find ytd-playlist-panel-video-renderer elements');
             }
         })
+        .catch(err => logger.error(err));
 }

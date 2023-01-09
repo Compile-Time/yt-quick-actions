@@ -30,8 +30,10 @@ const saveToWatchLaterPopupEntryReadyObserver = new MutationObserver((mutations,
                 .filter(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
                 .filter(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
                 .filter(new TagNavigationFilter(Tags.YT_ICON))
-                .findFirstToParentNavigator(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.WATCH_LATER))
-                .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM));
+                .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.WATCH_LATER))
+                .intoParentNavigator()
+                .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+                .consume();
 
             if (watchLaterMenuEntry) {
                 watchLaterMenuEntry.click();
@@ -76,13 +78,15 @@ const homePageVideosLoadingObserver = new MutationObserver(mutations => {
         if (homePageVideoMoreOptionsButton.nodeName.toLowerCase() === Tags.BUTTON && !!ytdRichGridRow) {
             const menuButton = homePageVideoMoreOptionsButton as HTMLButtonElement;
             const divDismissible = HtmlParentNavigator.startFrom(menuButton)
-                .find(new IdNavigationFilter(Tags.DIV, Ids.DISMISSIBLE));
+                .find(new IdNavigationFilter(Tags.DIV, Ids.DISMISSIBLE))
+                .consume();
             // Set position relative so when 'position: absolute' is used in our elements the position of
             // divDismissible is used as the position context.
             divDismissible.setAttribute('style', 'position: relative')
 
             const existingWatchLaterButton = HtmlTreeNavigator.startFrom(divDismissible)
-                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_HOME_WATCH_LATER));
+                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_HOME_WATCH_LATER))
+                .consume();
             if (!existingWatchLaterButton) {
                 divDismissible.append(setupWatchLaterButton(menuButton).completeHtmlElement);
             }
@@ -95,7 +99,8 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): QaButtonInContaine
     watchLaterButton.buttonElement.onclick = () => {
         videoMenuButton.click();
         const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-            .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER));
+            .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+            .consume();
 
         if (!popupContainer) {
             logger.error('Could not find popup container');
@@ -139,6 +144,7 @@ export function runHomePageScriptIfTargetElementExists(): void {
                 .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
                 .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
                 .findFirst(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW))
+                .consume();
             return {ytdRichGridRow: ytdRichGridRow};
         })
         .observeFn(observer =>
@@ -155,11 +161,13 @@ export function runHomePageScriptIfTargetElementExists(): void {
                 .filter(new TagNavigationFilter(Tags.YTD_APP))
                 .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
                 .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
-                .findAll(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW));
+                .findAll(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW))
+                .map(result => result.consume());
             if (ytdRichGridRows.length > 0) {
                 initContentScript(ytdRichGridRows);
             } else {
                 logger.error('Could not find home page video grid rows');
             }
-        });
+        })
+        .catch(err => logger.error(err));
 }

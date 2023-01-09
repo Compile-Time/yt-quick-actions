@@ -1,5 +1,5 @@
 import {QaHtmlElements} from "../../html-element-processing/qa-html-elements";
-import {Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
+import {AttributeNames, Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {
     IdNavigationFilter,
     SvgDrawPathNavigationFilter,
@@ -12,74 +12,10 @@ import {
 } from "../../html-element-processing/element-watcher/mutation-element-exists-watcher";
 import {LogProvider} from "../../logging/log-provider";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
-import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {OneshotObserver} from "../../data/oneshot-observer";
-import {
-    TimeoutElementExistsWatcher
-} from "../../html-element-processing/element-watcher/timeout-element-exists-watcher";
+import {MutationSummary} from "mutation-summary";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
-
-/*
-Wait for the "Save to" popup to be ready and then check the "Watch later" entry.
- */
-const saveToFullScreenPopupReadyObserver = new MutationObserver((mutations, observer) => {
-    const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-        .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER));
-
-    // It is assumed that the first entry of the playlist popup is the watch later playlist because YouTube places
-    // it at the first position. Sadly, there is no better way to determine the "Watch later" playlist.
-    const watchLaterMenuEntry = HtmlTreeNavigator.startFrom(popupContainer)
-        .filter(new IdNavigationFilter(Tags.DIV, Ids.PLAYLISTS))
-        .findFirst(new IdNavigationFilter(Tags.YT_FORMATTED_STRING, Ids.LABEL));
-
-    watchLaterMenuEntry.click();
-
-    const popupCloseButton = HtmlTreeNavigator.startFrom(popupContainer)
-        .filter(new TagNavigationFilter(Tags.TP_YT_PAPER_DIALOG))
-        .filter(new IdNavigationFilter(Tags.DIV, Ids.HEADER))
-        .filter(new TagNavigationFilter(Tags.YT_ICON_BUTTON))
-        .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.BUTTON));
-
-    if (popupCloseButton) {
-        popupCloseButton.click();
-    } else {
-        logger.error('Could not find popup close button');
-    }
-
-    observer.disconnect();
-});
-
-/*
-Wait for the more options popup to be ready and then delegate to the normal "Save to" click process.
- */
-const saveToHalfScreenObserver = new MutationObserver((mutations, observer) => {
-    for (const mutation of mutations) {
-        const ytdMenuServiceItemRenderer = mutation.target as HTMLElement;
-
-        TimeoutElementExistsWatcher.build()
-            .queryFn(() => {
-                const popupTrigger = HtmlTreeNavigator.startFrom(ytdMenuServiceItemRenderer)
-                    .findFirstToParentNavigator(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_SAVE))
-                    .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM));
-                return {popupTrigger: popupTrigger};
-            })
-            // Delay the start to prevent an accidental click of other actions, such as "Transcript" or "Clip".
-            .startDelayed(200)
-            .then(elementWatcherResult => {
-                const popupTrigger = elementWatcherResult.popupTrigger;
-                if (mutation.oldValue === ''
-                    && ytdMenuServiceItemRenderer.nodeName.toLowerCase() === Tags.YTD_MENU_SERVICE_ITEM_RENDERER
-                    && !!popupTrigger) {
-                    clickSaveToWatchLaterOption(popupTrigger);
-                    observer.disconnect();
-                }
-            });
-        // Logging the "not found" code path causes to many false positives because the "found" code path might
-        // resolve to an element. This also applies to the mutation observer solutions in other content scripts as well.
-    }
-});
 
 /**
  * Wait for the "Save to" popup to be ready and then check the "Watch later" entry.
@@ -88,18 +24,73 @@ const saveToHalfScreenObserver = new MutationObserver((mutations, observer) => {
  */
 function clickSaveToWatchLaterOption(popupTrigger: HTMLElement): void {
     const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-        .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER));
+        .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+        .consume();
 
     if (!popupContainer) {
         logger.error('Could not find popup container for full screen size');
         return;
     }
 
-    contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
-        OneshotObserverId.SAVE_TO_FULL_SCREEN_POPUP_READY,
-        saveToFullScreenPopupReadyObserver
-    )).observe(popupContainer, {
-        subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
+    const ms = new MutationSummary({
+        callback: summaries => {
+            logger.debug('popup summaries', summaries);
+            const popupCloseSvgPaths: HTMLElement[] = summaries[0].added
+                .filter(addedNode => addedNode.nodeName.toLowerCase() === 'path')
+                .map(pathNode => pathNode as HTMLElement)
+                .filter(pathElement => pathElement.getAttribute(AttributeNames.D) === SVG_DRAW_PATH.POPUP_CLOSE);
+
+            if (popupCloseSvgPaths.length > 0) {
+                // The "Save To" popup is rendered for the first time -> The close button SVG is rendered in at some
+                // point.
+                ms.disconnect();
+
+                const closePopupButton = HtmlParentNavigator.startFrom(popupCloseSvgPaths[0])
+                    .find(new IdNavigationFilter(Tags.BUTTON, Ids.BUTTON))
+                    .consume();
+                const watchLaterCheckboxEntry = HtmlParentNavigator.startFrom(closePopupButton)
+                    .find(new TagNavigationFilter(Tags.YTD_ADD_TO_PLAYLIST_RENDERER))
+                    .intoTreeNavigator()
+                    .filter(new IdNavigationFilter(Tags.DIV, Ids.PLAYLISTS))
+                    .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_ADD_TO_OPTION_RENDERER))
+                    .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_CHECKBOX, Ids.CHECKBOX))
+                    .consume();
+
+                watchLaterCheckboxEntry.click();
+                closePopupButton.click();
+            } else if (summaries[1].removed.length > 0) {
+                // The "Save To" popup was already opened -> 'aria-hidden' attribute should be removed from the
+                // popup itself.
+                summaries[1].removed
+                    .map(tpYtPaperDialog => tpYtPaperDialog as HTMLElement)
+                    .filter(
+                        removedFromElement => !!HtmlTreeNavigator.startFrom(removedFromElement)
+                            .findFirst(new TagNavigationFilter(Tags.YTD_PLAYLIST_ADD_TO_OPTION_RENDERER))
+                            .consume()
+                    )
+                    .forEach(tpYtPaperDialog => {
+                        ms.disconnect();
+
+                        const watchLaterCheckboxEntry = HtmlTreeNavigator.startFrom(tpYtPaperDialog)
+                            .filter(new IdNavigationFilter(Tags.DIV, Ids.PLAYLISTS))
+                            .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_ADD_TO_OPTION_RENDERER))
+                            .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_CHECKBOX, Ids.CHECKBOX))
+                            .consume();
+                        watchLaterCheckboxEntry.click()
+
+                        const closePopupButton = HtmlTreeNavigator.startFrom(tpYtPaperDialog)
+                            .filter(new IdNavigationFilter(Tags.DIV, Ids.HEADER))
+                            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.BUTTON))
+                            .consume();
+                        closePopupButton.click();
+                    });
+            }
+        },
+        rootNode: popupContainer,
+        queries: [
+            {all: true},
+            {attribute: 'aria-hidden'}
+        ]
     });
 
     popupTrigger.click();
@@ -118,17 +109,53 @@ function clickSaveToWatchLaterOption(popupTrigger: HTMLElement): void {
 function clickSaveToWatchLaterOptionForHalfScreenSize(moreOptionsButton: HTMLElement): void {
     const popupContainer = HtmlTreeNavigator.startFrom(document.body)
         .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+        .consume();
 
     if (!popupContainer) {
         logger.error('Could not find popup container for half screen size');
         return;
     }
 
-    contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
-        OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
-        saveToHalfScreenObserver
-    )).observe(popupContainer, {
-        subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
+    const ms = new MutationSummary({
+        callback: summaries => {
+            const saveSvgPaths: HTMLElement[] = summaries[0].added
+                .filter(addedNode => addedNode.nodeName.toLowerCase() === 'path')
+                .map(pathNode => pathNode as HTMLElement)
+                .filter(pathElement => pathElement.getAttribute(AttributeNames.D) === SVG_DRAW_PATH.VIDEO_SAVE);
+
+            if (saveSvgPaths.length > 0) {
+                // The "More Options" popup is rendered for the first time -> SVG is loaded in at some point.
+                ms.disconnect();
+
+                const saveMenuEntry = HtmlParentNavigator.startFrom(saveSvgPaths[0])
+                    .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+                    .consume();
+                logger.debug('click from svg');
+                clickSaveToWatchLaterOption(saveMenuEntry);
+            } else if (summaries[1].removed.length > 0) {
+                // The "More Options" popup was already opened -> 'hidden' attribute should be removed from entries
+                // that will be displayed.
+                summaries[1].removed
+                    .map(ytdMenuServiceItemRenderer => ytdMenuServiceItemRenderer as HTMLElement)
+                    .filter(
+                        removedFromElement => !!HtmlTreeNavigator.startFrom(removedFromElement)
+                            .filter(new TagNavigationFilter(Tags.YT_ICON))
+                            .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_SAVE))
+                            .consume()
+                    )
+                    .forEach(ytdMenuServiceItemRenderer => {
+                        ms.disconnect();
+
+                        logger.debug('click from attribute');
+                        clickSaveToWatchLaterOption(ytdMenuServiceItemRenderer);
+                    });
+            }
+        },
+        rootNode: popupContainer,
+        queries: [
+            {all: true},
+            {attribute: 'hidden'}
+        ]
     });
 
     moreOptionsButton.click();
@@ -139,7 +166,8 @@ function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElemen
     createdElements.push(quickActionsWatchLater);
     quickActionsWatchLater.onclick = () => {
         const ytdMenuRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
-            .find(new TagNavigationFilter(Tags.YTD_MENU_RENDERER));
+            .find(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
+            .consume();
 
         if (!ytdMenuRenderer) {
             logger.error('Could not find ytd-menu-renderer as a parent');
@@ -150,8 +178,10 @@ function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElemen
         const saveButton = HtmlTreeNavigator.startFrom(ytdMenuRenderer)
             .filter(new TagNavigationFilter(Tags.YTD_BUTTON_RENDERER))
             .filter(new TagNavigationFilter(Tags.YT_ICON))
-            .findFirstToParentNavigator(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_SAVE))
-            .find(new TagNavigationFilter(Tags.BUTTON));
+            .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_SAVE))
+            .intoParentNavigator()
+            .find(new TagNavigationFilter(Tags.BUTTON))
+            .consume();
 
         if (saveButton) {
             clickSaveToWatchLaterOption(saveButton);
@@ -171,6 +201,7 @@ function initContentScript(moreOptionsButton: HTMLElement): void {
     // For some reason the parent of the found button in the yt-button-shape is a yt-icon-button ...
     const firstMoreOptionsHtmlTag = HtmlParentNavigator.startFrom(moreOptionsButton)
         .find(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+        .consume();
     firstMoreOptionsHtmlTag.parentElement.insertBefore(quickActionsWatchLater, firstMoreOptionsHtmlTag);
 }
 
@@ -181,8 +212,10 @@ function getMoreOptionsButton(): HTMLElement {
         .filter(new IdNavigationFilter(Tags.DIV, Ids.ACTIONS))
         .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
         .filter(new IdNavigationFilter(Tags.YT_BUTTON_SHAPE, Ids.BUTTON_SHAPE))
-        .findFirstToParentNavigator(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_MORE_ACTIONS))
-        .find(new TagNavigationFilter(Tags.BUTTON));
+        .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_MORE_ACTIONS))
+        .intoParentNavigator()
+        .find(new TagNavigationFilter(Tags.BUTTON))
+        .consume();
 }
 
 export function runVideoScriptIfTargetElementExists(): void {
@@ -207,4 +240,5 @@ export function runVideoScriptIfTargetElementExists(): void {
                 logger.error('Could not find more options button under video');
             }
         })
+        .catch(err => logger.error(err));
 }

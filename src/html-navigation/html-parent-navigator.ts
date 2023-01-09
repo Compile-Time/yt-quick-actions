@@ -1,4 +1,5 @@
 import {NavigationFilter} from "./filter/navigation-filter";
+import {HtmlFindResult} from "./html-find-result";
 
 export class HtmlParentNavigator {
     private constructor(private element: HTMLElement) {
@@ -8,8 +9,12 @@ export class HtmlParentNavigator {
         return new HtmlParentNavigator(element)
     }
 
-    find(filter: NavigationFilter): HTMLElement {
-        return (!this.element) ? null : this.navigateToParent(this.element, filter);
+    find(filter: NavigationFilter): HtmlFindResult {
+        if (!this.element) {
+            return HtmlFindResult.noResult();
+        }
+
+        return new HtmlFindResult(this.navigateToParent(this.element, filter));
     }
 
     private navigateToParent(element: HTMLElement, filter: NavigationFilter): HTMLElement {

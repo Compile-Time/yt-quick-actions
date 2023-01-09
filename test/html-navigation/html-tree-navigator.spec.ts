@@ -15,7 +15,8 @@ describe('HtmlTreeNavigator', () => {
         div.appendChild(div2);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(div)
-            .findAll(new TagNavigationFilter('div'));
+            .findAll(new TagNavigationFilter('div'))
+            .map(result => result.consume());
 
         expect(elements).toEqual([div2]);
     });
@@ -28,7 +29,8 @@ describe('HtmlTreeNavigator', () => {
         div.appendChild(div2);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(div)
-            .findAll(new TagNavigationFilter('span'));
+            .findAll(new TagNavigationFilter('span'))
+            .map(result => result.consume());
 
         expect(elements).toEqual([]);
     });
@@ -49,7 +51,8 @@ describe('HtmlTreeNavigator', () => {
         rootContainer.appendChild(div3);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
-            .findAll(new TagNavigationFilter('div'));
+            .findAll(new TagNavigationFilter('div'))
+            .map(result => result.consume());
 
         expect(elements).toEqual([div1, div2, div3]);
     });
@@ -98,7 +101,8 @@ describe('HtmlTreeNavigator', () => {
         rootContainer.appendChild(div3);
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
-            .findAll(new SvgDrawPathNavigationFilter('M20 20'));
+            .findAll(new SvgDrawPathNavigationFilter('M20 20'))
+            .map(result => result.consume());
 
         expect(elements).toEqual([path2]);
     });
@@ -138,7 +142,8 @@ describe('HtmlTreeNavigator', () => {
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter(Tags.BUTTON))
-            .findAll(new SvgDrawPathNavigationFilter('M10 10'));
+            .findAll(new SvgDrawPathNavigationFilter('M10 10'))
+            .map(result => result.consume());
 
         expect(elements).toEqual([path1]);
     });
@@ -175,7 +180,8 @@ describe('HtmlTreeNavigator', () => {
 
         const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
             .filter(new TagNavigationFilter(Tags.DIV))
-            .findAll(new IdNavigationFilter('button', 'button1'));
+            .findAll(new IdNavigationFilter('button', 'button1'))
+            .map(result => result.consume());
 
         expect(elements).toEqual([button1]);
     });

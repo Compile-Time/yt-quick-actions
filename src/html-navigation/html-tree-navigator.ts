@@ -1,6 +1,6 @@
 import {NavigationFilter} from "./filter/navigation-filter";
 import {NavigationFiltersToProcessQueue} from "./filter/navigation-filters-to-process-queue";
-import {HtmlParentNavigator} from "./html-parent-navigator";
+import {HtmlFindResult} from "./html-find-result";
 
 /**
  * Builder-like class for HTML tree navigation.
@@ -40,13 +40,14 @@ export class HtmlTreeNavigator {
      * @param targetElementFilter - The filter to use for finding the desired target element
      * @returns {HTMLElement[]} - If any of the given filters do not match, an empty array is returned
      */
-    findAll(targetElementFilter: NavigationFilter): HTMLElement[] {
+    findAll(targetElementFilter: NavigationFilter): HtmlFindResult[] {
         if (!this.element) {
             return [];
         }
 
         this.filter(targetElementFilter);
-        return this.navigateTree(this.initialFilterQueue, this.element.children);
+        return this.navigateTree(this.initialFilterQueue, this.element.children)
+            .map(element => new HtmlFindResult(element));
     }
 
     /**
@@ -56,9 +57,9 @@ export class HtmlTreeNavigator {
      *
      * @param filter - The filter defining the final element to look for
      */
-    findFirst(filter: NavigationFilter): HTMLElement {
+    findFirst(filter: NavigationFilter): HtmlFindResult {
         const foundElements = this.findAll(filter);
-        return foundElements.length > 0 ? foundElements[0] : null;
+        return foundElements.length > 0 ? foundElements[0] : HtmlFindResult.noResult();
     }
 
     /**
@@ -68,14 +69,9 @@ export class HtmlTreeNavigator {
      *
      * @param filter - The filter defining the final element to look for
      */
-    findLast(filter: NavigationFilter): HTMLElement {
+    findLast(filter: NavigationFilter): HtmlFindResult {
         const foundElements = this.findAll(filter);
-        return foundElements.length > 0 ? foundElements[foundElements.length - 1] : null;
-    }
-
-    findFirstToParentNavigator(filter: NavigationFilter): HtmlParentNavigator {
-        const foundElement = this.findFirst(filter);
-        return HtmlParentNavigator.startFrom(foundElement);
+        return foundElements.length > 0 ? foundElements[foundElements.length - 1] : HtmlFindResult.noResult();
     }
 
     private navigateTree(filterQueue: NavigationFiltersToProcessQueue, htmlCollection: HTMLCollection): HTMLElement[] {
