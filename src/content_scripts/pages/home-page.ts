@@ -139,30 +139,25 @@ export function runHomePageScriptIfTargetElementExists(): void {
     logger.debug('Watch for first home page video grid row');
     MutationElementExistsWatcher.build()
         .queryFn(() => {
-            const ytdRichGridRow = HtmlTreeNavigator.startFrom(document.body)
-                .filter(new TagNavigationFilter(Tags.YTD_APP))
-                .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
-                .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
-                .findFirst(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW))
-                .consume();
-            return {ytdRichGridRow: ytdRichGridRow};
-        })
-        .observeFn(observer =>
-            contentScriptObserversManager.addBackgroundObserver(observer)
-                .observe(document.body, {
-                    childList: true,
-                    subtree: true
-                })
-        )
-        .start()
-        .then(() => {
-            logger.debug('First video grid row was found!');
             const ytdRichGridRows = HtmlTreeNavigator.startFrom(document.body)
                 .filter(new TagNavigationFilter(Tags.YTD_APP))
                 .filter(new IdNavigationFilter(Tags.DIV, Ids.CONTENT))
                 .filter(new TagNavigationFilter(Tags.YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER))
                 .findAll(new TagNavigationFilter(Tags.YTD_RICH_GRID_ROW))
                 .map(result => result.consume());
+            return {ytdRichGridRows: ytdRichGridRows};
+        })
+        .observeFn(
+            observer => contentScriptObserversManager.addBackgroundObserver(observer)
+                .observe(document.body, {
+                    childList: true,
+                    subtree: true
+                })
+        )
+        .start()
+        .then(elementWatcherResult => {
+            logger.debug('First video grid row was found!');
+            const ytdRichGridRows = elementWatcherResult.ytdRichGridRows as HTMLElement[];
             if (ytdRichGridRows.length > 0) {
                 initContentScript(ytdRichGridRows);
             } else {

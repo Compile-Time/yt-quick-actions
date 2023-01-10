@@ -1,3 +1,3 @@
 export interface ElementWatcherResult {
-    [key: string]: HTMLElement
+    [key: string]: HTMLElement | HTMLElement[];
 }

@@ -96,25 +96,23 @@ export function runWatchingPlaylistScriptIfTargetElementExists(): void {
     MutationElementExistsWatcher.build()
         .queryFn(() => {
                 const playlistItems = HtmlTreeNavigator.startFrom(document.body)
-                    .findFirst(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
-                    .consume();
+                    .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+                    .map(result => result.consume());
 
                 return {playlistItems: playlistItems};
             }
         )
-        .observeFn(observer =>
-            contentScriptObserversManager.addBackgroundObserver(observer)
+        .observeFn(
+            observer => contentScriptObserversManager.addBackgroundObserver(observer)
                 .observe(document.body, {
                     childList: true,
                     subtree: true
                 })
         )
         .start()
-        .then(() => {
+        .then(elementWatcherResult => {
             logger.debug('First playlist item was found!');
-            const playlistPanelVideoRendererItems = HtmlTreeNavigator.startFrom(document.body)
-                .findAll(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
-                .map(result => result.consume());
+            const playlistPanelVideoRendererItems = elementWatcherResult.playlistItems as HTMLElement[];
             if (playlistPanelVideoRendererItems) {
                 initContentScript(playlistPanelVideoRendererItems);
             } else {

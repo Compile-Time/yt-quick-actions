@@ -238,8 +238,8 @@ export function runVideoScriptIfTargetElementExists(): void {
     logger.debug('Watch for the more options button under a video');
     MutationElementExistsWatcher.build()
         .queryFn(() => ({moreOptions: getMoreOptionsButton()}))
-        .observeFn(observer =>
-            contentScriptObserversManager.addBackgroundObserver(observer)
+        .observeFn(
+            observer => contentScriptObserversManager.addBackgroundObserver(observer)
                 .observe(document.body, {
                     childList: true,
                     subtree: true
@@ -247,10 +247,9 @@ export function runVideoScriptIfTargetElementExists(): void {
         )
         .start()
         .then(elementWatcherResult => {
-            logger.debug(elementWatcherResult);
-            const moreOptionsButton = getMoreOptionsButton();
+            logger.debug('More options button was found!');
+            const moreOptionsButton = elementWatcherResult.moreOptions as HTMLElement;
             if (moreOptionsButton) {
-                logger.debug('More options button was found!');
                 initContentScript(moreOptionsButton);
             } else {
                 logger.error('Could not find more options button under video');

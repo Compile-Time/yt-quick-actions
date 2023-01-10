@@ -139,26 +139,23 @@ export function runPlaylistScriptIfTargetElementExists(): void {
     logger.debug('Watch for the first menu button in a playlist');
     MutationElementExistsWatcher.build()
         .queryFn(() => {
-            const ytIconButton = HtmlTreeNavigator.startFrom(document.body)
+            const ytIconButtons = HtmlTreeNavigator.startFrom(document.body)
                 .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
-                .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
-                .consume();
-            return {ytIconButton: ytIconButton};
+                .findAll(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
+                .map(result => result.consume());
+            return {ytIconButtons: ytIconButtons};
         })
-        .observeFn(observer =>
-            contentScriptObserversManager.addBackgroundObserver(observer)
+        .observeFn(
+            observer => contentScriptObserversManager.addBackgroundObserver(observer)
                 .observe(document.body, {
                     childList: true,
                     subtree: true
                 })
         )
         .start()
-        .then(() => {
+        .then(elementWatchResult => {
             logger.debug('First menu button was found!');
-            const menuButtons: HTMLElement[] = HtmlTreeNavigator.startFrom(document.body)
-                .filter(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
-                .findAll(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
-                .map(result => result.consume());
+            const menuButtons = elementWatchResult.ytIconButtons as HTMLElement[];
             if (menuButtons.length > 0) {
                 initContentScript(menuButtons);
             } else {
