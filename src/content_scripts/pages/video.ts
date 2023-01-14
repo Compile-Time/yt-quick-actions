@@ -13,6 +13,8 @@ import {
 import {LogProvider} from "../../logging/log-provider";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
 import {MutationSummary} from "mutation-summary";
+import {OneshotObserver, PageObserver} from "../../observation/observer-types";
+import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
@@ -29,9 +31,9 @@ let halfScreenSaveMutationSummary: MutationSummary;
  * One important implementation detail is that the popup dialog will initialize all its HTML on the first appearance
  * and only removes/adds tags or changes tag attributes on subsequent appearances.
  *
- * @param rootNode - The root node from which the {@link MutationSummary} should begin watching for changes
+ * @param popupContainer - The root node from which the {@link MutationSummary} should begin watching for changes
  */
-function initFullScreenSaveMutationSummary(rootNode: Node) {
+function initFullScreenSaveMutationSummary(popupContainer: Node) {
     fullScreenSaveMutationSummary = new MutationSummary({
         callback: summaries => {
             logger.debug('popup summaries', summaries);
@@ -86,7 +88,7 @@ function initFullScreenSaveMutationSummary(rootNode: Node) {
                     });
             }
         },
-        rootNode: rootNode,
+        rootNode: popupContainer,
         queries: [
             {all: true},
             {attribute: 'aria-hidden'}
@@ -108,9 +110,9 @@ function initFullScreenSaveMutationSummary(rootNode: Node) {
  * "Save" action. Because the "Save" action only exists in either the more options popup or directly under
  * the video both cases need to be handled.
  *
- * @param rootNode - The root node from which the {@link MutationSummary} should begin watching for changes
+ * @param popupContainer - The root node from which the {@link MutationSummary} should begin watching for changes
  */
-function initHalfScreenSaveMutationSummary(rootNode: Node) {
+function initHalfScreenSaveMutationSummary(popupContainer: Node) {
     halfScreenSaveMutationSummary = new MutationSummary({
         callback: summaries => {
             const saveSvgPaths: HTMLElement[] = summaries[0].added
@@ -145,7 +147,7 @@ function initHalfScreenSaveMutationSummary(rootNode: Node) {
                     });
             }
         },
-        rootNode: rootNode,
+        rootNode: popupContainer,
         queries: [
             {all: true},
             {attribute: 'hidden'}
@@ -155,12 +157,18 @@ function initHalfScreenSaveMutationSummary(rootNode: Node) {
 }
 
 function clickSaveToWatchLaterCheckbox(popupTrigger: HTMLElement): void {
-    fullScreenSaveMutationSummary.reconnect();
+    contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
+        OneshotObserverId.SAVE_TO_FULL_SCREEN_POPUP_READY,
+        fullScreenSaveMutationSummary
+    )).observe();
     popupTrigger.click();
 }
 
 function clickSaveToWatchLaterCheckboxForHalfScreenSize(moreOptionsButton: HTMLElement): void {
-    halfScreenSaveMutationSummary.reconnect();
+    contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
+        OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
+        halfScreenSaveMutationSummary
+    )).observe();
     moreOptionsButton.click();
 }
 
@@ -239,11 +247,14 @@ export function runVideoScriptIfTargetElementExists(): void {
     MutationElementExistsWatcher.build()
         .queryFn(() => ({moreOptions: getMoreOptionsButton()}))
         .observeFn(
-            observer => contentScriptObserversManager.addBackgroundObserver(observer)
-                .observe(document.body, {
-                    childList: true,
-                    subtree: true
-                })
+            observer =>
+                contentScriptObserversManager.addBackgroundObserver(new PageObserver(observer,
+                    {
+                        targetNode: document.body,
+                        initOptions: {
+                            childList: true, subtree: true
+                        }
+                    })).observe()
         )
         .start()
         .then(elementWatcherResult => {

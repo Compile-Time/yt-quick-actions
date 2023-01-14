@@ -7,7 +7,7 @@ import {
 } from "../../html-navigation/filter/navigation-filter";
 import {AttributeNames, Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
-import {OneshotObserver} from "../../data/oneshot-observer";
+import {OneshotObserver, PageObserver} from "../../observation/observer-types";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 import {
     MutationElementExistsWatcher
@@ -52,13 +52,14 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotObserverId.REMOVE_POPUP_ENTRY_READY,
-            removePopupEntryReadyObserver
-        )).observe(popupMenu, {
-            subtree: true,
-            attributes: true,
-            attributeOldValue: true,
-            attributeFilter: [AttributeNames.HIDDEN]
-        });
+            removePopupEntryReadyObserver,
+            {
+                targetNode: popupMenu,
+                initOptions: {
+                    subtree: true, attributes: true, attributeOldValue: true, attributeFilter: [AttributeNames.HIDDEN]
+                }
+            }
+        )).observe();
     };
     return button;
 }
@@ -103,11 +104,12 @@ export function runWatchingPlaylistScriptIfTargetElementExists(): void {
             }
         )
         .observeFn(
-            observer => contentScriptObserversManager.addBackgroundObserver(observer)
-                .observe(document.body, {
-                    childList: true,
-                    subtree: true
-                })
+            observer => contentScriptObserversManager.addBackgroundObserver(new PageObserver(observer, {
+                targetNode: document.body,
+                initOptions: {
+                    childList: true, subtree: true
+                }
+            })).observe()
         )
         .start()
         .then(elementWatcherResult => {

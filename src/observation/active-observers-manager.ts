@@ -1,4 +1,4 @@
-import {OneshotObserver} from "./data/oneshot-observer";
+import {OneshotObserver, PageObserver} from "./observer-types";
 
 /**
  * Manage active mutation observers inside the same page context.
@@ -12,7 +12,7 @@ import {OneshotObserver} from "./data/oneshot-observer";
  * this manager must be created for both the content script and background script.
  */
 export class ActiveObserversManager {
-    private backgroundObservers: MutationObserver[] = [];
+    private backgroundObservers: PageObserver[] = [];
     private oneshotObservers: OneshotObserver[] = [];
 
     /**
@@ -27,16 +27,16 @@ export class ActiveObserversManager {
      *
      * @param oneshotObserver - The mutation observer and identifier data to add as an oneshot observer
      */
-    upsertOneshotObserver(oneshotObserver: OneshotObserver): MutationObserver {
+    upsertOneshotObserver(oneshotObserver: OneshotObserver): PageObserver {
         const existingOneshotObserver = this.oneshotObservers
             .find(oneshotOb => oneshotOb.equals(oneshotObserver));
         if (existingOneshotObserver) {
-            existingOneshotObserver.observer.disconnect();
+            existingOneshotObserver.disconnect();
             this.oneshotObservers = this.oneshotObservers
                 .filter(oneshotOb => !oneshotOb.equals(existingOneshotObserver));
         }
         this.oneshotObservers.push(oneshotObserver);
-        return oneshotObserver.observer;
+        return oneshotObserver;
     }
 
     /**
@@ -47,7 +47,7 @@ export class ActiveObserversManager {
      *
      * @param observer - The mutation observer to track as a background observer
      */
-    addBackgroundObserver(observer: MutationObserver): MutationObserver {
+    addBackgroundObserver(observer: PageObserver): PageObserver {
         this.backgroundObservers.push(observer);
         return observer;
     }
@@ -59,9 +59,9 @@ export class ActiveObserversManager {
      * existing mutation observers.
      */
     disconnectAll(): void {
-        const observers: MutationObserver[] = [
+        const observers: PageObserver[] = [
             ...this.backgroundObservers,
-            ...this.oneshotObservers.map(oneshotOb => oneshotOb.observer)
+            ...this.oneshotObservers.map(oneshotOb => oneshotOb)
         ];
         observers.forEach(observer => observer.disconnect());
 

@@ -7,7 +7,7 @@ import {
 import {Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {QaButtonInContainer, QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
-import {OneshotObserver} from "../../data/oneshot-observer";
+import {OneshotObserver, PageObserver} from "../../observation/observer-types";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 import {
     MutationElementExistsWatcher
@@ -109,10 +109,14 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): QaButtonInContaine
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotObserverId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
-            saveToWatchLaterPopupEntryReadyObserver
-        )).observe(popupContainer, {
-            subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
-        })
+            saveToWatchLaterPopupEntryReadyObserver,
+            {
+                targetNode: popupContainer,
+                initOptions: {
+                    subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
+                }
+            }
+        )).observe();
     };
 
     return watchLaterButton;
@@ -124,15 +128,21 @@ function initContentScript(ytdRichGridRows: HTMLElement[]): void {
 
     contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
         OneshotObserverId.HOME_PAGE_MENU_UPDATED_OBSERVER,
-        firstHomePageVideoMenuClickObserver
-    )).observe(divForYtdRichGridRows, {
-        subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
-    })
+        firstHomePageVideoMenuClickObserver,
+        {
+            targetNode: divForYtdRichGridRows,
+            initOptions: {
+                subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
+            }
+        }
+    )).observe();
 
-    contentScriptObserversManager.addBackgroundObserver(homePageVideosLoadingObserver)
-        .observe(divForYtdRichGridRows, {
+    contentScriptObserversManager.addBackgroundObserver(new PageObserver(homePageVideosLoadingObserver, {
+        targetNode: divForYtdRichGridRows,
+        initOptions: {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
-        })
+        }
+    })).observe();
 }
 
 export function runHomePageScriptIfTargetElementExists(): void {
@@ -148,11 +158,13 @@ export function runHomePageScriptIfTargetElementExists(): void {
             return {ytdRichGridRows: ytdRichGridRows};
         })
         .observeFn(
-            observer => contentScriptObserversManager.addBackgroundObserver(observer)
-                .observe(document.body, {
-                    childList: true,
-                    subtree: true
-                })
+            observer =>
+                contentScriptObserversManager.addBackgroundObserver(new PageObserver(observer, {
+                    targetNode: document.body,
+                    initOptions: {
+                        childList: true, subtree: true
+                    }
+                })).observe()
         )
         .start()
         .then(elementWatcherResult => {

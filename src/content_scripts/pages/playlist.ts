@@ -7,16 +7,19 @@ import {
     TagNavigationFilter
 } from "../../html-navigation/filter/navigation-filter";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
-import {OneshotObserver} from "../../data/oneshot-observer";
+import {OneshotObserver, PageObserver} from "../../observation/observer-types";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
 import {
     MutationElementExistsWatcher
 } from "../../html-element-processing/element-watcher/mutation-element-exists-watcher";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
 import {LogProvider} from "../../logging/log-provider";
+import {MutationSummary} from "mutation-summary";
 
-const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.PLAYLIST);
+
+let playlistMutationSummary: MutationSummary;
+let moreOptionsMenuMutationSummary: MutationSummary;
 
 /*
 If we do not wait for the popup content to update, the first entry in the playlist is deleted due to the
@@ -55,27 +58,23 @@ const playlistLoadingNewEntriesObserver = new MutationObserver((mutations) => {
             return;
         }
 
-        const ytIconButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
+        const moreOptionsButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
             .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
             .consume();
 
-        if (!ytIconButton) {
+        if (!moreOptionsButton) {
             logger.error('Could not find yt-icon-button (more options) in ytd-playlist-video-renderer');
             return;
         }
 
-        const existingRemoveButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
-            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON));
-        if (!!ytdPlaylistVideoRenderer && !existingRemoveButton) {
-            appendRemoveButton(ytIconButton, ytdPlaylistVideoRenderer);
-        }
+        setupRemoveButtonIfNotPresent(moreOptionsButton, ytdPlaylistVideoRenderer);
     }
 });
 
-function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
+function setupRemoveButton(moreOptionsMenu: HTMLElement, ytdPlaylistVideoRenderer: HTMLElement): void {
     const removeButton = QaHtmlElements.removeButton();
     removeButton.onclick = () => {
-        menuButton.click();
+        moreOptionsMenu.click();
         const popupMenu = HtmlTreeNavigator.startFrom(document.body)
             .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
             .consume();
@@ -87,38 +86,47 @@ function setupRemoveButton(menuButton: HTMLElement): HTMLButtonElement {
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotObserverId.PLAYLIST_MENU_UPDATED_OBSERVER,
-            menuUpdatedObserver
-        )).observe(popupMenu, {
-            subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['hidden']
-        })
+            moreOptionsMenuMutationSummary
+        )).observe();
     };
-
-    return removeButton;
-}
-
-function appendRemoveButton(ytIconButton: HTMLElement, ytdPlaylistVideoRenderer: HTMLElement): void {
-    const removeButton = setupRemoveButton(ytIconButton as HTMLButtonElement);
-    createdElements.push(removeButton);
     ytdPlaylistVideoRenderer.append(removeButton);
 }
 
-function initContentScript(menuButtons: HTMLElement[]): void {
-    // Remove all previously created remove buttons.
-    createdElements.forEach(element => element.remove());
+function setupRemoveButtonIfNotPresent(moreOptionsButton: HTMLElement, ytdPlaylistVideoRenderer: HTMLElement): void {
+    const existingRemoveButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
+        .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON));
+    if (!!ytdPlaylistVideoRenderer && !existingRemoveButton) {
+        setupRemoveButton(moreOptionsButton, ytdPlaylistVideoRenderer);
+    }
+}
 
-    // Initialize the playlist options menu. If this is not done, then the first click on any Quick Actions
-    // element will only open the menu.
-    const firstMenuButton = menuButtons[0] as HTMLButtonElement;
-    firstMenuButton.click();
-    firstMenuButton.click();
+function initMoreOptionsMenuMutationSummary(ytdPopupContainer: Node): void {
+    moreOptionsMenuMutationSummary = new MutationSummary({
+        callback: summaries => {
+            logger.debug('more options summary', summaries);
+        },
+        rootNode: ytdPopupContainer,
+        queries: [
+            {all: true}
+        ]
+    });
+    moreOptionsMenuMutationSummary.disconnect();
+}
 
-    for (const menuButton of menuButtons) {
-        const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(menuButton)
+function clickRemoveOptionInMoreOptionsMenu(moreOptionsMenu: HTMLElement): void {
+    moreOptionsMenuMutationSummary.reconnect();
+    moreOptionsMenu.click();
+}
+
+function initContentScript(moreOptionsButtons: HTMLElement[]): void {
+    for (const moreOptionsButton of moreOptionsButtons) {
+        const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
             .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
             .consume();
-        appendRemoveButton(menuButton, ytdPlaylistVideoRenderer);
+        setupRemoveButtonIfNotPresent(moreOptionsButton, ytdPlaylistVideoRenderer)
     }
 
+    const firstMenuButton = moreOptionsButtons[0] as HTMLButtonElement;
     const ytdPlaylistVideoListRenderer = HtmlParentNavigator.startFrom(firstMenuButton)
         .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
         .consume();
@@ -129,14 +137,21 @@ function initContentScript(menuButtons: HTMLElement[]): void {
         return;
     }
 
-    contentScriptObserversManager.addBackgroundObserver(playlistLoadingNewEntriesObserver)
-        .observe(ytdPlaylistVideoListRenderer, {
+    const popupMenu = HtmlTreeNavigator.startFrom(document.body)
+        .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+        .consume();
+    initMoreOptionsMenuMutationSummary(popupMenu);
+
+    contentScriptObserversManager.addBackgroundObserver(new PageObserver(playlistLoadingNewEntriesObserver, {
+        targetNode: ytdPlaylistVideoListRenderer,
+        initOptions: {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
-        })
+        }
+    })).observe();
 }
 
 export function runPlaylistScriptIfTargetElementExists(): void {
-    logger.debug('Watch for the first menu button in a playlist');
+    logger.debug('Watch for the first menu button in a playlist item');
     MutationElementExistsWatcher.build()
         .queryFn(() => {
             const ytIconButtons = HtmlTreeNavigator.startFrom(document.body)
@@ -145,19 +160,20 @@ export function runPlaylistScriptIfTargetElementExists(): void {
                 .map(result => result.consume());
             return {ytIconButtons: ytIconButtons};
         })
-        .observeFn(
-            observer => contentScriptObserversManager.addBackgroundObserver(observer)
-                .observe(document.body, {
-                    childList: true,
-                    subtree: true
-                })
+        .observeFn(observer =>
+            contentScriptObserversManager.addBackgroundObserver(new PageObserver(observer, {
+                targetNode: document.body,
+                initOptions: {
+                    childList: true, subtree: true
+                }
+            })).observe()
         )
         .start()
         .then(elementWatchResult => {
-            logger.debug('First menu button was found!');
-            const menuButtons = elementWatchResult.ytIconButtons as HTMLElement[];
-            if (menuButtons.length > 0) {
-                initContentScript(menuButtons);
+            logger.debug('First menu button in playlist item was found!');
+            const moreOptionsButtons = elementWatchResult.ytIconButtons as HTMLElement[];
+            if (moreOptionsButtons.length > 0) {
+                initContentScript(moreOptionsButtons);
             } else {
                 logger.error('Could not find menu buttons of playlist items');
             }

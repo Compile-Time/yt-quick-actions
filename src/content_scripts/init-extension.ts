@@ -1,4 +1,4 @@
-import {TabMessage} from "../data/tab-message";
+import {TabMessage} from "../messaging/tab-message";
 import * as Browser from "webextension-polyfill";
 import {StorageAccessor} from "../storage/storage-accessor";
 import {PageEvent} from "../enums/page-event";

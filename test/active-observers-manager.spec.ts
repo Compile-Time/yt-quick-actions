@@ -1,5 +1,5 @@
-import {ActiveObserversManager} from "../src/active-observers-manager";
-import {OneshotObserver} from "../src/data/oneshot-observer";
+import {ActiveObserversManager} from "../src/observation/active-observers-manager";
+import {OneshotObserver, PageObserver} from "../src/observation/observer-types";
 import {createSpyObj} from 'jest-createspyobj';
 
 
@@ -30,8 +30,8 @@ describe('ActiveObserversManager', () => {
 
         manager.upsertOneshotObserver(new OneshotObserver('test', mockObserver1));
         manager.upsertOneshotObserver(new OneshotObserver('test2', mockObserver2));
-        manager.addBackgroundObserver(mockObserver3);
-        manager.addBackgroundObserver(mockObserver4);
+        manager.addBackgroundObserver(new PageObserver(mockObserver3));
+        manager.addBackgroundObserver(new PageObserver(mockObserver4));
 
         manager.disconnectAll();
 
