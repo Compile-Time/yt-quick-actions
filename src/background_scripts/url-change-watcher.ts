@@ -1,7 +1,7 @@
 import * as Browser from "webextension-polyfill";
 import {Tabs} from "webextension-polyfill";
 import {PageEvent} from "../enums/page-event";
-import {TabMessage} from "../data/tab-message";
+import {TabMessage} from "../messaging/tab-message";
 import {StorageAccessor} from "../storage/storage-accessor";
 import {LogProvider} from "../logging/log-provider";
 import {PromiseUtil} from "../util/promise-util";
@@ -11,6 +11,20 @@ import OnUpdatedChangeInfoType = Tabs.OnUpdatedChangeInfoType;
 const backgroundLogProvider = new LogProvider();
 const logger = backgroundLogProvider.getLogger(LogProvider.URL_CHANGE_WATCHER);
 
+/**
+ * Send a tab URL change to a content script.
+ *
+ * Sometimes when loading YouTube from a new tab the background script reports an error that the receiver does not
+ * exist. This is possible because the background script is initialized on browser start while the content script
+ * only on matching URLs. Therefore, the background script could send a message before any handlers exist in the
+ * content script.
+ *
+ * FIXME: Use a connection instead of a one-off message.
+ *
+ * @param tabId - The tab to which the message should be sent
+ * @param tab - The current tab
+ * @param message - The message to send to a receiving content script
+ */
 function sendMessage(tabId: number, tab: Tab, message: TabMessage): void {
     logger.debug(`Sending following message from tab "${tab.title}"`, message);
     Browser.tabs.sendMessage(tabId, message)
@@ -45,7 +59,6 @@ async function processYoutubeTabUpdate(tabId: number, changeInfo: OnUpdatedChang
             sendMessage(tabId, tab, message);
         }
     }
-
 }
 
 Browser.tabs.onUpdated.addListener(processYoutubeTabUpdate);

@@ -3,10 +3,6 @@ export class PromiseUtil {
     /**
      * Retry a promise for X {@link numberOfRetries} and with X {@link delayMilliseconds}.
      *
-     * This function primarily serves as a fix (workaround?) for Firefox. Sometimes when loading YouTube from a new tab
-     * the background script reports an error that the receiver does not exist. This method fixes this by
-     * retrying the send operation to the receiving end.
-     *
      * @param callbackPromise - A function that returns a {@link Promise}
      * @param numberOfRetries - The amount of times a retry should be performed before finally reporting an error
      * @param delayMilliseconds - The amount of milliseconds to wait in each retry cycle
