@@ -32,13 +32,13 @@ export class MutationElementExistsWatcher extends ElementWatcher<MutationElement
             }
 
             const initialElementQueryResult: ElementWatcherResult = this.elementQueryFn();
-            if (Object.values(initialElementQueryResult).every(element => !!element)) {
+            if (this.isValidQueryResult(initialElementQueryResult)) {
                 return resolve(initialElementQueryResult);
             }
 
             const domChangeObserver = new MutationObserver((_, observer) => {
                 const elementQueryResult: ElementWatcherResult = this.elementQueryFn();
-                if (Object.values(elementQueryResult).every(element => !!element)) {
+                if (this.isValidQueryResult(elementQueryResult)) {
                     resolve(elementQueryResult);
                     observer.disconnect();
                 }
@@ -46,6 +46,19 @@ export class MutationElementExistsWatcher extends ElementWatcher<MutationElement
 
             this.mutationObserverFn(domChangeObserver);
         });
+    }
+
+    private isValidQueryResult(elementQueryResult: ElementWatcherResult): boolean {
+        const objectValues = Object.values(elementQueryResult);
+        return objectValues.length > 0
+            && objectValues.every(value => {
+                return this.isHtmlElementArray(value) ? value.length > 0 : !!value;
+            })
+
+    }
+
+    private isHtmlElementArray(elements: HTMLElement | HTMLElement[]): elements is Array<HTMLElement> {
+        return (elements as Array<HTMLElement>).length !== undefined;
     }
 
 }
