@@ -40,7 +40,6 @@ function initFullScreenSaveObserver(popupContainer: Node) {
         disconnectFn => {
             const summary = new MutationSummary({
                 callback: summaries => {
-                    logger.debug('popup summaries', summaries);
                     const popupCloseSvgPaths: HTMLElement[] = summaries[0].added
                         .filter(addedNode => addedNode.nodeName.toLowerCase() === 'path')
                         .map(pathNode => pathNode as HTMLElement)

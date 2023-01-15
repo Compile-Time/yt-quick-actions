@@ -52,7 +52,10 @@ export class MutationElementExistsWatcher extends ElementWatcher<MutationElement
         const objectValues = Object.values(elementQueryResult);
         return objectValues.length > 0
             && objectValues.every(value => {
-                return this.isHtmlElementArray(value) ? value.length > 0 : !!value;
+                if (!value) {
+                    return false;
+                }
+                return this.isHtmlElementArray(value) ? value.length > 0 : true;
             })
 
     }
