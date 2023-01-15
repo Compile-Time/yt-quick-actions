@@ -14,6 +14,10 @@ export class HtmlFindResult {
         return this.element;
     }
 
+    exists(): boolean {
+        return !!this.element;
+    }
+
     intoParentNavigator(): HtmlParentNavigator {
         return HtmlParentNavigator.startFrom(this.element);
     }
