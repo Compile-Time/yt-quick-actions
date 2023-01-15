@@ -52,7 +52,7 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotObserverId.REMOVE_POPUP_ENTRY_READY,
-            removePopupEntryReadyObserver,
+            () => removePopupEntryReadyObserver,
             {
                 targetNode: popupMenu,
                 initOptions: {
@@ -104,7 +104,7 @@ export function runWatchingPlaylistScriptIfTargetElementExists(): void {
             }
         )
         .observeFn(
-            observer => contentScriptObserversManager.addBackgroundObserver(new PageObserver(observer, {
+            observer => contentScriptObserversManager.addBackgroundObserver(new PageObserver(() => observer, {
                 targetNode: document.body,
                 initOptions: {
                     childList: true, subtree: true

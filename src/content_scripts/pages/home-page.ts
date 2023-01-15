@@ -109,7 +109,7 @@ function setupWatchLaterButton(videoMenuButton: HTMLElement): QaButtonInContaine
 
         contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
             OneshotObserverId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
-            saveToWatchLaterPopupEntryReadyObserver,
+            () => saveToWatchLaterPopupEntryReadyObserver,
             {
                 targetNode: popupContainer,
                 initOptions: {
@@ -128,7 +128,7 @@ function initContentScript(ytdRichGridRows: HTMLElement[]): void {
 
     contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
         OneshotObserverId.HOME_PAGE_MENU_UPDATED_OBSERVER,
-        firstHomePageVideoMenuClickObserver,
+        () => firstHomePageVideoMenuClickObserver,
         {
             targetNode: divForYtdRichGridRows,
             initOptions: {
@@ -137,7 +137,7 @@ function initContentScript(ytdRichGridRows: HTMLElement[]): void {
         }
     )).observe();
 
-    contentScriptObserversManager.addBackgroundObserver(new PageObserver(homePageVideosLoadingObserver, {
+    contentScriptObserversManager.addBackgroundObserver(new PageObserver(() => homePageVideosLoadingObserver, {
         targetNode: divForYtdRichGridRows,
         initOptions: {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['aria-label']
@@ -159,7 +159,7 @@ export function runHomePageScriptIfTargetElementExists(): void {
         })
         .observeFn(
             observer =>
-                contentScriptObserversManager.addBackgroundObserver(new PageObserver(observer, {
+                contentScriptObserversManager.addBackgroundObserver(new PageObserver(() => observer, {
                     targetNode: document.body,
                     initOptions: {
                         childList: true, subtree: true

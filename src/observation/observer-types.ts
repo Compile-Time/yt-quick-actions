@@ -6,16 +6,29 @@ export interface MutationObserverArgs {
 }
 
 export class PageObserver {
-    constructor(private readonly observer: MutationObserver | MutationSummary,
-                private readonly mutationObserverArgs?: MutationObserverArgs) {
+
+    protected readonly observer: MutationObserver | MutationSummary;
+    protected readonly mutationObserverArgs?: MutationObserverArgs;
+    protected disconnected: boolean;
+
+    constructor(observerProvider: (disconnectFn: () => void) => MutationObserver | MutationSummary,
+                mutationObserverArgs?: MutationObserverArgs) {
+        this.observer = observerProvider(() => this.disconnect());
+        this.mutationObserverArgs = mutationObserverArgs;
+        this.disconnected = false;
     }
 
     disconnect(): void {
-        // `disconnect()` exists on both types of `observer`.
-        this.observer.disconnect();
+        // Disconnected MutationSummary observers will throw an error when disconnecting from them again.
+        if (!this.disconnected) {
+            // The disconnect method exists both on a MutationSummary and MutationObserver.
+            this.observer.disconnect();
+            this.disconnected = true;
+        }
     }
 
     observe(): void {
+        this.disconnected = false;
         if (this.isMutationSummary(this.observer)) {
             this.observer.reconnect();
         } else {
@@ -30,9 +43,9 @@ export class PageObserver {
 
 export class OneshotObserver extends PageObserver {
     constructor(private readonly id: string,
-                observer: MutationObserver | MutationSummary,
+                observerProvider: (disconnectFn: () => void) => MutationObserver | MutationSummary,
                 mutationObserverArgs?: MutationObserverArgs) {
-        super(observer, mutationObserverArgs);
+        super(observerProvider, mutationObserverArgs);
     }
 
     equals(other: OneshotObserver): boolean {
