@@ -18,6 +18,10 @@ export class HtmlFindResult {
         return !!this.element;
     }
 
+    notExists(): boolean {
+        return !this.exists()
+    }
+
     intoParentNavigator(): HtmlParentNavigator {
         return HtmlParentNavigator.startFrom(this.element);
     }
