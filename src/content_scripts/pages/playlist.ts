@@ -29,11 +29,14 @@ function setupRemoveButton(moreOptionsMenu: HTMLElement, ytdPlaylistVideoRendere
     ytdPlaylistVideoRenderer.append(removeButton);
 }
 
-function setupRemoveButtonIfNotPresent(moreOptionsButton: HTMLElement, ytdPlaylistVideoRenderer: HTMLElement): void {
-    const existingRemoveButton: HTMLElement = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
-        .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON))
+function setupRemoveButtonIfNotPresent(moreOptionsButton: HTMLElement): void {
+    const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
+        .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
         .consume();
-    if (!!ytdPlaylistVideoRenderer && !existingRemoveButton) {
+
+    if (HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
+        .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON))
+        .notExists()) {
         setupRemoveButton(moreOptionsButton, ytdPlaylistVideoRenderer);
     }
 }
@@ -76,7 +79,7 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
                         summaries[1].removed
                             .map(ytdMenuServiceItem => ytdMenuServiceItem as HTMLElement)
                             .filter(
-                                removedFromElement => HtmlTreeNavigator.startFrom(removedFromElement)
+                                ytdMenuServiceItem => HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
                                     .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
                                     .exists()
                             )
@@ -116,12 +119,7 @@ function initPlaylistObserver(rootNode: Node): void {
                 callback: summaries => {
                     summaries[0].added
                         .map(ytIconButton => ytIconButton as HTMLElement)
-                        .forEach(moreOptionsButton => {
-                            const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
-                                .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
-                                .consume();
-                            setupRemoveButtonIfNotPresent(moreOptionsButton, ytdPlaylistVideoRenderer);
-                        });
+                        .forEach(moreOptionsButton => setupRemoveButtonIfNotPresent(moreOptionsButton));
                 },
                 rootNode: rootNode,
                 queries: [
@@ -140,12 +138,7 @@ function clickRemoveMenuEntryInMoreOptionsMenu(moreOptionsMenu: HTMLElement): vo
 }
 
 function initContentScript(moreOptionsButtons: HTMLElement[]): void {
-    for (const moreOptionsButton of moreOptionsButtons) {
-        const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
-            .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
-            .consume();
-        setupRemoveButtonIfNotPresent(moreOptionsButton, ytdPlaylistVideoRenderer)
-    }
+    moreOptionsButtons.forEach(moreOptionsButton => setupRemoveButtonIfNotPresent(moreOptionsButton));
 
     const firstMenuButton = moreOptionsButtons[0] as HTMLButtonElement;
     const ytdPlaylistVideoListRenderer = HtmlParentNavigator.startFrom(firstMenuButton)
