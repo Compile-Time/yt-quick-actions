@@ -23,7 +23,7 @@ let fullScreenSaveObserver: OneshotObserver;
 let halfScreenSaveObserver: OneshotObserver;
 
 /**
- * Initialize a {@link OneshotObserver} with a {@link MutationSummary} for a half screen size YouTube browser
+ * Initialize a {@link OneshotObserver} with a {@link MutationSummary} for a full screen size YouTube browser
  * window and immediately disconnect from it.
  *
  * The created {@link MutationSummary} will observe changes to YouTube's "Save To" popup dialog, so a video can be
