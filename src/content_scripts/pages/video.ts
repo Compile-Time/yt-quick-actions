@@ -34,7 +34,7 @@ let halfScreenSaveObserver: OneshotObserver;
  *
  * @param popupContainer - The root node from which the {@link MutationSummary} should begin watching for changes
  */
-function initFullScreenSaveMutationSummary(popupContainer: Node) {
+function initFullScreenSaveObserver(popupContainer: Node) {
     fullScreenSaveObserver = new OneshotObserver(
         OneshotObserverId.SAVE_TO_FULL_SCREEN_POPUP_READY,
         disconnectFn => {
@@ -119,7 +119,7 @@ function initFullScreenSaveMutationSummary(popupContainer: Node) {
  *
  * @param popupContainer - The root node from which the {@link MutationSummary} should begin watching for changes
  */
-function initHalfScreenSaveMutationSummary(popupContainer: Node) {
+function initHalfScreenSaveObserver(popupContainer: Node) {
     halfScreenSaveObserver = new OneshotObserver(
         OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
         disconnectFn => {
@@ -225,8 +225,8 @@ function initContentScript(moreOptionsButton: HTMLElement): void {
         return;
     }
 
-    initFullScreenSaveMutationSummary(popupContainer);
-    initHalfScreenSaveMutationSummary(popupContainer);
+    initFullScreenSaveObserver(popupContainer);
+    initHalfScreenSaveObserver(popupContainer);
 
     const quickActionsWatchLater = setupWatchLaterButton(moreOptionsButton);
 

@@ -114,7 +114,6 @@ function initPlaylistObserver(rootNode: Node): void {
         () => {
             const summary = new MutationSummary({
                 callback: summaries => {
-                    logger.debug('playlist summaries', summaries);
                     summaries[0].added
                         .map(ytIconButton => ytIconButton as HTMLElement)
                         .forEach(moreOptionsButton => {
@@ -152,16 +151,10 @@ function initContentScript(moreOptionsButtons: HTMLElement[]): void {
     const ytdPlaylistVideoListRenderer = HtmlParentNavigator.startFrom(firstMenuButton)
         .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
         .consume();
-
-    if (!ytdPlaylistVideoListRenderer) {
-        logger.error('Could not find ytd-playlist-video-list-renderer to setup quick actions for future' +
-            ' playlist items');
-        return;
-    }
-
     const popupMenu = HtmlTreeNavigator.startFrom(document.body)
         .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
         .consume();
+
     initMoreOptionsMenuObserver(popupMenu);
     initPlaylistObserver(ytdPlaylistVideoListRenderer);
 
