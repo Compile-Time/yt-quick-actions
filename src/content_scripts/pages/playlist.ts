@@ -18,36 +18,8 @@ import {MutationSummary} from "mutation-summary";
 
 const logger = contentLogProvider.getLogger(LogProvider.PLAYLIST);
 
-let playlistMutationSummary: MutationSummary;
+let playlistObserver: PageObserver;
 let moreOptionsMenuObserver: OneshotObserver;
-
-/*
-Register an observer to add the remove button to new playlist items loaded afterwards. This only
- occurs in long playlists.
- */
-const playlistLoadingNewEntriesObserver = new MutationObserver((mutations) => {
-    for (const mutation of mutations) {
-        const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(mutation.target as HTMLElement)
-            .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
-            .consume();
-
-        if (!ytdPlaylistVideoRenderer) {
-            logger.error('Could not find ytd-playlist-video-renderer from mutation target');
-            return;
-        }
-
-        const moreOptionsButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
-            .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
-            .consume();
-
-        if (!moreOptionsButton) {
-            logger.error('Could not find yt-icon-button (more options) in ytd-playlist-video-renderer');
-            return;
-        }
-
-        setupRemoveButtonIfNotPresent(moreOptionsButton, ytdPlaylistVideoRenderer);
-    }
-});
 
 function setupRemoveButton(moreOptionsMenu: HTMLElement, ytdPlaylistVideoRenderer: HTMLElement): void {
     const removeButton = QaHtmlElements.removeButton();
@@ -66,7 +38,7 @@ function setupRemoveButtonIfNotPresent(moreOptionsButton: HTMLElement, ytdPlayli
     }
 }
 
-function initMoreOptionsMenuMutationSummary(ytdPopupContainer: Node): void {
+function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
     moreOptionsMenuObserver = new OneshotObserver(
         OneshotObserverId.PLAYLIST_MENU_UPDATED_OBSERVER,
         disconnectFn => {
@@ -115,6 +87,32 @@ function initMoreOptionsMenuMutationSummary(ytdPopupContainer: Node): void {
     );
 }
 
+function initPlaylistObserver(rootNode: Node): void {
+    playlistObserver = new PageObserver(
+        () => {
+            const summary = new MutationSummary({
+                callback: summaries => {
+                    logger.debug('playlist summaries', summaries);
+                    summaries[0].added
+                        .map(ytIconButton => ytIconButton as HTMLElement)
+                        .forEach(moreOptionsButton => {
+                            const ytdPlaylistVideoRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
+                                .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
+                                .consume();
+                            setupRemoveButtonIfNotPresent(moreOptionsButton, ytdPlaylistVideoRenderer);
+                        });
+                },
+                rootNode: rootNode,
+                queries: [
+                    {element: 'yt-icon-button#button'}
+                ]
+            })
+            summary.disconnect();
+            return summary;
+        }
+    );
+}
+
 function clickRemoveMenuEntryInMoreOptionsMenu(moreOptionsMenu: HTMLElement): void {
     contentScriptObserversManager.upsertOneshotObserver(moreOptionsMenuObserver).observe();
     moreOptionsMenu.click();
@@ -142,14 +140,10 @@ function initContentScript(moreOptionsButtons: HTMLElement[]): void {
     const popupMenu = HtmlTreeNavigator.startFrom(document.body)
         .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
         .consume();
-    initMoreOptionsMenuMutationSummary(popupMenu);
+    initMoreOptionsMenuObserver(popupMenu);
+    initPlaylistObserver(ytdPlaylistVideoListRenderer);
 
-    contentScriptObserversManager.addBackgroundObserver(new PageObserver(() => playlistLoadingNewEntriesObserver, {
-        targetNode: ytdPlaylistVideoListRenderer,
-        initOptions: {
-            subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
-        }
-    })).observe();
+    contentScriptObserversManager.addBackgroundObserver(playlistObserver).observe();
 }
 
 export function runPlaylistScriptIfTargetElementExists(): void {
