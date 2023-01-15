@@ -1,4 +1,4 @@
-import {Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
+import {AttributeNames, Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {
@@ -19,29 +19,7 @@ import {MutationSummary} from "mutation-summary";
 const logger = contentLogProvider.getLogger(LogProvider.PLAYLIST);
 
 let playlistMutationSummary: MutationSummary;
-let moreOptionsMenuMutationSummary: MutationSummary;
-
-/*
-If we do not wait for the popup content to update, the first entry in the playlist is deleted due to the
- HTML load performed with the first entry.
- */
-const menuUpdatedObserver = new MutationObserver((mutations, observer) => {
-    mutations.forEach((mutation) => {
-        if (mutation.oldValue === '') {
-            const tpYtPaperListBox: HTMLElement = mutation.target as HTMLElement;
-            const removeMenuEntry = HtmlTreeNavigator.startFrom(tpYtPaperListBox)
-                .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
-                .intoParentNavigator()
-                .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
-                .consume();
-
-            if (removeMenuEntry) {
-                removeMenuEntry.click();
-            }
-            observer.disconnect();
-        }
-    })
-});
+let moreOptionsMenuObserver: OneshotObserver;
 
 /*
 Register an observer to add the remove button to new playlist items loaded afterwards. This only
@@ -74,47 +52,71 @@ const playlistLoadingNewEntriesObserver = new MutationObserver((mutations) => {
 function setupRemoveButton(moreOptionsMenu: HTMLElement, ytdPlaylistVideoRenderer: HTMLElement): void {
     const removeButton = QaHtmlElements.removeButton();
     removeButton.onclick = () => {
-        moreOptionsMenu.click();
-        const popupMenu = HtmlTreeNavigator.startFrom(document.body)
-            .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
-            .consume();
-
-        if (!popupMenu) {
-            logger.error('Could not find popup menu');
-            return;
-        }
-
-        contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
-            OneshotObserverId.PLAYLIST_MENU_UPDATED_OBSERVER,
-            moreOptionsMenuMutationSummary
-        )).observe();
-    };
+        clickRemoveMenuEntryInMoreOptionsMenu(moreOptionsMenu);
+    }
     ytdPlaylistVideoRenderer.append(removeButton);
 }
 
 function setupRemoveButtonIfNotPresent(moreOptionsButton: HTMLElement, ytdPlaylistVideoRenderer: HTMLElement): void {
-    const existingRemoveButton = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
-        .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON));
+    const existingRemoveButton: HTMLElement = HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
+        .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON))
+        .consume();
     if (!!ytdPlaylistVideoRenderer && !existingRemoveButton) {
         setupRemoveButton(moreOptionsButton, ytdPlaylistVideoRenderer);
     }
 }
 
 function initMoreOptionsMenuMutationSummary(ytdPopupContainer: Node): void {
-    moreOptionsMenuMutationSummary = new MutationSummary({
-        callback: summaries => {
-            logger.debug('more options summary', summaries);
-        },
-        rootNode: ytdPopupContainer,
-        queries: [
-            {all: true}
-        ]
-    });
-    moreOptionsMenuMutationSummary.disconnect();
+    moreOptionsMenuObserver = new OneshotObserver(
+        OneshotObserverId.PLAYLIST_MENU_UPDATED_OBSERVER,
+        disconnectFn => {
+            const summary = new MutationSummary({
+                callback: summaries => {
+                    const removeSvgPaths: HTMLElement[] = summaries[0].added
+                        .filter(addedNode => addedNode.nodeName.toLowerCase() === 'path')
+                        .map(pathNode => pathNode as HTMLElement)
+                        .filter(pathElement => pathElement.getAttribute(AttributeNames.D) === SVG_DRAW_PATH.TRASH_ICON);
+
+                    if (removeSvgPaths.length > 0) {
+                        // The "More Options" popup is rendered for the first time -> Relevant SVG is loaded in at some point.
+                        disconnectFn();
+
+                        // There should be only one remove menu entry.
+                        HtmlParentNavigator.startFrom(removeSvgPaths[0])
+                            .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+                            .consume()
+                            .click();
+                    } else if (summaries[1].removed.length > 0) {
+                        // The "More Options" popup was already rendered once -> Find the relevant entry by the
+                        // hidden attribute being removed.
+                        summaries[1].removed
+                            .map(ytdMenuServiceItem => ytdMenuServiceItem as HTMLElement)
+                            .filter(
+                                removedFromElement => HtmlTreeNavigator.startFrom(removedFromElement)
+                                    .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
+                                    .exists()
+                            )
+                            // Only a single element should match the above filter.
+                            .forEach(removeMenuEntry => {
+                                disconnectFn();
+                                removeMenuEntry.click();
+                            });
+                    }
+                },
+                rootNode: ytdPopupContainer,
+                queries: [
+                    {all: true},
+                    {attribute: 'hidden'}
+                ]
+            });
+            summary.disconnect();
+            return summary;
+        }
+    );
 }
 
-function clickRemoveOptionInMoreOptionsMenu(moreOptionsMenu: HTMLElement): void {
-    moreOptionsMenuMutationSummary.reconnect();
+function clickRemoveMenuEntryInMoreOptionsMenu(moreOptionsMenu: HTMLElement): void {
+    contentScriptObserversManager.upsertOneshotObserver(moreOptionsMenuObserver).observe();
     moreOptionsMenu.click();
 }
 
@@ -142,7 +144,7 @@ function initContentScript(moreOptionsButtons: HTMLElement[]): void {
         .consume();
     initMoreOptionsMenuMutationSummary(popupMenu);
 
-    contentScriptObserversManager.addBackgroundObserver(new PageObserver(playlistLoadingNewEntriesObserver, {
+    contentScriptObserversManager.addBackgroundObserver(new PageObserver(() => playlistLoadingNewEntriesObserver, {
         targetNode: ytdPlaylistVideoListRenderer,
         initOptions: {
             subtree: true, attributes: true, attributeOldValue: true, attributeFilter: ['title']
@@ -161,7 +163,7 @@ export function runPlaylistScriptIfTargetElementExists(): void {
             return {ytIconButtons: ytIconButtons};
         })
         .observeFn(observer =>
-            contentScriptObserversManager.addBackgroundObserver(new PageObserver(observer, {
+            contentScriptObserversManager.addBackgroundObserver(new PageObserver(() => observer, {
                 targetNode: document.body,
                 initOptions: {
                     childList: true, subtree: true
