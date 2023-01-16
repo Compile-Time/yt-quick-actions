@@ -37,9 +37,6 @@ function setupWatchLaterButtonIfNotPresent(videoMenuButton: HTMLElement): void {
 }
 
 function createWatchLaterButton(videoMenuButton: HTMLElement): QaButtonInContainer {
-    // FIXME: For some reason the watch later button propagates the click to the home page video causing it to be
-    //  added to watch later and to navigate to the video page. It is not an issue with the overlapping div element
-    //  created by the extension, as changing pointer-events to auto still causes the button to propagate the event.
     const watchLaterButton = QaHtmlElements.watchLaterHomeVideoButton();
     watchLaterButton.buttonElement.onclick = () => {
         contentScriptObserversManager.upsertOneshotObserver(saveToWatchLaterEntryObserver).observe();
@@ -115,7 +112,9 @@ function initHomePageVideosLoadingObserverNew(rootNode: Node): void {
                 },
                 rootNode: rootNode,
                 queries: [
-                    {element: 'yt-icon-button#button'}
+                    // Do not use the yt-icon-element here. For some reason a click on a yt-icon-button gets
+                    // propagated to the parent container which causes YouTube to play the video.
+                    {element: 'button#button'}
                 ]
             });
             summary.disconnect();
