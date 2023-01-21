@@ -72,15 +72,25 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
                         // The "More Options" popup was already rendered once -> Find the relevant entry by the
                         // hidden attribute being removed.
                         summaries[1].removed
-                            .map(ytdMenuServiceItem => ytdMenuServiceItem as HTMLElement)
-                            .filter(ytdMenuServiceItem => HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
-                                .filter(new TagNavigationFilter(Tags.YT_ICON))
-                                .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
-                                .exists())
+                            .map(ytdMenuServiceItem => (ytdMenuServiceItem as HTMLElement))
+                            .filter(
+                                ytdMenuServiceItem => HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
+                                    .filter(new TagNavigationFilter(Tags.YT_ICON))
+                                    .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
+                                    .exists()
+                            )
                             // Only a single entry should remain after the filter.
-                            .forEach(removeYtdServiceMenuItem => {
-                                disconnectFn();
-                                removeYtdServiceMenuItem.click();
+                            .forEach(potentialRemoveServiceMenuEntry => {
+                                logger.debug(potentialRemoveServiceMenuEntry);
+                                // Sometimes the element after filtering will be the share action when removing an
+                                // element from the playlist page, clicking a video in the playlist and then
+                                // removing an entry in the active playlist panel. This quirk exists due to
+                                // YouTube's weird menu popup update process. Therefore, it is necessary to check
+                                // again if we are dealing with the right menu entry here.
+                                if (potentialRemoveServiceMenuEntry.getAttribute(AttributeNames.D) === SVG_DRAW_PATH.TRASH_ICON) {
+                                    disconnectFn();
+                                    potentialRemoveServiceMenuEntry.click();
+                                }
                             });
                     }
                 },
