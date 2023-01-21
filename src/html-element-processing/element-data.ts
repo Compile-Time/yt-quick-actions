@@ -44,7 +44,6 @@ export enum Ids {
 
 export enum AttributeNames {
     D = 'd',
-    HIDDEN = 'hidden',
 }
 
 export enum SVG_DRAW_PATH {

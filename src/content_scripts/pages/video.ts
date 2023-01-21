@@ -145,14 +145,13 @@ function initHalfScreenSaveObserver(ytdPopupContainer: Node) {
                         summaries[1].removed
                             .map(ytdMenuServiceItemRenderer => ytdMenuServiceItemRenderer as HTMLElement)
                             .filter(
-                                removedFromElement => !!HtmlTreeNavigator.startFrom(removedFromElement)
+                                removedFromElement => HtmlTreeNavigator.startFrom(removedFromElement)
                                     .filter(new TagNavigationFilter(Tags.YT_ICON))
                                     .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_SAVE))
-                                    .consume()
+                                    .exists()
                             )
                             .forEach(ytdMenuServiceItemRenderer => {
                                 disconnectFn();
-
                                 clickSaveToWatchLaterCheckbox(ytdMenuServiceItemRenderer);
                             });
                     }
