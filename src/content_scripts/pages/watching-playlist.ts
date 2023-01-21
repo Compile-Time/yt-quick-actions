@@ -46,9 +46,9 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
  * playlist" entry when it appears. The {@link MutationSummary} both works for an active playlist displayed to the
  * right of a video or below a video.
  *
- * @param rootNode - The node to watch for changes
+ * @param ytdPopupContainer - A YouTube ytd-popup-container HTML element that should be watched for changes
  */
-function initMoreOptionsMenuObserver(rootNode: Node): void {
+function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
     moreOptionsMenuObserver = new OneshotObserver(
         OneshotObserverId.REMOVE_POPUP_ENTRY_READY,
         disconnectFn => {
@@ -84,7 +84,7 @@ function initMoreOptionsMenuObserver(rootNode: Node): void {
                             });
                     }
                 },
-                rootNode: rootNode,
+                rootNode: ytdPopupContainer,
                 queries: [
                     {all: true},
                     {attribute: 'hidden'}

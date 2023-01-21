@@ -32,9 +32,9 @@ let halfScreenSaveObserver: OneshotObserver;
  * One important implementation detail is that the popup dialog will initialize all its HTML on the first appearance
  * and only removes/adds tags or changes tag attributes on subsequent appearances.
  *
- * @param popupContainer - The root node from which the {@link MutationSummary} should begin watching for changes
+ * @param ytdPopupContainer - A YouTube ytd-popup-container HTML element that should be watched for changes
  */
-function initFullScreenSaveObserver(popupContainer: Node) {
+function initFullScreenSaveObserver(ytdPopupContainer: Node) {
     fullScreenSaveObserver = new OneshotObserver(
         OneshotObserverId.SAVE_TO_FULL_SCREEN_POPUP_READY,
         disconnectFn => {
@@ -91,7 +91,7 @@ function initFullScreenSaveObserver(popupContainer: Node) {
                             });
                     }
                 },
-                rootNode: popupContainer,
+                rootNode: ytdPopupContainer,
                 queries: [
                     {all: true},
                     {attribute: 'aria-hidden'}
@@ -116,9 +116,9 @@ function initFullScreenSaveObserver(popupContainer: Node) {
  * "Save" action. Because the "Save" action only exists in either the more options popup or directly under
  * the video both cases need to be handled.
  *
- * @param popupContainer - The root node from which the {@link MutationSummary} should begin watching for changes
+ * @param ytdPopupContainer - A YouTube ytd-popup-container HTML element that should be watched for changes
  */
-function initHalfScreenSaveObserver(popupContainer: Node) {
+function initHalfScreenSaveObserver(ytdPopupContainer: Node) {
     halfScreenSaveObserver = new OneshotObserver(
         OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
         disconnectFn => {
@@ -157,7 +157,7 @@ function initHalfScreenSaveObserver(popupContainer: Node) {
                             });
                     }
                 },
-                rootNode: popupContainer,
+                rootNode: ytdPopupContainer,
                 queries: [
                     {all: true},
                     {attribute: 'hidden'}

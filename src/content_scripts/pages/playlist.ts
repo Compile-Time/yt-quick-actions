@@ -51,7 +51,7 @@ function setupRemoveButtonIfNotPresent(moreOptionsButton: HTMLElement): void {
  * One important implementation detail is that the drop-down content will initialize all its HTML on the first
  * appearance and only removes/adds tags or changes tag attributes on subsequent appearances.
  *
- * @param ytdPopupContainer
+ * @param ytdPopupContainer - A YouTube ytd-popup-container HTML element that should be watched for changes
  */
 function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
     moreOptionsMenuObserver = new OneshotObserver(
@@ -110,9 +110,9 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
  * remove button for new videos added to the playlist container. A playlist always loads videos in batches of 100.
  * If the end of the playlist is reached then the next 100 videos will be loaded.
  *
- * @param rootNode - The root node from with changes should be observed
+ * @param ytdPlaylistVideoListRenderer - A YouTube ytd-playlist-video-list-renderer HTML element to watch for changes.
  */
-function initPlaylistObserver(rootNode: Node): void {
+function initPlaylistObserver(ytdPlaylistVideoListRenderer: Node): void {
     playlistObserver = new PageObserver(
         () => {
             const summary = new MutationSummary({
@@ -121,7 +121,7 @@ function initPlaylistObserver(rootNode: Node): void {
                         .map(ytIconButton => ytIconButton as HTMLElement)
                         .forEach(moreOptionsButton => setupRemoveButtonIfNotPresent(moreOptionsButton));
                 },
-                rootNode: rootNode,
+                rootNode: ytdPlaylistVideoListRenderer,
                 queries: [
                     {element: 'yt-icon-button#button'}
                 ]

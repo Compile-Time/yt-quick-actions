@@ -52,9 +52,9 @@ function createWatchLaterButton(videoMenuButton: HTMLElement): QaButtonInContain
  * The created {@link MutationSummary} watches for changes in YouTube's popup container and clicks the "Save To
  * Watch Later" entry when it appears.
  *
- * @param rootNode - The element to watch for changes
+ * @param ytdPopupContainer - A YouTube ytd-popup-container HTML element that should be watched for changes
  */
-function initSaveToWatchLaterEntryObserver(rootNode: Node): void {
+function initSaveToWatchLaterEntryObserver(ytdPopupContainer: Node): void {
     saveToWatchLaterEntryObserver = new OneshotObserver(
         OneshotObserverId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
         disconnectFn => {
@@ -91,7 +91,7 @@ function initSaveToWatchLaterEntryObserver(rootNode: Node): void {
                             });
                     }
                 },
-                rootNode: rootNode,
+                rootNode: ytdPopupContainer,
                 queries: [
                     {all: true},
                     {attribute: 'hidden'}
@@ -110,9 +110,9 @@ function initSaveToWatchLaterEntryObserver(rootNode: Node): void {
  * The created {@link MutationSummary} watches for the appearance of new video grid rows to add a Quick Action watch
  * later button to it.
  *
- * @param rootNode - The element to watch for changes
+ * @param divContainerForYtdRichGridRows - A div element containing YouTube's ytd-rich-grid-row elements
  */
-function initHomePageVideosLoadingObserverNew(rootNode: Node): void {
+function initHomePageVideosLoadingObserverNew(divContainerForYtdRichGridRows: Node): void {
     homePageVideosLoadingObserver = new PageObserver(
         () => {
             const summary = new MutationSummary({
@@ -128,7 +128,7 @@ function initHomePageVideosLoadingObserverNew(rootNode: Node): void {
                             .forEach(moreOptionsButton => setupWatchLaterButtonIfNotPresent(moreOptionsButton));
                     }
                 },
-                rootNode: rootNode,
+                rootNode: divContainerForYtdRichGridRows,
                 queries: [
                     // Do not use the yt-icon-element here. For some reason a click on a yt-icon-button gets
                     // propagated to the parent container which causes YouTube to play the video.
