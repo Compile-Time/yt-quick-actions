@@ -45,6 +45,15 @@ function createWatchLaterButton(videoMenuButton: HTMLElement): QaButtonInContain
     return watchLaterButton;
 }
 
+/**
+ * Initialize a {@link OneshotObserver} with a {@link MutationSummary} that watches the more options popup of a home
+ * page video and clicks the "Save to Watch Later" menu.
+ *
+ * The created {@link MutationSummary} watches for changes in YouTube's popup container and clicks the "Save To
+ * Watch Later" entry when it appears.
+ *
+ * @param rootNode - The element to watch for changes
+ */
 function initSaveToWatchLaterEntryObserver(rootNode: Node): void {
     saveToWatchLaterEntryObserver = new OneshotObserver(
         OneshotObserverId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
@@ -94,6 +103,15 @@ function initSaveToWatchLaterEntryObserver(rootNode: Node): void {
     );
 }
 
+/**
+ * Initialize a {@link PageObserver} with a {@link MutationSummary} that watches the home page for new videos being
+ * loaded.
+ *
+ * The created {@link MutationSummary} watches for the appearance of new video grid rows to add a Quick Action watch
+ * later button to it.
+ *
+ * @param rootNode - The element to watch for changes
+ */
 function initHomePageVideosLoadingObserverNew(rootNode: Node): void {
     homePageVideosLoadingObserver = new PageObserver(
         () => {
