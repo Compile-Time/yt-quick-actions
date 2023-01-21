@@ -14,28 +14,11 @@ import {
 } from "../../html-element-processing/element-watcher/mutation-element-exists-watcher";
 import {LogProvider} from "../../logging/log-provider";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
+import {MutationSummary} from "mutation-summary";
 
 const logger = contentLogProvider.getLogger(LogProvider.WATCHING_PLAYLIST);
 
-/*
-Wait for the menu popup to update so the correct video is removed.
-*/
-const removePopupEntryReadyObserver = new MutationObserver((mutations, observer) => {
-    for (const mutation of mutations) {
-        const ytdMenuServiceItemRenderer = mutation.target as HTMLElement;
-        const removeMenuEntry: HTMLElement = HtmlTreeNavigator.startFrom(ytdMenuServiceItemRenderer)
-            .filter(new TagNavigationFilter(Tags.YT_ICON))
-            .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
-            .intoParentNavigator()
-            .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
-            .consume();
-
-        if (!!removeMenuEntry && mutation.oldValue === '') {
-            removeMenuEntry.click();
-            observer.disconnect();
-        }
-    }
-});
+let moreOptionsMenuObserver: OneshotObserver;
 
 function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
     const button = QaHtmlElements.removeButtonInWatchingPlaylist();
@@ -50,46 +33,95 @@ function setupRemoveButton(element: HTMLElement): HTMLButtonElement {
             return;
         }
 
-        contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(
-            OneshotObserverId.REMOVE_POPUP_ENTRY_READY,
-            () => removePopupEntryReadyObserver,
-            {
-                targetNode: popupMenu,
-                initOptions: {
-                    subtree: true, attributes: true, attributeOldValue: true, attributeFilter: [AttributeNames.HIDDEN]
-                }
-            }
-        )).observe();
+        contentScriptObserversManager.upsertOneshotObserver(moreOptionsMenuObserver).observe();
     };
     return button;
 }
 
+/**
+ * Initialize a {@link OneshotObserver} with a {@link MutationSummary} that watches the more options popup of active
+ * playlist entry.
+ *
+ * The created {@link MutationSummary} watches for changes in YouTube's popup container and clicks the "Remove from
+ * playlist" entry when it appears. The {@link MutationSummary} both works for an active playlist displayed to the
+ * right of a video or below a video.
+ *
+ * @param rootNode - The node to watch for changes
+ */
+function initMoreOptionsMenuObserver(rootNode: Node): void {
+    moreOptionsMenuObserver = new OneshotObserver(
+        OneshotObserverId.REMOVE_POPUP_ENTRY_READY,
+        disconnectFn => {
+            const summary = new MutationSummary({
+                callback: summaries => {
+                    const removeSvgPaths: HTMLElement[] = summaries[0].added
+                        .filter(addedNode => addedNode.nodeName.toLowerCase() === 'path')
+                        .map(pathNode => pathNode as HTMLElement)
+                        .filter(pathElement => pathElement.getAttribute(AttributeNames.D) === SVG_DRAW_PATH.TRASH_ICON);
+
+                    if (removeSvgPaths.length > 0) {
+                        // The "More Options" popup is rendered for the first time -> Relevant SVG is loaded in at some point.
+                        disconnectFn();
+
+                        // There should be only one remove menu entry.
+                        HtmlParentNavigator.startFrom(removeSvgPaths[0])
+                            .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+                            .consume()
+                            .click();
+                    } else if (summaries[1].removed.length > 0) {
+                        // The "More Options" popup was already rendered once -> Find the relevant entry by the
+                        // hidden attribute being removed.
+                        summaries[1].removed
+                            .map(ytdMenuServiceItem => ytdMenuServiceItem as HTMLElement)
+                            .filter(ytdMenuServiceItem => HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
+                                .filter(new TagNavigationFilter(Tags.YT_ICON))
+                                .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
+                                .exists())
+                            // Only a single entry should remain after the filter.
+                            .forEach(removeYtdServiceMenuItem => {
+                                disconnectFn();
+                                removeYtdServiceMenuItem.click();
+                            });
+                    }
+                },
+                rootNode: rootNode,
+                queries: [
+                    {all: true},
+                    {attribute: 'hidden'}
+                ]
+            })
+            summary.disconnect();
+            return summary;
+        },
+    );
+}
+
 function initContentScript(playlistPanelVideoRendererItems: HTMLElement[]): void {
-    const ytMenuIconButtons = playlistPanelVideoRendererItems
-        .map(element => HtmlTreeNavigator.startFrom(element)
+    const ytdPopupContainer = HtmlTreeNavigator.startFrom(document.body)
+        .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+        .consume();
+
+    initMoreOptionsMenuObserver(ytdPopupContainer);
+
+    playlistPanelVideoRendererItems
+        .map(playlistPanelVideoRendererItem => HtmlTreeNavigator.startFrom(playlistPanelVideoRendererItem)
             .findFirst(new IdNavigationFilter(Tags.YT_ICON_BUTTON, Ids.BUTTON))
             .consume()
-        );
+        )
+        .forEach(ytMenuIconButton => {
+            const removeButton = setupRemoveButton(ytMenuIconButton);
 
-    // Initialize the menu popup to prevent the first click on any Quick Action element to only show the popup.
-    const firstYtMenuIconButtons = ytMenuIconButtons[0];
-    firstYtMenuIconButtons.click();
-    firstYtMenuIconButtons.click();
+            const playlistItem = HtmlParentNavigator.startFrom(ytMenuIconButton)
+                .find(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
+                .consume();
 
-    for (const ytMenuIconButton of ytMenuIconButtons) {
-        const removeButton = setupRemoveButton(ytMenuIconButton);
-
-        const playlistItem = HtmlParentNavigator.startFrom(ytMenuIconButton)
-            .find(new IdNavigationFilter(Tags.YTD_PLAYLIST_PANEL_VIDEO_RENDERER, Ids.PLAYLIST_ITEMS))
-            .consume();
-
-        const existingRemoveButton = HtmlTreeNavigator.startFrom(playlistItem)
-            .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON))
-            .consume();
-        if (!existingRemoveButton) {
-            playlistItem.append(removeButton);
-        }
-    }
+            const existingRemoveButton = HtmlTreeNavigator.startFrom(playlistItem)
+                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON))
+                .consume();
+            if (!existingRemoveButton) {
+                playlistItem.append(removeButton);
+            }
+        });
 }
 
 export function runWatchingPlaylistScriptIfTargetElementExists(): void {
