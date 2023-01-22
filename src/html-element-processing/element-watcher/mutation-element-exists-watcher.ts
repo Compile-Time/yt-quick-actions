@@ -2,7 +2,7 @@ import {ElementWatcher} from "./element-watcher";
 import {ElementWatcherResult} from "./element-watcher-result";
 
 export class MutationElementExistsWatcher extends ElementWatcher<MutationElementExistsWatcher> {
-    private mutationObserverFn: ((observer: MutationObserver) => void);
+    private mutationObserverFn: ((notStartedObserver: MutationObserver) => void);
 
     private constructor() {
         super()

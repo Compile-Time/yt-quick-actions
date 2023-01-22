@@ -1,4 +1,4 @@
-import {AttributeNames, Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
+import {Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlParentNavigator} from "../../html-navigation/html-parent-navigator";
 import {
@@ -59,40 +59,21 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
         disconnectFn => {
             const summary = new MutationSummary({
                 callback: summaries => {
-                    const removeSvgPaths: HTMLElement[] = summaries[0].added
-                        .filter(addedNode => addedNode.nodeName.toLowerCase() === 'path')
-                        .map(pathNode => pathNode as HTMLElement)
-                        .filter(pathElement => pathElement.getAttribute(AttributeNames.D) === SVG_DRAW_PATH.TRASH_ICON);
-
-                    if (removeSvgPaths.length > 0) {
-                        // The "More Options" popup is rendered for the first time -> Relevant SVG is loaded in at some point.
-                        disconnectFn();
-
-                        // There should be only one remove menu entry.
-                        HtmlParentNavigator.startFrom(removeSvgPaths[0])
-                            .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
-                            .consume()
-                            .click();
-                    } else if (summaries[1].removed.length > 0) {
-                        // The "More Options" popup was already rendered once -> Find the relevant entry by the
-                        // hidden attribute being removed.
-                        summaries[1].removed
-                            .map(ytdMenuServiceItem => ytdMenuServiceItem as HTMLElement)
-                            .filter(
-                                ytdMenuServiceItem => HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
-                                    .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
-                                    .exists()
-                            )
-                            // Only a single element should match the above filter.
-                            .forEach(removeMenuEntry => {
-                                disconnectFn();
-                                removeMenuEntry.click();
-                            });
-                    }
+                    summaries[0].removed
+                        .map(ytdMenuServiceItem => ytdMenuServiceItem as HTMLElement)
+                        .filter(
+                            ytdMenuServiceItem => HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
+                                .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON))
+                                .exists()
+                        )
+                        // Only a single element should match the above filter.
+                        .forEach(removeMenuEntry => {
+                            disconnectFn();
+                            removeMenuEntry.click();
+                        });
                 },
                 rootNode: ytdPopupContainer,
                 queries: [
-                    {all: true},
                     {attribute: 'hidden'}
                 ]
             });
@@ -141,6 +122,11 @@ function initContentScript(moreOptionsButtons: HTMLElement[]): void {
     moreOptionsButtons.forEach(moreOptionsButton => setupRemoveButtonIfNotPresent(moreOptionsButton));
 
     const firstMenuButton = moreOptionsButtons[0] as HTMLButtonElement;
+
+    // Initialize menu popup content.
+    firstMenuButton.click();
+    firstMenuButton.click();
+
     const ytdPlaylistVideoListRenderer = HtmlParentNavigator.startFrom(firstMenuButton)
         .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
         .consume();

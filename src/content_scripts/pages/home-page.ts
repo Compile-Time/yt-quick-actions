@@ -4,7 +4,7 @@ import {
     SvgDrawPathNavigationFilter,
     TagNavigationFilter
 } from "../../html-navigation/filter/navigation-filter";
-import {AttributeNames, Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
+import {Ids, SVG_DRAW_PATH, Tags} from "../../html-element-processing/element-data";
 import {QaButtonInContainer, QaHtmlElements} from "../../html-element-processing/qa-html-elements";
 import {HtmlTreeNavigator} from "../../html-navigation/html-tree-navigator";
 import {OneshotObserver, PageObserver} from "../../observation/observer-types";
@@ -60,40 +60,21 @@ function initSaveToWatchLaterEntryObserver(ytdPopupContainer: Node): void {
         disconnectFn => {
             const summary = new MutationSummary({
                 callback: summaries => {
-                    const watchLaterSvgPaths: HTMLElement[] = summaries[0].added
-                        .filter(addedNode => addedNode.nodeName.toLowerCase() === 'path')
-                        .map(pathNode => pathNode as HTMLElement)
-                        .filter(pathElement => pathElement.getAttribute(AttributeNames.D) === SVG_DRAW_PATH.WATCH_LATER);
-
-                    if (watchLaterSvgPaths.length > 0) {
-                        // The "More Options" popup is rendered for the first time -> Relevant SVG is loaded in at some point.
-                        disconnectFn();
-
-                        // There should be only one watch later menu entry.
-                        HtmlParentNavigator.startFrom(watchLaterSvgPaths[0])
-                            .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
-                            .consume()
-                            .click();
-                    } else if (summaries[1].removed.length > 0) {
-                        // The "More Options" popup was already rendered once -> Find the relevant entry by the
-                        // hidden attribute being removed.
-                        summaries[1].removed
-                            .map(ytdMenuServiceItemRenderer => ytdMenuServiceItemRenderer as HTMLElement)
-                            .filter(
-                                ytdMenuServiceItemRenderer => HtmlTreeNavigator.startFrom(ytdMenuServiceItemRenderer)
-                                    .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.WATCH_LATER))
-                                    .exists()
-                            )
-                            // Only a single element should match the above filter.
-                            .forEach(watchLaterMenuEntry => {
-                                disconnectFn();
-                                watchLaterMenuEntry.click();
-                            });
-                    }
+                    summaries[0].removed
+                        .map(ytdMenuServiceItemRenderer => ytdMenuServiceItemRenderer as HTMLElement)
+                        .filter(
+                            ytdMenuServiceItemRenderer => HtmlTreeNavigator.startFrom(ytdMenuServiceItemRenderer)
+                                .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.WATCH_LATER))
+                                .exists()
+                        )
+                        // Only a single element should match the above filter.
+                        .forEach(watchLaterMenuEntry => {
+                            disconnectFn();
+                            watchLaterMenuEntry.click();
+                        });
                 },
                 rootNode: ytdPopupContainer,
                 queries: [
-                    {all: true},
                     {attribute: 'hidden'}
                 ]
             });
@@ -141,6 +122,33 @@ function initHomePageVideosLoadingObserverNew(divContainerForYtdRichGridRows: No
     );
 }
 
+function initMoreOptionsMenuContent(ytdRichGridRow: HTMLElement): void {
+    MutationElementExistsWatcher.build()
+        .queryFn(() => {
+            const button = HtmlTreeNavigator.startFrom(ytdRichGridRow)
+                .filter(new TagNavigationFilter(Tags.YTD_RICH_GRID_MEDIA))
+                .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.BUTTON))
+                .consume();
+            return {button: button};
+        })
+        .observeFn(notStartedObserver => {
+            contentScriptObserversManager.upsertOneshotObserver(new OneshotObserver(OneshotObserverId.HOME_PAGE_MENU_UPDATED_OBSERVER,
+                () => notStartedObserver,
+                {
+                    targetNode: ytdRichGridRow,
+                    initOptions: {
+                        childList: true, subtree: true
+                    }
+                })).observe()
+        })
+        .start()
+        .then(elementWatcherResult => {
+            const button = elementWatcherResult.button as HTMLElement;
+            button.click();
+            button.click();
+        });
+}
+
 function initContentScript(ytdRichGridRows: HTMLElement[]): void {
     const firstYtdRichGridRow = ytdRichGridRows[0];
     const divForYtdRichGridRows = firstYtdRichGridRow.parentElement;
@@ -156,6 +164,7 @@ function initContentScript(ytdRichGridRows: HTMLElement[]): void {
 
     initSaveToWatchLaterEntryObserver(popupContainer);
     initHomePageVideosLoadingObserverNew(divForYtdRichGridRows);
+    initMoreOptionsMenuContent(firstYtdRichGridRow);
 
     contentScriptObserversManager.addBackgroundObserver(homePageVideosLoadingObserver).observe();
 }
