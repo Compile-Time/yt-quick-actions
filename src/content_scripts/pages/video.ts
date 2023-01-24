@@ -12,15 +12,19 @@ import {
 } from "../../html-element-processing/element-watcher/mutation-element-exists-watcher";
 import {LogProvider} from "../../logging/log-provider";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
-import {MutationSummary} from "mutation-summary";
+import {MutationSummary, Summary} from "mutation-summary";
 import {OneshotObserver, PageObserver} from "../../observation/observer-types";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
+import {PromiseUtil} from "../../util/promise-util";
+import {ConditionsMatcher} from "../../util/conditions-matcher";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
 
 let fullScreenSaveObserver: OneshotObserver;
 let halfScreenSaveObserver: OneshotObserver;
+
+let moreOptionsMenuChanges: Summary[][] = [];
 
 /**
  * Initialize a {@link OneshotObserver} with a {@link MutationSummary} for a full screen size YouTube browser
@@ -41,7 +45,6 @@ function initFullScreenSaveObserver(ytdPopupContainer: Node) {
             const summary = new MutationSummary({
                 callback: summaries => {
                     const popupCloseSvgPaths: HTMLElement[] = summaries[0].added
-                        .filter(addedNode => addedNode.nodeName.toLowerCase() === 'path')
                         .map(pathNode => pathNode as HTMLElement)
                         .filter(pathElement => pathElement.getAttribute(AttributeNames.D) === SVG_DRAW_PATH.POPUP_CLOSE);
 
@@ -93,7 +96,7 @@ function initFullScreenSaveObserver(ytdPopupContainer: Node) {
                 },
                 rootNode: ytdPopupContainer,
                 queries: [
-                    {all: true},
+                    {element: 'path'},
                     {attribute: 'aria-hidden'}
                 ]
             });
@@ -108,9 +111,7 @@ function initFullScreenSaveObserver(ytdPopupContainer: Node) {
  * window and immediately disconnect from it.
  *
  * The created {@link MutationSummary} will observe changes to YouTube's more options popup drop-down ("..."), so it
- * can trigger the "Save" action for a video. After triggering the save action the {@link MutationSummary} is
- * disconnected and delegates to the {@link fullScreenSaveObserver} to add the video to the "Watch later"
- * playlist.
+ * can collect mutation changes into {@link moreOptionsMenuChanges}. These changes will then be processed after a delay.
  *
  * On half-screen sizes some video actions are hidden into the more options button ("..."). This includes the
  * "Save" action. Because the "Save" action only exists in either the more options popup or directly under
@@ -121,44 +122,12 @@ function initFullScreenSaveObserver(ytdPopupContainer: Node) {
 function initHalfScreenSaveObserver(ytdPopupContainer: Node) {
     halfScreenSaveObserver = new OneshotObserver(
         OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
-        disconnectFn => {
+        () => {
             const summary = new MutationSummary({
-                callback: summaries => {
-                    const saveSvgPaths: HTMLElement[] = summaries[0].added
-                        .filter(addedNode => addedNode.nodeName.toLowerCase() === 'path')
-                        .map(pathNode => pathNode as HTMLElement)
-                        .filter(pathElement => pathElement.getAttribute(AttributeNames.D) === SVG_DRAW_PATH.VIDEO_SAVE);
-
-                    if (saveSvgPaths.length > 0) {
-                        // The "More Options" popup is rendered for the first time -> Relevant SVG is loaded in at some point.
-                        disconnectFn();
-
-                        // There should be only one save menu entry.
-                        const saveMenuEntry = HtmlParentNavigator.startFrom(saveSvgPaths[0])
-                            .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
-                            .consume();
-
-                        clickSaveToWatchLaterCheckbox(saveMenuEntry);
-                    } else if (summaries[1].removed.length > 0) {
-                        // The "More Options" popup was already opened -> 'hidden' attribute should be removed from entries
-                        // that will be displayed.
-                        summaries[1].removed
-                            .map(ytdMenuServiceItemRenderer => ytdMenuServiceItemRenderer as HTMLElement)
-                            .filter(
-                                removedFromElement => HtmlTreeNavigator.startFrom(removedFromElement)
-                                    .filter(new TagNavigationFilter(Tags.YT_ICON))
-                                    .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_SAVE))
-                                    .exists()
-                            )
-                            .forEach(ytdMenuServiceItemRenderer => {
-                                disconnectFn();
-                                clickSaveToWatchLaterCheckbox(ytdMenuServiceItemRenderer);
-                            });
-                    }
-                },
+                callback: summaries => moreOptionsMenuChanges.push(summaries),
                 rootNode: ytdPopupContainer,
                 queries: [
-                    {all: true},
+                    {element: `path[d="${SVG_DRAW_PATH.VIDEO_SAVE}"]`},
                     {attribute: 'hidden'}
                 ]
             });
@@ -166,6 +135,73 @@ function initHalfScreenSaveObserver(ytdPopupContainer: Node) {
             return summary;
         }
     );
+}
+
+function clickSaveToFromAddedSvgPath(listOfSummaries: Summary[][]): void {
+    listOfSummaries.map(summaries => summaries[0])
+        .filter(summary => summary.added.length > 0)
+        .flatMap(summary => summary.added)
+        .map(node => node as HTMLElement)
+        // Valid path elements have a non-empty class attribute.
+        .filter(path => path.getAttribute('class').length > 0)
+        .forEach(path => {
+            const saveMenuEntry = HtmlParentNavigator.startFrom(path)
+                .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+                .consume();
+
+            clickSaveToWatchLaterCheckbox(saveMenuEntry);
+        });
+}
+
+function clickSaveToFromUnhiddenYtdMenuServiceItemRenderer(listOfSummaries: Summary[][]): void {
+    listOfSummaries.map(summaries => summaries[1])
+        .filter(summary => summary.removed.length > 0)
+        .flatMap(summary => summary.removed)
+        .map(node => node as HTMLElement)
+        .filter(
+            removeNode => HtmlTreeNavigator.startFrom(removeNode)
+                .filter(new TagNavigationFilter(Tags.YT_ICON))
+                .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_SAVE))
+                .exists()
+        )
+        .forEach(ytdMenuServiceItemRenderer => {
+            clickSaveToWatchLaterCheckbox(ytdMenuServiceItemRenderer);
+        });
+}
+
+function processMoreOptionsMenuChangesAfterDelay(): void {
+    PromiseUtil.delay(400, () => new Promise<void>(resolve => {
+        const optionsInitFromDifferentPageOrWindowSize = new ConditionsMatcher<Summary[][]>([
+            listOfSummaries => listOfSummaries.some(summaries =>
+                summaries[0].added.length > 0 && summaries[0].removed.length > 0
+            ),
+            listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
+        ]);
+        const optionsInitOnSamePage = new ConditionsMatcher<Summary[][]>([
+            listOfSummaries => listOfSummaries.some(summaries => summaries[0].added.length > 0),
+            listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
+        ]);
+        const onlyHiddenChanges = new ConditionsMatcher<Summary[][]>([
+            listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
+        ]);
+
+        if (optionsInitFromDifferentPageOrWindowSize.matchesAll(moreOptionsMenuChanges)) {
+            clickSaveToFromAddedSvgPath(moreOptionsMenuChanges);
+        } else if (optionsInitOnSamePage.matchesAll(moreOptionsMenuChanges)) {
+            clickSaveToFromAddedSvgPath(moreOptionsMenuChanges);
+        } else if (onlyHiddenChanges.matchesAll(moreOptionsMenuChanges)) {
+            clickSaveToFromUnhiddenYtdMenuServiceItemRenderer(moreOptionsMenuChanges);
+        }
+
+        halfScreenSaveObserver.disconnect();
+        moreOptionsMenuChanges = []
+        return resolve();
+    })).then()
+        .catch(err => {
+            logger.error('[yt-quick-actions] Failed to click "Save To" in half screen', err);
+            moreOptionsMenuChanges = [];
+            halfScreenSaveObserver.disconnect();
+        });
 }
 
 function clickSaveToWatchLaterCheckbox(popupTrigger: HTMLElement): void {
@@ -176,6 +212,7 @@ function clickSaveToWatchLaterCheckbox(popupTrigger: HTMLElement): void {
 function clickSaveToWatchLaterCheckboxForHalfScreenSize(moreOptionsButton: HTMLElement): void {
     contentScriptObserversManager.upsertOneshotObserver(halfScreenSaveObserver).observe();
     moreOptionsButton.click();
+    processMoreOptionsMenuChangesAfterDelay();
 }
 
 function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElement {
