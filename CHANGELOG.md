@@ -6,11 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Unreleased]
+
+## [1.0.1]
+
+This is mostly a bugfix release to make the extension work for all languages
+available in YouTube.
+
+### Added
+
+- RxJS dependency
+- mutation-summary dependency
+- Release archive creation script
+- Documentation for more option menu behaviour in YouTube
+
+### Changed
+
+- Updated dependencies
 
 ### Fixed
 
-- The extension now works correctly for other languages than English
+- The extension only works for the English language (#2)
+- Parcel randomly builds the wrong target
 
 ## [1.0.0]
 
