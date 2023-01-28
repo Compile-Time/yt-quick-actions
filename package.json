@@ -43,6 +43,7 @@
     "loglevel": "^1.8.0",
     "loglevel-plugin-prefix": "^0.8.4",
     "mutation-summary": "^1.0.0",
+    "rxjs": "^7.8.0",
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {

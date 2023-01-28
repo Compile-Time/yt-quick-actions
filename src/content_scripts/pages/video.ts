@@ -15,8 +15,8 @@ import {contentLogProvider, contentScriptObserversManager} from "../init-globals
 import {MutationSummary, Summary} from "mutation-summary";
 import {OneshotObserver, PageObserver} from "../../observation/observer-types";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {PromiseUtil} from "../../util/promise-util";
 import {ConditionsMatcher} from "../../util/conditions-matcher";
+import {buffer, debounceTime, first, Subject} from "rxjs";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
@@ -24,7 +24,8 @@ const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
 let fullScreenSaveObserver: OneshotObserver;
 let halfScreenSaveObserver: OneshotObserver;
 
-let moreOptionsMenuChanges: Summary[][] = [];
+const moreOptionsMenuChanges: Summary[][] = [];
+const moreOptionsMenuChangesSubject: Subject<Summary[]> = new Subject<Summary[]>();
 
 /**
  * Initialize a {@link OneshotObserver} with a {@link MutationSummary} for a full screen size YouTube browser
@@ -124,7 +125,7 @@ function initHalfScreenSaveObserver(ytdPopupContainer: Node) {
         OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
         () => {
             const summary = new MutationSummary({
-                callback: summaries => moreOptionsMenuChanges.push(summaries),
+                callback: summaries => moreOptionsMenuChangesSubject.next(summaries),
                 rootNode: ytdPopupContainer,
                 queries: [
                     {element: `path[d="${SVG_DRAW_PATH.VIDEO_SAVE}"]`},
@@ -169,39 +170,30 @@ function clickSaveToFromUnhiddenYtdMenuServiceItemRenderer(listOfSummaries: Summ
         });
 }
 
-function processMoreOptionsMenuChangesAfterDelay(): void {
-    PromiseUtil.delay(400, () => new Promise<void>(resolve => {
-        const optionsInitFromDifferentPageOrWindowSize = new ConditionsMatcher<Summary[][]>([
-            listOfSummaries => listOfSummaries.some(summaries =>
-                summaries[0].added.length > 0 && summaries[0].removed.length > 0
-            ),
-            listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
-        ]);
-        const optionsInitOnSamePage = new ConditionsMatcher<Summary[][]>([
-            listOfSummaries => listOfSummaries.some(summaries => summaries[0].added.length > 0),
-            listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
-        ]);
-        const onlyHiddenChanges = new ConditionsMatcher<Summary[][]>([
-            listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
-        ]);
+function processMoreOptionsMenuChanges(listOfSummaries: (Summary[])[]): void {
+    const optionsInitFromDifferentPageOrWindowSize = new ConditionsMatcher<(Summary[])[]>([
+        listOfSummaries => listOfSummaries.some(summaries =>
+            summaries[0].added.length > 0 && summaries[0].removed.length > 0
+        ),
+        listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
+    ]);
+    const optionsInitOnSamePage = new ConditionsMatcher<(Summary[])[]>([
+        listOfSummaries => listOfSummaries.some(summaries => summaries[0].added.length > 0),
+        listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
+    ]);
+    const onlyHiddenChanges = new ConditionsMatcher<(Summary[])[]>([
+        listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
+    ]);
 
-        if (optionsInitFromDifferentPageOrWindowSize.matchesAll(moreOptionsMenuChanges)) {
-            clickSaveToFromAddedSvgPath(moreOptionsMenuChanges);
-        } else if (optionsInitOnSamePage.matchesAll(moreOptionsMenuChanges)) {
-            clickSaveToFromAddedSvgPath(moreOptionsMenuChanges);
-        } else if (onlyHiddenChanges.matchesAll(moreOptionsMenuChanges)) {
-            clickSaveToFromUnhiddenYtdMenuServiceItemRenderer(moreOptionsMenuChanges);
-        }
+    if (optionsInitFromDifferentPageOrWindowSize.matchesAll(listOfSummaries)) {
+        clickSaveToFromAddedSvgPath(listOfSummaries);
+    } else if (optionsInitOnSamePage.matchesAll(listOfSummaries)) {
+        clickSaveToFromAddedSvgPath(listOfSummaries);
+    } else if (onlyHiddenChanges.matchesAll(listOfSummaries)) {
+        clickSaveToFromUnhiddenYtdMenuServiceItemRenderer(listOfSummaries);
+    }
 
-        halfScreenSaveObserver.disconnect();
-        moreOptionsMenuChanges = []
-        return resolve();
-    })).then()
-        .catch(err => {
-            logger.error('[yt-quick-actions] Failed to click "Save To" in half screen', err);
-            moreOptionsMenuChanges = [];
-            halfScreenSaveObserver.disconnect();
-        });
+    halfScreenSaveObserver.disconnect();
 }
 
 function clickSaveToWatchLaterCheckbox(popupTrigger: HTMLElement): void {
@@ -211,8 +203,26 @@ function clickSaveToWatchLaterCheckbox(popupTrigger: HTMLElement): void {
 
 function clickSaveToWatchLaterCheckboxForHalfScreenSize(moreOptionsButton: HTMLElement): void {
     contentScriptObserversManager.upsertOneshotObserver(halfScreenSaveObserver).observe();
+
+    const popupContainer = HtmlTreeNavigator.startFrom(document.body)
+        .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+        .consume();
+
+    moreOptionsMenuChangesSubject
+        .pipe(
+            buffer(
+                moreOptionsMenuChangesSubject.pipe(debounceTime(4))
+            ),
+            first()
+        )
+        .subscribe((listOfSummaries: (Summary[])[]) => {
+            logger.debug('subscribe call', listOfSummaries);
+            processMoreOptionsMenuChanges(listOfSummaries);
+            popupContainer.removeAttribute('hidden');
+        });
+
+    popupContainer.setAttribute('hidden', '');
     moreOptionsButton.click();
-    processMoreOptionsMenuChangesAfterDelay();
 }
 
 function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElement {
