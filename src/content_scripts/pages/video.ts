@@ -12,11 +12,11 @@ import {
 } from "../../html-element-processing/element-watcher/mutation-element-exists-watcher";
 import {LogProvider} from "../../logging/log-provider";
 import {contentLogProvider, contentScriptObserversManager} from "../init-globals";
-import {MutationSummary, Summary} from "mutation-summary";
+import {MutationSummary} from "mutation-summary";
 import {OneshotObserver, PageObserver} from "../../observation/observer-types";
 import {OneshotObserverId} from "../../enums/oneshot-observer-id";
-import {ConditionsMatcher} from "../../util/conditions-matcher";
 import {buffer, debounceTime, first, Subject} from "rxjs";
+import {MutationChange} from "../../mutations/mutation-change";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
@@ -24,8 +24,7 @@ const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
 let fullScreenSaveObserver: OneshotObserver;
 let halfScreenSaveObserver: OneshotObserver;
 
-const moreOptionsMenuChanges: Summary[][] = [];
-const moreOptionsMenuChangesSubject: Subject<Summary[]> = new Subject<Summary[]>();
+const moreOptionsMenuChangesSubject: Subject<MutationChange> = new Subject<MutationChange>();
 
 /**
  * Initialize a {@link OneshotObserver} with a {@link MutationSummary} for a full screen size YouTube browser
@@ -112,7 +111,8 @@ function initFullScreenSaveObserver(ytdPopupContainer: Node) {
  * window and immediately disconnect from it.
  *
  * The created {@link MutationSummary} will observe changes to YouTube's more options popup drop-down ("..."), so it
- * can collect mutation changes into {@link moreOptionsMenuChanges}. These changes will then be processed after a delay.
+ * can push summaries into {@link moreOptionsMenuChangesSubject}. These changes will then be processed by RxJS
+ * operations.
  *
  * On half-screen sizes some video actions are hidden into the more options button ("..."). This includes the
  * "Save" action. Because the "Save" action only exists in either the more options popup or directly under
@@ -124,8 +124,9 @@ function initHalfScreenSaveObserver(ytdPopupContainer: Node) {
     halfScreenSaveObserver = new OneshotObserver(
         OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
         () => {
+            const svgPathFilter = new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_SAVE);
             const summary = new MutationSummary({
-                callback: summaries => moreOptionsMenuChangesSubject.next(summaries),
+                callback: summaries => moreOptionsMenuChangesSubject.next(new MutationChange(svgPathFilter, summaries)),
                 rootNode: ytdPopupContainer,
                 queries: [
                     {element: `path[d="${SVG_DRAW_PATH.VIDEO_SAVE}"]`},
@@ -138,59 +139,23 @@ function initHalfScreenSaveObserver(ytdPopupContainer: Node) {
     );
 }
 
-function clickSaveToFromAddedSvgPath(listOfSummaries: Summary[][]): void {
-    listOfSummaries.map(summaries => summaries[0])
-        .filter(summary => summary.added.length > 0)
-        .flatMap(summary => summary.added)
-        .map(node => node as HTMLElement)
-        // Valid path elements have a non-empty class attribute.
-        .filter(path => path.getAttribute('class').length > 0)
-        .forEach(path => {
-            const saveMenuEntry = HtmlParentNavigator.startFrom(path)
-                .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
-                .consume();
+function processMoreOptionsMenuChanges(mutationChanges: MutationChange[]): void {
+    const addedSvgElements = mutationChanges
+        .map(mutationChange => mutationChange.extractAddedSvgElementFromSummaries())
+        .filter(addedSvgElement => !!addedSvgElement);
+    const unHiddenYtdMenuServiceItemRenderers = mutationChanges
+        .map(mutationChange => mutationChange.extractUnHiddenYtdMenuServiceItemRendererFromSummaries())
+        .filter(unHiddenYtdServiceMenuItemRenderer => !!unHiddenYtdServiceMenuItemRenderer)
 
-            clickSaveToWatchLaterCheckbox(saveMenuEntry);
-        });
-}
+    // The order of the if branches matters. The first check should always be if a svg element has been added.
+    if (addedSvgElements.length === 1) {
+        const saveMenuEntry = HtmlParentNavigator.startFrom(addedSvgElements[0])
+            .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+            .consume();
 
-function clickSaveToFromUnhiddenYtdMenuServiceItemRenderer(listOfSummaries: Summary[][]): void {
-    listOfSummaries.map(summaries => summaries[1])
-        .filter(summary => summary.removed.length > 0)
-        .flatMap(summary => summary.removed)
-        .map(node => node as HTMLElement)
-        .filter(
-            removeNode => HtmlTreeNavigator.startFrom(removeNode)
-                .filter(new TagNavigationFilter(Tags.YT_ICON))
-                .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_SAVE))
-                .exists()
-        )
-        .forEach(ytdMenuServiceItemRenderer => {
-            clickSaveToWatchLaterCheckbox(ytdMenuServiceItemRenderer);
-        });
-}
-
-function processMoreOptionsMenuChanges(listOfSummaries: (Summary[])[]): void {
-    const optionsInitFromDifferentPageOrWindowSize = new ConditionsMatcher<(Summary[])[]>([
-        listOfSummaries => listOfSummaries.some(summaries =>
-            summaries[0].added.length > 0 && summaries[0].removed.length > 0
-        ),
-        listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
-    ]);
-    const optionsInitOnSamePage = new ConditionsMatcher<(Summary[])[]>([
-        listOfSummaries => listOfSummaries.some(summaries => summaries[0].added.length > 0),
-        listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
-    ]);
-    const onlyHiddenChanges = new ConditionsMatcher<(Summary[])[]>([
-        listOfSummaries => listOfSummaries.some(summaries => summaries[1].removed.length > 0)
-    ]);
-
-    if (optionsInitFromDifferentPageOrWindowSize.matchesAll(listOfSummaries)) {
-        clickSaveToFromAddedSvgPath(listOfSummaries);
-    } else if (optionsInitOnSamePage.matchesAll(listOfSummaries)) {
-        clickSaveToFromAddedSvgPath(listOfSummaries);
-    } else if (onlyHiddenChanges.matchesAll(listOfSummaries)) {
-        clickSaveToFromUnhiddenYtdMenuServiceItemRenderer(listOfSummaries);
+        clickSaveToWatchLaterCheckbox(saveMenuEntry);
+    } else if (unHiddenYtdMenuServiceItemRenderers.length === 1) {
+        clickSaveToWatchLaterCheckbox(unHiddenYtdMenuServiceItemRenderers[0]);
     }
 
     halfScreenSaveObserver.disconnect();
@@ -215,12 +180,12 @@ function clickSaveToWatchLaterCheckboxForHalfScreenSize(moreOptionsButton: HTMLE
             ),
             first()
         )
-        .subscribe((listOfSummaries: (Summary[])[]) => {
-            logger.debug('subscribe call', listOfSummaries);
-            processMoreOptionsMenuChanges(listOfSummaries);
+        .subscribe((mutationChanges: MutationChange[]) => {
+            processMoreOptionsMenuChanges(mutationChanges);
             popupContainer.removeAttribute('hidden');
         });
 
+    // Hide the popup container so there is no drop-down flicker when triggering a quick action.
     popupContainer.setAttribute('hidden', '');
     moreOptionsButton.click();
 }
