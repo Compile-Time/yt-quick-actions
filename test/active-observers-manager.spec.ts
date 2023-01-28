@@ -14,8 +14,8 @@ describe('ActiveObserversManager', () => {
         const mockObserver1 = mockObserver();
         const mockObserver2 = mockObserver();
 
-        manager.upsertOneshotObserver(new OneshotObserver('test', mockObserver1));
-        manager.upsertOneshotObserver(new OneshotObserver('test', mockObserver2));
+        manager.upsertOneshotObserver(new OneshotObserver('test', () => mockObserver1));
+        manager.upsertOneshotObserver(new OneshotObserver('test', () => mockObserver2));
 
         expect(mockObserver1.disconnect).toHaveBeenCalled();
         expect(mockObserver2.disconnect).not.toHaveBeenCalled();
@@ -28,10 +28,10 @@ describe('ActiveObserversManager', () => {
         const mockObserver3 = mockObserver();
         const mockObserver4 = mockObserver();
 
-        manager.upsertOneshotObserver(new OneshotObserver('test', mockObserver1));
-        manager.upsertOneshotObserver(new OneshotObserver('test2', mockObserver2));
-        manager.addBackgroundObserver(new PageObserver(mockObserver3));
-        manager.addBackgroundObserver(new PageObserver(mockObserver4));
+        manager.upsertOneshotObserver(new OneshotObserver('test', () => mockObserver1));
+        manager.upsertOneshotObserver(new OneshotObserver('test2', () => mockObserver2));
+        manager.addBackgroundObserver(new PageObserver(() => mockObserver3));
+        manager.addBackgroundObserver(new PageObserver(() => mockObserver4));
 
         manager.disconnectAll();
 
