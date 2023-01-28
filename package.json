@@ -4,26 +4,30 @@
     "defaults"
   ],
   "scripts": {
-    "start": "parcel watch --target firefox-dev --host localhost --dist-dir=dist",
-    "start-ch": "parcel watch --target chrome-dev --host localhost --dist-dir=dist",
-    "start-no-hmr": "parcel watch --target firefox-dev --host localhost --no-hmr --dist-dir=dist",
-    "start-no-hmr-ch": "parcel watch --target chrome-dev --host localhost --no-hmr --dist-dir=dist",
-    "build": "parcel build --target firefox-prod --dist-dir=dist",
-    "build-ch": "parcel build --target chrome-prod --dist-dir=dist",
+    "start": "parcel watch --target firefox-dev --host localhost --cache-dir=.parcel-cache/firefox",
+    "start-ch": "parcel watch --target chrome-dev --host localhost --cache-dir=.parcel-cache/chrome",
+    "start-no-hmr": "parcel watch --target firefox-dev --host localhost --no-hmr --cache-dir=.parcel-cache/firefox",
+    "start-no-hmr-ch": "parcel watch --target chrome-dev --host localhost --no-hmr --cache-dir=.parcel-cache/chrome",
+    "build": "parcel build --target firefox-prod --no-cache",
+    "build-ch": "parcel build --target chrome-prod --no-cache",
     "test": "jest"
   },
   "targets": {
     "firefox-dev": {
-      "source": "manifest-firefox.json"
+      "source": "manifest-firefox.json",
+      "distDir": "dist/firefox-dev"
     },
     "chrome-dev": {
-      "source": "manifest-chrome.json"
+      "source": "manifest-chrome.json",
+      "distDir": "dist/chrome-dev"
     },
     "firefox-prod": {
-      "source": "manifest-firefox.json"
+      "source": "manifest-firefox.json",
+      "distDir": "dist/firefox-prod"
     },
     "chrome-prod": {
-      "source": "manifest-chrome.json"
+      "source": "manifest-chrome.json",
+      "distDir": "dist/chrome-prod"
     }
   },
   "@parcel/bundler-default": {
