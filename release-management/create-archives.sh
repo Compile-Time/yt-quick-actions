@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 
 SCRIPT_PATH="$(dirname -- "$0")"
-ARCHIVE_DESTINATION='release-management/archives'
 
-rm -rf "$SCRIPT_PATH"/archives/*.zip
+ARCHIVE_DESTINATION='release-management/archives'
+ARCHIVE_FIREFOX_NAME='yt-quick-actions-firefox.zip'
+ARCHIVE_CHROME_NAME='yt-quick-actions-chrome.zip'
+
+rm -f "$SCRIPT_PATH"/archives/"$ARCHIVE_FIREFOX_NAME"
+rm -f "$SCRIPT_PATH"/archives/"$ARCHIVE_CHROME_NAME"
 
 pushd ../"$SCRIPT_PATH" || exit
 
@@ -15,11 +19,11 @@ npm run build-ch
 pushd dist || exit
 pushd firefox-prod || exit
 
-zip -r -FS ../../"$ARCHIVE_DESTINATION"/yt-quick-actions-firefox.zip *
+zip -r -FS ../../"$ARCHIVE_DESTINATION"/"$ARCHIVE_FIREFOX_NAME" *
 
 popd || exit
 pushd chrome-prod || exit
 
-zip -r -FS ../../"$ARCHIVE_DESTINATION"/yt-quick-actions-chrome.zip *
+zip -r -FS ../../"$ARCHIVE_DESTINATION"/"$ARCHIVE_CHROME_NAME" *
 
 echo 'Successfully created archives!'
