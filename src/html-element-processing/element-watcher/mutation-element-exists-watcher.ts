@@ -1,6 +1,9 @@
 import { ElementWatcher } from "./element-watcher";
 import { ElementWatcherResult } from "./element-watcher-result";
 
+export type ElementQueryFn = () => ElementWatcherResult | null;
+export type MutationObserverFn = (observer: MutationObserver) => void;
+
 export class MutationElementExistsWatcher extends ElementWatcher<MutationElementExistsWatcher> {
   private mutationObserverFn: (notStartedObserver: MutationObserver) => void;
 
@@ -12,15 +15,13 @@ export class MutationElementExistsWatcher extends ElementWatcher<MutationElement
     return new MutationElementExistsWatcher();
   }
 
-  queryFn(
-    elementQueryFn: () => ElementWatcherResult | null
-  ): MutationElementExistsWatcher {
+  queryFn(elementQueryFn: ElementQueryFn): MutationElementExistsWatcher {
     this.elementQueryFn = elementQueryFn;
     return this;
   }
 
   observeFn(
-    mutationObserverFn: (observer: MutationObserver) => void
+    mutationObserverFn: MutationObserverFn
   ): MutationElementExistsWatcher {
     this.mutationObserverFn = mutationObserverFn;
     return this;

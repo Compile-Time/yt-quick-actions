@@ -1,41 +1,48 @@
-import { TabMessage } from "../messaging/tab-message";
-import * as Browser from "webextension-polyfill";
-import { StorageAccessor } from "../storage/storage-accessor";
-import { PageEvent } from "../enums/page-event";
-import { runPlaylistScriptIfTargetElementExists } from "./pages/playlist";
-import {
-  contentLogProvider,
-  contentScriptObserversManager,
-} from "./init-globals";
-import { runHomePageScriptIfTargetElementExists } from "./pages/home-page";
-import { runVideoScriptIfTargetElementExists } from "./pages/video";
-import { runWatchingPlaylistScriptIfTargetElementExists } from "./pages/watching-playlist";
+import { initPlaylistObservers } from "./pages/playlist";
+import { initVideoObservers } from "./pages/video";
+import { initWatchingPlaylistObservers } from "./pages/watching-playlist";
+import { initHomeOrSubscriptionsObservers } from "./pages/home-or-subscriptions";
+import { contentScriptObserversManager } from "./init-globals";
 
-async function processMessage(message: TabMessage): Promise<void> {
-  const logLevel = await StorageAccessor.getLogLevel();
-  contentLogProvider.setContentScriptLoggersLevel(logLevel);
+/**
+ * Initialize the relevant observers for the current YouTube page based on location path.
+ *
+ * This method is used by event listeners for the "yt-navigate-start" event and the "DOMContentLoaded" event. The
+ * reason we need both listeners is the following: On the first ever load of YouTube the "DOMContentLoaded" event is
+ * triggered. Afterward, the "DOMContentLoaded" event is never triggered again. Therefore, we need to listen to the
+ * "yt-navigate-start" event to react to navigation changes inside of YouTube.
+ *
+ * Note that the order of the path checking if statements is important. More explicit statements should go before broad
+ * statements.
+ */
+function init() {
+  contentScriptObserversManager.disconnectAll();
 
-  if (message.disconnectObservers) {
-    contentScriptObserversManager.disconnectAll();
-  }
-
-  switch (message.pageEvent) {
-    case PageEvent.NAVIGATED_TO_HOME_PAGE:
-      runHomePageScriptIfTargetElementExists();
-      break;
-
-    case PageEvent.NAVIGATED_TO_VIDEO:
-      runVideoScriptIfTargetElementExists();
-      break;
-
-    case PageEvent.NAVIGATED_TO_PLAYLIST:
-      runPlaylistScriptIfTargetElementExists();
-      break;
-
-    case PageEvent.NAVIGATED_TO_VIDEO_IN_PLAYLIST:
-      runWatchingPlaylistScriptIfTargetElementExists();
-      break;
+  const pathAndQueryParams = `${location.pathname}${location.search}`;
+  if (
+    pathAndQueryParams.includes("watch") &&
+    pathAndQueryParams.includes("list=WL")
+  ) {
+    initWatchingPlaylistObservers();
+    initVideoObservers();
+  } else if (pathAndQueryParams.includes("watch")) {
+    initVideoObservers();
+  } else if (
+    pathAndQueryParams.includes("playlist") &&
+    pathAndQueryParams.includes("list=WL")
+  ) {
+    initPlaylistObservers();
+  } else if (pathAndQueryParams.includes("subscriptions")) {
+    initHomeOrSubscriptionsObservers();
+  } else if (pathAndQueryParams === "/") {
+    initHomeOrSubscriptionsObservers();
   }
 }
 
-Browser.runtime.onMessage.addListener(processMessage);
+document.addEventListener("yt-navigate-start", () => {
+  init();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  init();
+});

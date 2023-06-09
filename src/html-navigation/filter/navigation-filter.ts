@@ -25,11 +25,8 @@ export abstract class NavigationFilter {
     return JSON.stringify(this);
   }
 
-  protected lowercaseEquals(
-    normalString: string,
-    lowercaseString: string
-  ): boolean {
-    return normalString.toLowerCase() === lowercaseString;
+  protected lowercaseEquals(stringA: string, stringB: string): boolean {
+    return stringA.toLowerCase() === stringB.toLowerCase();
   }
 
   protected lowercaseContains(normalString: string, lowercaseString: string) {

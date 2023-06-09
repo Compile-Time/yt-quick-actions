@@ -6,7 +6,13 @@ import {
 } from "../html-navigation/filter/navigation-filter";
 import { Tags } from "../html-element-processing/element-data";
 
-export class MutationChange {
+/**
+ * Convenience class aggregating {@link Summary} changes and providing extraction methods for a given
+ * `svgTargetFilter`.
+ *
+ * Currently only used for the {@link YtdPopupContainerClicker} class but can be expanded to allow all types of {@link NavigationFilter}.
+ */
+export class MutationsElementExtractor {
   private mutationSummaries: Summary[];
   private svgTargetFilter: SvgDrawPathNavigationFilter;
 
@@ -18,7 +24,7 @@ export class MutationChange {
     this.svgTargetFilter = svgTargetFilter;
   }
 
-  extractAddedSvgElementFromSummaries(): HTMLElement {
+  extractSvgFromAddedMutations(): HTMLElement {
     const svgPathSummaryElement = this.mutationSummaries[0].added
       .map((node) => node as HTMLElement)
       // The class attribute is non-empty on valid path elements.
@@ -27,7 +33,7 @@ export class MutationChange {
     return svgPathSummaryElement.length === 1 ? svgPathSummaryElement[0] : null;
   }
 
-  extractUnHiddenYtdMenuServiceItemRendererFromSummaries(): HTMLElement {
+  extractSvgFromUnHiddenYtdMenuServiceItemRenderer(): HTMLElement {
     const ytdMenuServiceItemRenderer = this.mutationSummaries[1].removed
       .map((node) => node as HTMLElement)
       .filter((node) =>

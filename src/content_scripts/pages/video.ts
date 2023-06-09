@@ -2,7 +2,7 @@ import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import {
   AttributeNames,
   Ids,
-  SVG_DRAW_PATH,
+  SvgDrawPath,
   Tags,
 } from "../../html-element-processing/element-data";
 import {
@@ -24,17 +24,13 @@ import {
   PageObserver,
 } from "../../observation/observer-types";
 import { OneshotObserverId } from "../../enums/oneshot-observer-id";
-import { buffer, debounceTime, first, Subject } from "rxjs";
-import { MutationChange } from "../../mutations/mutation-change";
+import { YtdPopupContainerClicker } from "../../html-element-processing/ytd-popup-container-clicker";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
 
 let fullScreenSaveObserver: OneshotObserver;
-let halfScreenSaveObserver: OneshotObserver;
-
-const moreOptionsMenuChangesSubject: Subject<MutationChange> =
-  new Subject<MutationChange>();
+let halfScreenSavePlaylistClicker: YtdPopupContainerClicker;
 
 /**
  * Initialize a {@link OneshotObserver} with a {@link MutationSummary} for a full screen size YouTube browser
@@ -59,7 +55,7 @@ function initFullScreenSaveObserver(ytdPopupContainer: Node) {
             .filter(
               (pathElement) =>
                 pathElement.getAttribute(AttributeNames.D) ===
-                SVG_DRAW_PATH.POPUP_CLOSE
+                SvgDrawPath.POPUP_CLOSE
             );
 
           if (popupCloseSvgPaths.length > 0) {
@@ -144,73 +140,12 @@ function initFullScreenSaveObserver(ytdPopupContainer: Node) {
   );
 }
 
-/**
- * Initialize a {@link OneshotObserver} with a {@link MutationSummary} for a full screen size YouTube browser
- * window and immediately disconnect from it.
- *
- * The created {@link MutationSummary} will observe changes to YouTube's more options popup drop-down ("..."), so it
- * can push summaries into {@link moreOptionsMenuChangesSubject}. These changes will then be processed by RxJS
- * operations.
- *
- * On half-screen sizes some video actions are hidden into the more options button ("..."). This includes the
- * "Save" action. Because the "Save" action only exists in either the more options popup or directly under
- * the video both cases need to be handled.
- *
- * @param ytdPopupContainer - A YouTube ytd-popup-container HTML element that should be watched for changes
- */
 function initHalfScreenSaveObserver(ytdPopupContainer: Node) {
-  halfScreenSaveObserver = new OneshotObserver(
+  halfScreenSavePlaylistClicker = new YtdPopupContainerClicker(
     OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
-    () => {
-      const svgPathFilter = new SvgDrawPathNavigationFilter(
-        SVG_DRAW_PATH.VIDEO_SAVE
-      );
-      const summary = new MutationSummary({
-        callback: (summaries) =>
-          moreOptionsMenuChangesSubject.next(
-            new MutationChange(svgPathFilter, summaries)
-          ),
-        rootNode: ytdPopupContainer,
-        queries: [
-          { element: `path[d="${SVG_DRAW_PATH.VIDEO_SAVE}"]` },
-          { attribute: "hidden" },
-        ],
-      });
-      summary.disconnect();
-      return summary;
-    }
+    SvgDrawPath.VIDEO_SAVE,
+    ytdPopupContainer as HTMLElement
   );
-}
-
-function processMoreOptionsMenuChanges(
-  mutationChanges: MutationChange[]
-): void {
-  const addedSvgElements = mutationChanges
-    .map((mutationChange) =>
-      mutationChange.extractAddedSvgElementFromSummaries()
-    )
-    .filter((addedSvgElement) => !!addedSvgElement);
-  const unHiddenYtdMenuServiceItemRenderers = mutationChanges
-    .map((mutationChange) =>
-      mutationChange.extractUnHiddenYtdMenuServiceItemRendererFromSummaries()
-    )
-    .filter(
-      (unHiddenYtdServiceMenuItemRenderer) =>
-        !!unHiddenYtdServiceMenuItemRenderer
-    );
-
-  // The order of the if branches matters. The first check should always be if a svg element has been added.
-  if (addedSvgElements.length === 1) {
-    const saveMenuEntry = HtmlParentNavigator.startFrom(addedSvgElements[0])
-      .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
-      .consume();
-
-    clickSaveToWatchLaterCheckbox(saveMenuEntry);
-  } else if (unHiddenYtdMenuServiceItemRenderers.length === 1) {
-    clickSaveToWatchLaterCheckbox(unHiddenYtdMenuServiceItemRenderers[0]);
-  }
-
-  halfScreenSaveObserver.disconnect();
 }
 
 function clickSaveToWatchLaterCheckbox(popupTrigger: HTMLElement): void {
@@ -224,56 +159,47 @@ function clickSaveToWatchLaterCheckboxForHalfScreenSize(
   moreOptionsButton: HTMLElement
 ): void {
   contentScriptObserversManager
-    .upsertOneshotObserver(halfScreenSaveObserver)
+    .upsertOneshotObserver(halfScreenSavePlaylistClicker.oneshotObserver)
     .observe();
-
-  const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-    .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
-    .consume();
-
-  moreOptionsMenuChangesSubject
-    .pipe(buffer(moreOptionsMenuChangesSubject.pipe(debounceTime(4))), first())
-    .subscribe((mutationChanges: MutationChange[]) => {
-      processMoreOptionsMenuChanges(mutationChanges);
-      popupContainer.removeAttribute("hidden");
-    });
-
-  // Hide the popup container so there is no drop-down flicker when triggering a quick action.
-  popupContainer.setAttribute("hidden", "");
+  halfScreenSavePlaylistClicker.observeAndBufferMutationChangesThenClickSvg(
+    (savePlaylistSvg) => {
+      clickSaveToWatchLaterCheckbox(savePlaylistSvg);
+    }
+  );
   moreOptionsButton.click();
 }
 
 function setupWatchLaterButton(
   moreOptionsButton: HTMLElement
 ): HTMLButtonElement {
-  const quickActionsWatchLater = QaHtmlElements.watchLaterUnderVideoButton();
+  const quickActionsWatchLater = QaHtmlElements.watchLaterUnderVideoButton(
+    () => {
+      const ytdMenuRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
+        .find(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
+        .consume();
+
+      if (!ytdMenuRenderer) {
+        logger.error("Could not find ytd-menu-renderer as a parent");
+        return;
+      }
+
+      // On half-screen size this element is hidden in the more options button ("...").
+      const saveButton = HtmlTreeNavigator.startFrom(ytdMenuRenderer)
+        .filter(new TagNavigationFilter(Tags.YTD_BUTTON_RENDERER))
+        .filter(new TagNavigationFilter(Tags.YT_ICON))
+        .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
+        .intoParentNavigator()
+        .find(new TagNavigationFilter(Tags.BUTTON))
+        .consume();
+
+      if (saveButton) {
+        clickSaveToWatchLaterCheckbox(saveButton);
+      } else {
+        clickSaveToWatchLaterCheckboxForHalfScreenSize(moreOptionsButton);
+      }
+    }
+  );
   createdElements.push(quickActionsWatchLater);
-  quickActionsWatchLater.onclick = () => {
-    const ytdMenuRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
-      .find(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
-      .consume();
-
-    if (!ytdMenuRenderer) {
-      logger.error("Could not find ytd-menu-renderer as a parent");
-      return;
-    }
-
-    // On half-screen size this element is hidden in the more options button ("...").
-    const saveButton = HtmlTreeNavigator.startFrom(ytdMenuRenderer)
-      .filter(new TagNavigationFilter(Tags.YTD_BUTTON_RENDERER))
-      .filter(new TagNavigationFilter(Tags.YT_ICON))
-      .findFirst(new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_SAVE))
-      .intoParentNavigator()
-      .find(new TagNavigationFilter(Tags.BUTTON))
-      .consume();
-
-    if (saveButton) {
-      clickSaveToWatchLaterCheckbox(saveButton);
-    } else {
-      clickSaveToWatchLaterCheckboxForHalfScreenSize(moreOptionsButton);
-    }
-  };
-
   return quickActionsWatchLater;
 }
 
@@ -314,15 +240,13 @@ function getMoreOptionsButton(): HTMLElement {
     .filter(new IdNavigationFilter(Tags.DIV, Ids.ACTIONS))
     .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
     .filter(new IdNavigationFilter(Tags.YT_BUTTON_SHAPE, Ids.BUTTON_SHAPE))
-    .findFirst(
-      new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.VIDEO_MORE_ACTIONS)
-    )
+    .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_MORE_ACTIONS))
     .intoParentNavigator()
     .find(new TagNavigationFilter(Tags.BUTTON))
     .consume();
 }
 
-export function runVideoScriptIfTargetElementExists(): void {
+export function initVideoObservers(): void {
   logger.debug("Watch for the more options button under a video");
   MutationElementExistsWatcher.build()
     .queryFn(() => ({ moreOptions: getMoreOptionsButton() }))

@@ -9,21 +9,19 @@
     "48": "assets/extension-icons/chrome/icon48.png",
     "128": "assets/extension-icons/chrome/icon128.png"
   },
-  "host_permissions": ["https://www.youtube.com/*"],
-  "permissions": ["storage", "tabs"],
-  "background": {
-    "service_worker": "src/background_scripts/url-change-watcher.ts",
-    "type": "module"
-  },
+  "host_permissions": ["*://www.youtube.com/*"],
+
+  "permissions": ["storage"],
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*"],
+      "matches": ["*://www.youtube.com/*"],
       "js": ["src/content_scripts/init-extension.ts"],
       "css": [
         "assets/pcss/yt-quick-actions.pcss",
         "assets/fontawesome-chrome/css/fontawesome.min.css",
         "assets/fontawesome-chrome/css/solid.min.css"
-      ]
+      ],
+      "run_at": "document_start"
     }
   ],
   "options_ui": {
