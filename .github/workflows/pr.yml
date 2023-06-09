@@ -1,7 +1,11 @@
 name: "PR"
-run-name: "PR ${{ github.event.pull_request.id }}"
+run-name: "PR ${{ github.event.pull_request.number }}"
 on:
   pull_request:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
 
 jobs:
   linting:
