@@ -1,0 +1,87 @@
+name: "Release"
+run-name: "Release ${{ github.ref_name }}"
+on:
+  push:
+    tags: "*"
+
+
+jobs:
+  linting:
+    name: Linting Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+          cache: pip
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "npm"
+      - name: Run pre-commit hooks
+        uses: pre-commit/action@v3.0.0
+      - name: Run Eslint
+        run: npm run eslint
+      - name: Run prettier check
+        run: npm run prettier:check
+  run-tests:
+    needs:
+      - linting
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+      - name: Run tests
+        run: npm run test
+  create-releases:
+    needs:
+      - run-tests
+    name: create releases
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: "npm"
+      - name: Build Firefox
+        run: npm run build
+      - name: Build Chrome
+        run: npm run build-ch
+      - name: Package Firefox
+        run: zip -r ./yt-quick-actions-firefox.zip ./dist/firefox-prod
+      - name: Package Chrome
+        run: zip -r ./yt-quick-actions-chrome.zip ./dist/chrome-prod
+      - name: Create Release
+        id: create-release
+        uses: release-drafter/release-drafter@v5
+        with:
+          name: Release ${{ github.ref_name }}
+          tag: ${{ github.ref_name}}
+          version: ${{ github.ref_name }}
+          publish: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Release Firefox Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./yt-quick-actions-firefox.zip
+          asset_name: yt-quick-actions-firefox.zip
+          asset_content_type: application/zip
+      - name: Upload Release Firefox Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./yt-quick-actions-chrome.zip
+          asset_name: yt-quick-actions-chrome.zip
+          asset_content_type: application/zip

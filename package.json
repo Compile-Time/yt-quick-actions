@@ -10,7 +10,10 @@
     "start-no-hmr-ch": "parcel watch --target chrome-dev --host localhost --no-hmr --cache-dir=.parcel-cache/chrome",
     "build": "parcel build --target firefox-prod --no-cache",
     "build-ch": "parcel build --target chrome-prod --no-cache",
-    "test": "jest"
+    "test": "jest",
+    "eslint": "eslint ./",
+    "prettier:check": "prettier --check .",
+    "prettier:write": "prettier --write ."
   },
   "targets": {
     "firefox-dev": {
@@ -58,6 +61,7 @@
     "@typescript-eslint/parser": "^5.42.0",
     "daisyui": "^2.33.0",
     "eslint": "^8.27.0",
+    "eslint-config-prettier": "^8.8.0",
     "eslint-config-standard-with-typescript": "^23.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.3.0",
@@ -67,6 +71,7 @@
     "jest-environment-jsdom": "^29.3.1",
     "parcel": "^2.7.0",
     "parcel-namer-rewrite": "^2.0.0-rc.3",
+    "prettier": "2.8.8",
     "tailwindcss": "^3.2.1",
     "ts-jest": "^29.0.3",
     "typescript": "^4.8.4"
