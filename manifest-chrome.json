@@ -9,25 +9,16 @@
     "48": "assets/extension-icons/chrome/icon48.png",
     "128": "assets/extension-icons/chrome/icon128.png"
   },
-  "host_permissions": [
-    "https://www.youtube.com/*"
-  ],
-  "permissions": [
-    "storage",
-    "tabs"
-  ],
+  "host_permissions": ["https://www.youtube.com/*"],
+  "permissions": ["storage", "tabs"],
   "background": {
     "service_worker": "src/background_scripts/url-change-watcher.ts",
     "type": "module"
   },
   "content_scripts": [
     {
-      "matches": [
-        "https://www.youtube.com/*"
-      ],
-      "js": [
-        "src/content_scripts/init-extension.ts"
-      ],
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["src/content_scripts/init-extension.ts"],
       "css": [
         "assets/pcss/yt-quick-actions.pcss",
         "assets/fontawesome-chrome/css/fontawesome.min.css",
@@ -40,12 +31,8 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [
-        "/assets/fontawesome/webfonts/*"
-      ],
-      "matches": [
-        "https://www.youtube.com/*"
-      ],
+      "resources": ["/assets/fontawesome/webfonts/*"],
+      "matches": ["https://www.youtube.com/*"],
       "use_dynamic_url": true
     }
   ]

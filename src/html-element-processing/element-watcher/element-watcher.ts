@@ -1,11 +1,9 @@
-import {ElementWatcherResult} from "./element-watcher-result";
+import { ElementWatcherResult } from "./element-watcher-result";
 
 export abstract class ElementWatcher<T extends ElementWatcher<T>> {
+  protected elementQueryFn: () => ElementWatcherResult | null;
 
-    protected elementQueryFn: (() => ElementWatcherResult | null);
+  abstract queryFn(elementQueryFn: () => ElementWatcherResult | null): T;
 
-    abstract queryFn(elementQueryFn: () => ElementWatcherResult | null): T
-
-    abstract start(): Promise<ElementWatcherResult>;
-
+  abstract start(): Promise<ElementWatcherResult>;
 }

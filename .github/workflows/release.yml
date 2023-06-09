@@ -4,7 +4,6 @@ on:
   push:
     tags: "*"
 
-
 jobs:
   linting:
     name: Linting Checks
@@ -19,7 +18,7 @@ jobs:
           node-version: 18
           cache: "npm"
       - name: Install npm dependencies
-        run: npm ci 
+        run: npm ci
       - name: Run pre-commit hooks
         uses: pre-commit/action@v3.0.0
       - name: Run Eslint
@@ -38,7 +37,7 @@ jobs:
           node-version: 18
           cache: npm
       - name: Install npm dependencies
-        run: npm ci 
+        run: npm ci
       - name: Run tests
         run: npm run test
   create-releases:
@@ -53,7 +52,7 @@ jobs:
           node-version: 18
           cache: "npm"
       - name: Install npm dependencies
-        run: npm ci 
+        run: npm ci
       - name: Build Firefox
         run: npm run build
       - name: Build Chrome

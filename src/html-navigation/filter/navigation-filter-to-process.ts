@@ -1,4 +1,4 @@
-import {NavigationFilter} from "./navigation-filter";
+import { NavigationFilter } from "./navigation-filter";
 
 /**
  * Class to keep track of process state for a filter.
@@ -6,28 +6,27 @@ import {NavigationFilter} from "./navigation-filter";
  * This is useful for situations where it is desirable to know if a filter has been already used (=processed) or not.
  */
 export class NavigationFilterToProcess {
-    private readonly filter: NavigationFilter;
-    private processed: boolean;
+  private readonly filter: NavigationFilter;
+  private processed: boolean;
 
-    constructor(filter: NavigationFilter,
-                processed = false) {
-        this.filter = filter;
-        this.processed = processed;
-    }
+  constructor(filter: NavigationFilter, processed = false) {
+    this.filter = filter;
+    this.processed = processed;
+  }
 
-    markProcessed(): void {
-        this.processed = true;
-    }
+  markProcessed(): void {
+    this.processed = true;
+  }
 
-    getFilter(): NavigationFilter {
-        return this.filter;
-    }
+  getFilter(): NavigationFilter {
+    return this.filter;
+  }
 
-    isProcessed(): boolean {
-        return this.processed;
-    }
+  isProcessed(): boolean {
+    return this.processed;
+  }
 
-    clone(): NavigationFilterToProcess {
-        return new NavigationFilterToProcess(this.filter, this.processed);
-    }
+  clone(): NavigationFilterToProcess {
+    return new NavigationFilterToProcess(this.filter, this.processed);
+  }
 }

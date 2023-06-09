@@ -1,32 +1,32 @@
 autolabeler:
   - label: "bug"
     branch:
-      - '/^fix/'
-      - '/^bugfix/'
+      - "/^fix/"
+      - "/^bugfix/"
     title:
       - "/^fix/i"
       - "/^bugfix/i"
   - label: "enhancement"
     branch:
-      - '/^feature/'
+      - "/^feature/"
     title:
       - "/^feature/i"
 categories:
-  - title: 'Features'
+  - title: "Features"
     labels:
-      - 'feature'
-      - 'enhancement'
-  - title: 'Bug Fixes'
+      - "feature"
+      - "enhancement"
+  - title: "Bug Fixes"
     labels:
-      - 'fix'
-      - 'bugfix'
-      - 'bug'
+      - "fix"
+      - "bugfix"
+      - "bug"
 exclude-labels:
-  - 'skip-changelog'
-category-template: '### $TITLE'
-change-template: '- $TITLE @$AUTHOR ([#$NUMBER]($URL))'
+  - "skip-changelog"
+category-template: "### $TITLE"
+change-template: "- $TITLE @$AUTHOR ([#$NUMBER]($URL))"
 change-title-escapes: '\<*_&#@'
-no-changes-template: '- No Changes'
+no-changes-template: "- No Changes"
 template: |
   ## Changes
 

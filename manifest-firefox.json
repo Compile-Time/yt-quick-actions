@@ -7,24 +7,15 @@
     "48": "assets/extension-icons/firefox/icon.svg",
     "96": "assets/extension-icons/firefox/icon.svg"
   },
-  "permissions": [
-    "https://www.youtube.com/*",
-    "storage"
-  ],
+  "permissions": ["https://www.youtube.com/*", "storage"],
   "background": {
-    "scripts": [
-      "src/background_scripts/url-change-watcher.ts"
-    ],
+    "scripts": ["src/background_scripts/url-change-watcher.ts"],
     "persistent": false
   },
   "content_scripts": [
     {
-      "matches": [
-        "https://www.youtube.com/*"
-      ],
-      "js": [
-        "src/content_scripts/init-extension.ts"
-      ],
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["src/content_scripts/init-extension.ts"],
       "css": [
         "assets/pcss/yt-quick-actions.pcss",
         "assets/fontawesome/css/fontawesome.min.css",
