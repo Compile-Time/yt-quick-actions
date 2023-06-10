@@ -1,7 +1,7 @@
-import {LogLevel} from "../enums/log-level";
+import { LogLevel } from "../enums/log-level";
 
 export class SettingsData {
-    static readonly LOG_LEVEL_ATTR = 'logLevel';
+  static readonly LOG_LEVEL_ATTR = "logLevel";
 
-    logLevel: LogLevel = LogLevel.WARN;
+  logLevel: LogLevel = LogLevel.WARN;
 }

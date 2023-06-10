@@ -1,0 +1,26 @@
+# This file configures pre-commit hooks.
+# See https://pre-commit.com/ for general information
+# See https://pre-commit.com/hooks.html for a listing of possible hooks
+exclude: "assets"
+repos:
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-json
+        exclude: "tsconfig.*json"
+      - id: check-yaml
+      - id: check-executables-have-shebangs
+      - id: end-of-file-fixer
+        exclude_types:
+          - svg
+          - pofile
+        exclude: "(^LICENSE$)"
+      - id: mixed-line-ending
+        args:
+          - "--fix=lf"
+      - id: trailing-whitespace
+        exclude_types:
+          - svg
+      - id: check-case-conflict
+      - id: detect-private-key

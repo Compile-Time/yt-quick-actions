@@ -1,5 +1,5 @@
-import {NavigationFilterToProcess} from "./navigation-filter-to-process";
-import {NavigationFilter} from "./navigation-filter";
+import { NavigationFilterToProcess } from "./navigation-filter-to-process";
+import { NavigationFilter } from "./navigation-filter";
 
 /**
  * Class representing a queue of filters to be processed.
@@ -8,38 +8,44 @@ import {NavigationFilter} from "./navigation-filter";
  * with recursion usage in mind.
  */
 export class NavigationFiltersToProcessQueue {
-    private readonly filtersToProcess: NavigationFilterToProcess[] = [];
+  private readonly filtersToProcess: NavigationFilterToProcess[] = [];
 
-    constructor(filters: NavigationFilterToProcess[] = []) {
-        this.filtersToProcess = filters;
-    }
+  constructor(filters: NavigationFilterToProcess[] = []) {
+    this.filtersToProcess = filters;
+  }
 
-    static fromFilters(navigationFilters: NavigationFilter[]): NavigationFiltersToProcessQueue {
-        return new NavigationFiltersToProcessQueue(navigationFilters.map(filter => new NavigationFilterToProcess(filter)));
-    }
+  static fromFilters(
+    navigationFilters: NavigationFilter[]
+  ): NavigationFiltersToProcessQueue {
+    return new NavigationFiltersToProcessQueue(
+      navigationFilters.map((filter) => new NavigationFilterToProcess(filter))
+    );
+  }
 
-    getCurrentOrNextUnprocessedFilter(): NavigationFilterToProcess | undefined {
-        for (const filterToProcess of this.filtersToProcess) {
-            if (!filterToProcess.isProcessed()) {
-                return filterToProcess;
-            }
-        }
-        return null;
+  getCurrentOrNextUnprocessedFilter(): NavigationFilterToProcess | undefined {
+    for (const filterToProcess of this.filtersToProcess) {
+      if (!filterToProcess.isProcessed()) {
+        return filterToProcess;
+      }
     }
+    return null;
+  }
 
-    addFilter(filter: NavigationFilter): void {
-        this.filtersToProcess.push(new NavigationFilterToProcess(filter));
-    }
+  addFilter(filter: NavigationFilter): void {
+    this.filtersToProcess.push(new NavigationFilterToProcess(filter));
+  }
 
-    areAllFiltersProcessed(): boolean {
-        return this.filtersToProcess
-            .every(filterProcessed => filterProcessed.isProcessed() === true)
-    }
+  areAllFiltersProcessed(): boolean {
+    return this.filtersToProcess.every(
+      (filterProcessed) => filterProcessed.isProcessed() === true
+    );
+  }
 
-    cloneWithoutProcessed(): NavigationFiltersToProcessQueue {
-        return new NavigationFiltersToProcessQueue(this.filtersToProcess
-            .filter(toProcess => !toProcess.isProcessed())
-            .map(toProcess => toProcess.clone())
-        )
-    }
+  cloneWithoutProcessed(): NavigationFiltersToProcessQueue {
+    return new NavigationFiltersToProcessQueue(
+      this.filtersToProcess
+        .filter((toProcess) => !toProcess.isProcessed())
+        .map((toProcess) => toProcess.clone())
+    );
+  }
 }

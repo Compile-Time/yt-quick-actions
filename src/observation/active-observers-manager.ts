@@ -1,4 +1,4 @@
-import {OneshotObserver, PageObserver} from "./observer-types";
+import { OneshotObserver, PageObserver } from "./observer-types";
 
 /**
  * Manage active mutation observers inside the same page context.
@@ -12,60 +12,62 @@ import {OneshotObserver, PageObserver} from "./observer-types";
  * this manager must be created for both the content script and background script.
  */
 export class ActiveObserversManager {
-    private backgroundObservers: PageObserver[] = [];
-    private oneshotObservers: OneshotObserver[] = [];
+  private backgroundObservers: PageObserver[] = [];
+  private oneshotObservers: OneshotObserver[] = [];
 
-    /**
-     * Track a mutation observer as an oneshot observer.
-     *
-     * An oneshot observer is an observer that runs under a specific condition and disconnects after the
-     * condition has been fulfilled. An example usage might be to determine if the content of a dialog has
-     * changed so that an action is performed for the correct element.
-     *
-     * If a different reference to an observer but the same id data is provided, then the previous referenced
-     * observer will be disconnected.
-     *
-     * @param oneshotObserver - The mutation observer and identifier data to add as an oneshot observer
-     */
-    upsertOneshotObserver(oneshotObserver: OneshotObserver): PageObserver {
-        const existingOneshotObserver = this.oneshotObservers
-            .find(oneshotOb => oneshotOb.equals(oneshotObserver));
-        if (existingOneshotObserver) {
-            existingOneshotObserver.disconnect();
-            this.oneshotObservers = this.oneshotObservers
-                .filter(oneshotOb => !oneshotOb.equals(existingOneshotObserver));
-        }
-        this.oneshotObservers.push(oneshotObserver);
-        return oneshotObserver;
+  /**
+   * Track a mutation observer as an oneshot observer.
+   *
+   * An oneshot observer is an observer that runs under a specific condition and disconnects after the
+   * condition has been fulfilled. An example usage might be to determine if the content of a dialog has
+   * changed so that an action is performed for the correct element.
+   *
+   * If a different reference to an observer but the same id data is provided, then the previous referenced
+   * observer will be disconnected.
+   *
+   * @param oneshotObserver - The mutation observer and identifier data to add as an oneshot observer
+   */
+  upsertOneshotObserver(oneshotObserver: OneshotObserver): PageObserver {
+    const existingOneshotObserver = this.oneshotObservers.find((oneshotOb) =>
+      oneshotOb.equals(oneshotObserver)
+    );
+    if (existingOneshotObserver) {
+      existingOneshotObserver.disconnect();
+      this.oneshotObservers = this.oneshotObservers.filter(
+        (oneshotOb) => !oneshotOb.equals(existingOneshotObserver)
+      );
     }
+    this.oneshotObservers.push(oneshotObserver);
+    return oneshotObserver;
+  }
 
-    /**
-     * Track a mutation observer as a background observer.
-     *
-     * Background observers are long-running mutation observers watching specific DOM elements inside a
-     * page context.
-     *
-     * @param observer - The mutation observer to track as a background observer
-     */
-    addBackgroundObserver(observer: PageObserver): PageObserver {
-        this.backgroundObservers.push(observer);
-        return observer;
-    }
+  /**
+   * Track a mutation observer as a background observer.
+   *
+   * Background observers are long-running mutation observers watching specific DOM elements inside a
+   * page context.
+   *
+   * @param observer - The mutation observer to track as a background observer
+   */
+  addBackgroundObserver(observer: PageObserver): PageObserver {
+    this.backgroundObservers.push(observer);
+    return observer;
+  }
 
-    /**
-     * Disconnect all currently tracked oneshot and background observers.
-     *
-     * Before running the next content script ensure that this method gets called before to stop any
-     * existing mutation observers.
-     */
-    disconnectAll(): void {
-        const observers: PageObserver[] = [
-            ...this.backgroundObservers,
-            ...this.oneshotObservers.map(oneshotOb => oneshotOb)
-        ];
-        observers.forEach(observer => observer.disconnect());
+  /**
+   * Disconnect all currently tracked oneshot and background observers.
+   *
+   * Before running the next content script ensure that this method gets called before to stop any
+   * existing mutation observers.
+   */
+  disconnectAll(): void {
+    const observers: PageObserver[] = [
+      ...this.backgroundObservers,
+      ...this.oneshotObservers.map((oneshotOb) => oneshotOb),
+    ];
+    observers.forEach((observer) => observer.disconnect());
 
-        this.oneshotObservers = [];
-        this.backgroundObservers = [];
-    }
+    this.oneshotObservers = [];
+    this.backgroundObservers = [];
+  }
 }

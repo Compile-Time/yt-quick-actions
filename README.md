@@ -16,29 +16,29 @@ Version changes can be found here: [CHANGELOG.md](./CHANGELOG.md)
 
 ## Installation
 
-* Firefox
-    * From addons.mozilla.org: [AMO](https://addons.mozilla.org/en-US/firefox/addon/yt-quick-actions/)
-    * From release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
-* Google Chrome
-    * From Chrome Web Store:
-      [chrome web store](https://chrome.google.com/webstore/detail/yt-quick-actions/lopaoogidddnpogjngfhbaklhdecmcii)
+- Firefox
+  - From addons.mozilla.org: [AMO](https://addons.mozilla.org/en-US/firefox/addon/yt-quick-actions/)
+  - From release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
+- Google Chrome
+  - From Chrome Web Store:
+    [chrome web store](https://chrome.google.com/webstore/detail/yt-quick-actions/lopaoogidddnpogjngfhbaklhdecmcii)
 
 ## Permissions
 
 The following permissions are required for the extension to work:
 
 - Firefox
-    - Host: `https://www.youtube.com/*`
-      <br>Modify the YouTube web page to add custom elements and access the URL from YouTube tabs.
-    - storage
-      <br>Store extension settings in browser storage.
+  - Host: `https://www.youtube.com/*`
+    <br>Modify the YouTube web page to add custom elements and access the URL from YouTube tabs.
+  - storage
+    <br>Store extension settings in browser storage.
 - Chrome
-    - Host: `https://www.youtube.com/*`
-      <br>Modify the YouTube web page to add custom elements.
-    - storage
-      <br>Store extension settings in browser storage.
-    - tabs
-      <br>Access the URL from YouTube tabs
+  - Host: `https://www.youtube.com/*`
+    <br>Modify the YouTube web page to add custom elements.
+  - storage
+    <br>Store extension settings in browser storage.
+  - tabs
+    <br>Access the URL from YouTube tabs
 
 ## Screenshots
 
