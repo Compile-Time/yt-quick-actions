@@ -5,7 +5,7 @@ import { OneshotObserver, PageObserver } from "./observer-types";
  *
  * Because of how YouTube is designed the DOM changes very little when navigating between pages. This can
  * cause mutation observers of one page to still be active in a different page. To prevent such an event
- * this is designed to keep track of all observer instances and provide an option to disconnect them all.
+ * this class is designed to keep track of all observer instances and provide an option to disconnect them all.
  *
  * Usage note: Mutation observers created in a content script can not be managed from a background script
  * because content script and background scripts both run in separate contexts. Therefore, an instance of
@@ -22,10 +22,10 @@ export class ActiveObserversManager {
    * condition has been fulfilled. An example usage might be to determine if the content of a dialog has
    * changed so that an action is performed for the correct element.
    *
-   * If a different reference to an observer but the same id data is provided, then the previous referenced
+   * If a different reference to an observer but the same oneshot id is provided, then the previous referenced
    * observer will be disconnected.
    *
-   * @param oneshotObserver - The mutation observer and identifier data to add as an oneshot observer
+   * @param oneshotObserver - A {@link OneshotObserver} to track
    */
   upsertOneshotObserver(oneshotObserver: OneshotObserver): PageObserver {
     const existingOneshotObserver = this.oneshotObservers.find((oneshotOb) =>
@@ -44,10 +44,10 @@ export class ActiveObserversManager {
   /**
    * Track a mutation observer as a background observer.
    *
-   * Background observers are long-running mutation observers watching specific DOM elements inside a
+   * Background observers are long-running mutation observers watching specific DOM changes inside a
    * page context.
    *
-   * @param observer - The mutation observer to track as a background observer
+   * @param observer - A {@link PageObserver} to track
    */
   addBackgroundObserver(observer: PageObserver): PageObserver {
     this.backgroundObservers.push(observer);
@@ -57,7 +57,7 @@ export class ActiveObserversManager {
   /**
    * Disconnect all currently tracked oneshot and background observers.
    *
-   * Before running the next content script ensure that this method gets called before to stop any
+   * Before running the next page code ensure that this method gets called before to stop any
    * existing mutation observers.
    */
   disconnectAll(): void {

@@ -1,6 +1,6 @@
 import {
   Ids,
-  SVG_DRAW_PATH,
+  SvgDrawPath,
   Tags,
 } from "../../html-element-processing/element-data";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
@@ -79,7 +79,7 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
             .filter((ytdMenuServiceItem) =>
               HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
                 .findFirst(
-                  new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON)
+                  new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON)
                 )
                 .exists()
             )
@@ -163,7 +163,7 @@ function initContentScript(moreOptionsButtons: HTMLElement[]): void {
     .observe();
 }
 
-export function runPlaylistScriptIfTargetElementExists(): void {
+export function initPlaylistObservers(): void {
   logger.debug("Watch for the first menu button in a playlist item");
   MutationElementExistsWatcher.build()
     .queryFn(() => {

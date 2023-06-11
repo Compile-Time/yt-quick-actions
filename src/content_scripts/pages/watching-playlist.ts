@@ -7,7 +7,7 @@ import {
 } from "../../html-navigation/filter/navigation-filter";
 import {
   Ids,
-  SVG_DRAW_PATH,
+  SvgDrawPath,
   Tags,
 } from "../../html-element-processing/element-data";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
@@ -70,7 +70,7 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
               HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
                 .filter(new TagNavigationFilter(Tags.YT_ICON))
                 .findFirst(
-                  new SvgDrawPathNavigationFilter(SVG_DRAW_PATH.TRASH_ICON)
+                  new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON)
                 )
                 .exists()
             )
@@ -121,7 +121,7 @@ function initContentScript(ytMenuIconButtons: HTMLElement[]): void {
   });
 }
 
-export function runWatchingPlaylistScriptIfTargetElementExists(): void {
+export function initWatchingPlaylistObservers(): void {
   logger.debug("Watch for first playlist item under or next to a video");
   MutationElementExistsWatcher.build()
     .queryFn(() => {

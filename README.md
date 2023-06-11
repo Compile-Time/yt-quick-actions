@@ -60,8 +60,8 @@ The following permissions are required for the extension to work:
 
 ## Building
 
-To build an unsigned extension with or without hot module reloading (HMR) for testing during development run the one of
-the `start` scripts.
+To build an unsigned extension for development testing, with or without hot
+module reloading (HMR), run one of the `start` scripts mentioned below.
 
 ```sh
 # Firefox
@@ -73,7 +73,8 @@ npm run start-ch
 npm run start-no-hmr-ch
 ```
 
-These script will produce the following directories under `dist` respectively:
+These script will produce the following directories under the `dist` directory
+respectively:
 
 - `/dist/firefox-dev`
 - `/dist/chrome-dev`

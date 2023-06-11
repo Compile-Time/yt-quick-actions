@@ -7,7 +7,6 @@ export enum Tags {
   TP_YT_PAPER_ITEM = "tp-yt-paper-item",
   TP_YT_PAPER_LISTBOX = "tp-yt-paper-listbox",
   YTD_ADD_TO_PLAYLIST_RENDERER = "ytd-add-to-playlist-renderer",
-  YTD_APP = "ytd-app",
   YTD_BUTTON_RENDERER = "ytd-button-renderer",
   YTD_MENU_RENDERER = "ytd-menu-renderer",
   YTD_PLAYLIST_ADD_TO_OPTION_RENDERER = "ytd-playlist-add-to-option-renderer",
@@ -16,8 +15,7 @@ export enum Tags {
   YTD_PLAYLIST_VIDEO_RENDERER = "ytd-playlist-video-renderer",
   YTD_POPUP_CONTAINER = "ytd-popup-container",
   YTD_RICH_GRID_MEDIA = "ytd-rich-grid-media",
-  YTD_RICH_GRID_ROW = "ytd-rich-grid-row",
-  YTD_TWO_COLUMN_BROWSE_RESULTS_RENDERER = "ytd-two-column-browse-results-renderer",
+  YTD_VIDEO_RENDERER = "ytd-video-renderer",
   YTD_WATCH_FLEXY = "ytd-watch-flexy",
   YTD_WATCH_METADATA = "ytd-watch-metadata",
   YT_BUTTON_SHAPE = "yt-button-shape",
@@ -30,7 +28,6 @@ export enum Ids {
   BUTTON = "button",
   BUTTON_SHAPE = "button-shape",
   CHECKBOX = "checkbox",
-  CONTENT = "content",
   DISMISSIBLE = "dismissible",
   HEADER = "header",
   ITEMS = "items",
@@ -46,7 +43,7 @@ export enum AttributeNames {
   D = "d",
 }
 
-export enum SVG_DRAW_PATH {
+export enum SvgDrawPath {
   TRASH_ICON = "M11,17H9V8h2V17z M15,8h-2v9h2V8z M19,4v1h-1v16H6V5H5V4h4V3h6v1H19z M17,5H7v15h10V5z",
   VIDEO_SAVE = "M22,13h-4v4h-2v-4h-4v-2h4V7h2v4h4V13z M14,7H2v1h12V7z M2,12h8v-1H2V12z M2,16h8v-1H2V16z",
   VIDEO_MORE_ACTIONS = "M7.5,12c0,0.83-0.67,1.5-1.5,1.5S4.5,12.83,4.5,12s0.67-1.5,1.5-1.5S7.5,11.17,7.5,12z" +
