@@ -24,8 +24,8 @@ const logger = contentLogProvider.getLogger(LogProvider.HOME_PAGE);
 
 let watchLaterClicker: YtdPopupContainerClicker;
 
-function setupWatchLaterButtonIfNotPresent(videoMenuButton: HTMLElement): void {
-  const divDismissible = HtmlParentNavigator.startFrom(videoMenuButton)
+function setupWatchLaterButtonIfNotPresent(menuButton: HTMLElement): void {
+  const divDismissible = HtmlParentNavigator.startFrom(menuButton)
     .find(new IdNavigationFilter(Tags.DIV, Ids.DISMISSIBLE))
     .consume();
   // Set position relative so when 'position: absolute' is used in our elements the position of
@@ -43,7 +43,7 @@ function setupWatchLaterButtonIfNotPresent(videoMenuButton: HTMLElement): void {
           .upsertOneshotObserver(watchLaterClicker.oneshotObserver)
           .observe();
         watchLaterClicker.observeAndBufferMutationChangesThenClickSvg();
-        videoMenuButton.click();
+        menuButton.click();
       });
 
     divDismissible.appendChild(watchLaterButtonInContainer.completeHtmlElement);
@@ -56,13 +56,23 @@ export function initHomeOrSubscriptionsObservers(): void {
       new PageObserver(() => {
         const summary = new MutationSummary({
           callback: (summaries) => {
-            const addedButtons: Node[] = summaries[0].added ?? [];
-            addedButtons
-              .filter((button) =>
-                HtmlParentNavigator.startFrom(button as HTMLElement)
-                  .find(new TagNavigationFilter(Tags.YTD_RICH_GRID_MEDIA))
-                  .exists()
-              )
+            const addedMenuButtons: Node[] = summaries[0].added ?? [];
+
+            addedMenuButtons
+              .filter((button) => {
+                const menuButton = button as HTMLElement;
+                return (
+                  // Only look for buttons in `ytd-rich-grid-media` elements for home page and subscriptions
+                  // flow one (?flow=1).
+                  HtmlParentNavigator.startFrom(menuButton)
+                    .find(new TagNavigationFilter(Tags.YTD_RICH_GRID_MEDIA))
+                    .exists() ||
+                  // Only look for buttons in `ytd-video-renderer` elements for subscriptions flow two (?flow=2).
+                  HtmlParentNavigator.startFrom(menuButton)
+                    .find(new TagNavigationFilter(Tags.YTD_VIDEO_RENDERER))
+                    .exists()
+                );
+              })
               .forEach((ytdRichGridMediaOptionsButton) =>
                 setupWatchLaterButtonIfNotPresent(
                   ytdRichGridMediaOptionsButton as HTMLElement
