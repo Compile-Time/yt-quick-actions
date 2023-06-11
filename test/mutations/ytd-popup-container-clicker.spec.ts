@@ -2,44 +2,28 @@ import { YtdPopupContainerClicker } from "../../src/mutations/ytd-popup-containe
 import { SvgDrawPath } from "../../src/html-element-processing/element-data";
 import { YtdMenuServiceItemRendererSvgExtractor } from "../../src/mutations/ytd-menu-service-item-renderer-svg-extractor";
 import { SvgDrawPathNavigationFilter } from "../../src/html-navigation/filter/navigation-filter";
+import { setupYtdMenuServiceItemRendererSample } from "../setup-data/dom-elements";
 
 describe("YtdPopupContainerClicker", () => {
   describe("observeAndBufferMutationChangesThenClickSvg", () => {
-    it("should click", (done) => {
+    it("should click the tp-yt-paper-element when the SVG is initialized (added or changed)", (done) => {
       const popupContainer = document.createElement("div");
-
       const ytdPopupContainerClicker = new YtdPopupContainerClicker(
         popupContainer
       );
-
       ytdPopupContainerClicker.observeAndBufferMutationChangesThenClickSvg();
-
       const svgTargetFilter = new SvgDrawPathNavigationFilter(
         SvgDrawPath.WATCH_LATER
       );
 
-      const ytdMenuServiceItemRenderer = document.createElement(
-        "ytd-menu-service-item-renderer"
-      );
-      const tpYtPaperItem = document.createElement("tp-yt-paper-item");
-      const ytIcon = document.createElement("yt-icon");
-      const svg = document.createElement("svg");
-      const g = document.createElement("g");
-      const path = document.createElement("path");
+      const { path, ytdMenuServiceItemRenderer, tpYtPaperItem } =
+        setupYtdMenuServiceItemRendererSample();
 
       tpYtPaperItem.addEventListener("click", () => {
         done();
       });
-
       path.setAttribute("class", "valid");
       path.setAttribute("d", SvgDrawPath.WATCH_LATER);
-
-      g.appendChild(path);
-      svg.appendChild(g);
-      ytIcon.appendChild(svg);
-      tpYtPaperItem.appendChild(ytIcon);
-      ytdMenuServiceItemRenderer.appendChild(tpYtPaperItem);
-      popupContainer.appendChild(ytdMenuServiceItemRenderer);
 
       ytdPopupContainerClicker.pushMutationsExtractor(
         new YtdMenuServiceItemRendererSvgExtractor(svgTargetFilter, [
@@ -53,6 +37,33 @@ describe("YtdPopupContainerClicker", () => {
           { added: [], removed: [] },
         ])
       );
-    }, 2000);
+    }, 1000);
+
+    it("should click the ytd-menu-service-item-renderer when the SVG is unhidden", (done) => {
+      const popupContainer = document.createElement("div");
+      const ytdPopupContainerClicker = new YtdPopupContainerClicker(
+        popupContainer
+      );
+      ytdPopupContainerClicker.observeAndBufferMutationChangesThenClickSvg();
+      const svgTargetFilter = new SvgDrawPathNavigationFilter(
+        SvgDrawPath.WATCH_LATER
+      );
+
+      const { path, ytdMenuServiceItemRenderer } =
+        setupYtdMenuServiceItemRendererSample();
+
+      ytdMenuServiceItemRenderer.addEventListener("click", () => {
+        done();
+      });
+      path.setAttribute("class", "valid");
+      path.setAttribute("d", SvgDrawPath.WATCH_LATER);
+
+      ytdPopupContainerClicker.pushMutationsExtractor(
+        new YtdMenuServiceItemRendererSvgExtractor(svgTargetFilter, [
+          { added: [], removed: [] },
+          { added: [], removed: [ytdMenuServiceItemRenderer] },
+        ])
+      );
+    }, 1000);
   });
 });

@@ -2,11 +2,14 @@ import { buffer, debounceTime, first, Subject } from "rxjs";
 import { YtdMenuServiceItemRendererSvgExtractor } from "./ytd-menu-service-item-renderer-svg-extractor";
 import { OneshotObserver } from "../observation/observer-types";
 import { OneshotObserverId } from "../enums/oneshot-observer-id";
-import { SvgDrawPathNavigationFilter } from "../html-navigation/filter/navigation-filter";
-import { SvgDrawPath } from "../html-element-processing/element-data";
+import {
+  SvgDrawPathNavigationFilter,
+  TagNavigationFilter,
+} from "../html-navigation/filter/navigation-filter";
+import { SvgDrawPath, Tags } from "../html-element-processing/element-data";
 import { MutationSummary } from "mutation-summary";
-import { clickTargetSvgFromMatchingMutationsElementExtractor } from "./mutations-element-extractor-clickers";
 import { contentScriptObserversManager } from "../content_scripts/init-globals";
+import { HtmlParentNavigator } from "../html-navigation/html-parent-navigator";
 
 export type SvgOptionFn = (svgOption: HTMLElement) => void;
 
@@ -91,7 +94,7 @@ export class YtdPopupContainerClicker {
       .pipe(buffer(this.subject.pipe(debounceTime(10))), first())
       .subscribe(
         (mutationChanges: YtdMenuServiceItemRendererSvgExtractor[]) => {
-          clickTargetSvgFromMatchingMutationsElementExtractor(
+          this.clickTargetSvgFromMatchingMutationsElementExtractor(
             mutationChanges,
             clickCallback
           );
@@ -104,5 +107,58 @@ export class YtdPopupContainerClicker {
 
     // Hide the popup container so there is no drop-down flicker when triggering a quick action.
     this.popupContainer.setAttribute("hidden", "");
+  }
+
+  /**
+   * Click the {@link SvgDrawPath} related element which is defined as the target filter inside the {@link YtdMenuServiceItemRendererSvgExtractor}s.
+   *
+   * This method takes a list of {@link YtdMenuServiceItemRendererSvgExtractor}s and then extracts the desired SVG
+   * element of each item as defined by the {@link MutationsElementExtractor}'s `targetFilter`.
+   * Depending on if the SVG was added or un-hidden by the parent `ytd-menu-service-item-renderer` element, an
+   * `tp-yt-paper-item` element will be passed to `clickCallback` or the `ytd-menu-service-item-renderer` element itself.
+   *
+   * When determining to pass a `tp-yt-paper-item` or a `ytd-menu-service-item-renderer` element, it is first checked
+   * if the SVG element was added and then checked if the parent `ytd-menu-service-item-renderer` was unhidden. This
+   * order is important because the parent element is always added before the SVG element.
+   *
+   * @param extractors List of {@link YtdMenuServiceItemRendererSvgExtractor}s to process for the click
+   * @param clickCallback Optional: Custom callback to run on the found `svgToClick` element instead of calling
+   * `HTMLElement.click()` on it.
+   */
+  private clickTargetSvgFromMatchingMutationsElementExtractor(
+    extractors: YtdMenuServiceItemRendererSvgExtractor[],
+    clickCallback?: SvgOptionFn
+  ): void {
+    const addedSvgElements = extractors
+      .map((extractor) => extractor.extractSvgFromAddedMutations())
+      .filter((addedSvgElement) => !!addedSvgElement);
+    const svgsOfunHiddenYtdMenuServiceItemRenderers = extractors
+      .map((extractor) =>
+        extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()
+      )
+      .filter(
+        (unHiddenYtdServiceMenuItemRenderer) =>
+          !!unHiddenYtdServiceMenuItemRenderer
+      );
+
+    if (addedSvgElements.length === 1) {
+      const tpYtPaperItem = HtmlParentNavigator.startFrom(addedSvgElements[0])
+        .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+        .consume();
+
+      if (clickCallback) {
+        clickCallback(tpYtPaperItem);
+      } else {
+        tpYtPaperItem.click();
+      }
+    } else if (svgsOfunHiddenYtdMenuServiceItemRenderers.length === 1) {
+      const matchingYtdMenuServiceItemRenderer =
+        svgsOfunHiddenYtdMenuServiceItemRenderers[0];
+      if (clickCallback) {
+        clickCallback(svgsOfunHiddenYtdMenuServiceItemRenderers[0]);
+      } else {
+        matchingYtdMenuServiceItemRenderer.click();
+      }
+    }
   }
 }
