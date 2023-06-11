@@ -1,4 +1,4 @@
-import { YtdPopupContainerClicker } from "../../src/html-element-processing/ytd-popup-container-clicker";
+import { YtdPopupContainerClicker } from "../../src/mutations/ytd-popup-container-clicker";
 import { SvgDrawPath } from "../../src/html-element-processing/element-data";
 import { YtdMenuServiceItemRendererSvgExtractor } from "../../src/mutations/ytd-menu-service-item-renderer-svg-extractor";
 import { SvgDrawPathNavigationFilter } from "../../src/html-navigation/filter/navigation-filter";

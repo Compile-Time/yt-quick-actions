@@ -2,20 +2,19 @@ import { YtdMenuServiceItemRendererSvgExtractor } from "./ytd-menu-service-item-
 import { HtmlParentNavigator } from "../html-navigation/html-parent-navigator";
 import { TagNavigationFilter } from "../html-navigation/filter/navigation-filter";
 import { Tags } from "../html-element-processing/element-data";
-import { SvgOptionFn } from "../html-element-processing/ytd-popup-container-clicker";
+import { SvgOptionFn } from "./ytd-popup-container-clicker";
 
 /**
- * Click the {@link SvgDrawPath} which was given as a constructor argument to {@link YtdPopupContainerClicker}
- * in the more options popup.
+ * Click the {@link SvgDrawPath} related element which is defined as the target filter inside the {@link YtdMenuServiceItemRendererSvgExtractor}s.
  *
- * This method takes a list of {@link YtdMenuServiceItemRendererSvgExtractor}s and then extracts the desired SVG element of each change
- * as defined by the constructor's `svgToClick` parameter. Depending on if the SVG was added or
- * un-hidden by the parent `ytd-menu-service-item-renderer` element, the SVG element will be passed to
- * `clickCallback` as is or extracted from the `ytd-menu-service-item-renderer` element.
+ * This method takes a list of {@link YtdMenuServiceItemRendererSvgExtractor}s and then extracts the desired SVG
+ * element of each item as defined by the {@link MutationsElementExtractor}'s `targetFilter`.
+ * Depending on if the SVG was added or un-hidden by the parent `ytd-menu-service-item-renderer` element, an
+ * `tp-yt-paper-item` element will be passed to `clickCallback` or the `ytd-menu-service-item-renderer` element itself.
  *
- * When determining to pass the SVG element as is or to extract it from the `ytd-menu-service-item-renderer`, it
- * is first checked if the SVG element was added and then checked if the parent `ytd-menu-service-item-renderer` was
- * unhidden. This order is important because the parent element is always added before the SVG element.
+ * When determining to pass a `tp-yt-paper-item` or a `ytd-menu-service-item-renderer` element, it is first checked
+ * if the SVG element was added and then checked if the parent `ytd-menu-service-item-renderer` was unhidden. This
+ * order is important because the parent element is always added before the SVG element.
  *
  * @param extractors List of {@link YtdMenuServiceItemRendererSvgExtractor}s to process for the click
  * @param clickCallback Optional: Custom callback to run on the found `svgToClick` element instead of calling

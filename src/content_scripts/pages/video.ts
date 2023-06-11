@@ -24,7 +24,7 @@ import {
   PageObserver,
 } from "../../observation/observer-types";
 import { OneshotObserverId } from "../../enums/oneshot-observer-id";
-import { YtdPopupContainerClicker } from "../../html-element-processing/ytd-popup-container-clicker";
+import { YtdPopupContainerClicker } from "../../mutations/ytd-popup-container-clicker";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);

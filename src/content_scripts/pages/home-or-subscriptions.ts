@@ -12,15 +12,9 @@ import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { PageObserver } from "../../observation/observer-types";
 import { OneshotObserverId } from "../../enums/oneshot-observer-id";
-import { LogProvider } from "../../logging/log-provider";
-import {
-  contentLogProvider,
-  contentScriptObserversManager,
-} from "../init-globals";
+import { contentScriptObserversManager } from "../init-globals";
 import { MutationSummary } from "mutation-summary";
-import { YtdPopupContainerClicker } from "../../html-element-processing/ytd-popup-container-clicker";
-
-const logger = contentLogProvider.getLogger(LogProvider.HOME_PAGE);
+import { YtdPopupContainerClicker } from "../../mutations/ytd-popup-container-clicker";
 
 let watchLaterClicker: YtdPopupContainerClicker;
 
