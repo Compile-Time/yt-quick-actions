@@ -5,23 +5,19 @@ import {
   TagNavigationFilter,
 } from "../html-navigation/filter/navigation-filter";
 import { Tags } from "../html-element-processing/element-data";
+import { SummaryLike } from "./summary-like";
+import { MutationsElementExtractor } from "./mutations-target-clicker";
 
 /**
  * Convenience class aggregating {@link Summary} changes and providing extraction methods for a given
  * `svgTargetFilter`.
- *
- * Currently only used for the {@link YtdPopupContainerClicker} class but can be expanded to allow all types of {@link NavigationFilter}.
  */
-export class MutationsElementExtractor {
-  private mutationSummaries: Summary[];
-  private svgTargetFilter: SvgDrawPathNavigationFilter;
-
+export class YtdMenuServiceItemRendererSvgExtractor extends MutationsElementExtractor {
   constructor(
     svgTargetFilter: SvgDrawPathNavigationFilter,
-    mutationSummaries: Summary[]
+    mutationSummaries: SummaryLike[]
   ) {
-    this.mutationSummaries = mutationSummaries;
-    this.svgTargetFilter = svgTargetFilter;
+    super(mutationSummaries, svgTargetFilter);
   }
 
   extractSvgFromAddedMutations(): HTMLElement {
@@ -29,7 +25,7 @@ export class MutationsElementExtractor {
       .map((node) => node as HTMLElement)
       // The class attribute is non-empty on valid path elements.
       .filter((pathElement) => !!pathElement.getAttribute("class"))
-      .filter((pathElement) => this.svgTargetFilter.applySingle(pathElement));
+      .filter((pathElement) => this.targetFilter.applySingle(pathElement));
     return svgPathSummaryElement.length === 1 ? svgPathSummaryElement[0] : null;
   }
 
@@ -39,7 +35,7 @@ export class MutationsElementExtractor {
       .filter((node) =>
         HtmlTreeNavigator.startFrom(node)
           .filter(new TagNavigationFilter(Tags.YT_ICON))
-          .findFirst(this.svgTargetFilter)
+          .findFirst(this.targetFilter)
           .exists()
       );
     return ytdMenuServiceItemRenderer.length === 1

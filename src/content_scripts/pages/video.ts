@@ -142,9 +142,14 @@ function initFullScreenSaveObserver(ytdPopupContainer: Node) {
 
 function initHalfScreenSaveObserver(ytdPopupContainer: Node) {
   halfScreenSavePlaylistClicker = new YtdPopupContainerClicker(
-    OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
-    SvgDrawPath.VIDEO_SAVE,
     ytdPopupContainer as HTMLElement
+  );
+  halfScreenSavePlaylistClicker.connectToMutationsExtractorEmitterOneshotObserver(
+    YtdPopupContainerClicker.createOneshotObserverForClicker(
+      OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
+      SvgDrawPath.VIDEO_SAVE,
+      halfScreenSavePlaylistClicker
+    )
   );
 }
 
@@ -158,9 +163,6 @@ function clickSaveToWatchLaterCheckbox(popupTrigger: HTMLElement): void {
 function clickSaveToWatchLaterCheckboxForHalfScreenSize(
   moreOptionsButton: HTMLElement
 ): void {
-  contentScriptObserversManager
-    .upsertOneshotObserver(halfScreenSavePlaylistClicker.oneshotObserver)
-    .observe();
   halfScreenSavePlaylistClicker.observeAndBufferMutationChangesThenClickSvg(
     (savePlaylistSvg) => {
       clickSaveToWatchLaterCheckbox(savePlaylistSvg);

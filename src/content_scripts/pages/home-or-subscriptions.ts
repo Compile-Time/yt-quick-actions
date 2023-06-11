@@ -39,9 +39,6 @@ function setupWatchLaterButtonIfNotPresent(menuButton: HTMLElement): void {
   ) {
     const watchLaterButtonInContainer =
       QaHtmlElements.watchLaterHomeVideoButton(() => {
-        contentScriptObserversManager
-          .upsertOneshotObserver(watchLaterClicker.oneshotObserver)
-          .observe();
         watchLaterClicker.observeAndBufferMutationChangesThenClickSvg();
         menuButton.click();
       });
@@ -93,8 +90,13 @@ export function initHomeOrSubscriptionsObservers(): void {
     .consume();
 
   watchLaterClicker = new YtdPopupContainerClicker(
-    OneshotObserverId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
-    SvgDrawPath.WATCH_LATER,
     ytdPopupContainer as HTMLElement
+  );
+  watchLaterClicker.connectToMutationsExtractorEmitterOneshotObserver(
+    YtdPopupContainerClicker.createOneshotObserverForClicker(
+      OneshotObserverId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
+      SvgDrawPath.WATCH_LATER,
+      watchLaterClicker
+    )
   );
 }
