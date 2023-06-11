@@ -1,4 +1,3 @@
-import { Summary } from "mutation-summary";
 import { HtmlTreeNavigator } from "../html-navigation/html-tree-navigator";
 import {
   SvgDrawPathNavigationFilter,
@@ -9,7 +8,7 @@ import { SummaryLike } from "./summary-like";
 import { MutationsElementExtractor } from "./mutations-target-clicker";
 
 /**
- * Convenience class aggregating {@link Summary} changes and providing extraction methods for a given
+ * Convenience class aggregating {@link SummaryLike} changes and providing extraction methods for a given
  * `svgTargetFilter`.
  */
 export class YtdMenuServiceItemRendererSvgExtractor extends MutationsElementExtractor {
