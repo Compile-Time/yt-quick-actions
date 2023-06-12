@@ -28,14 +28,10 @@ export class ActiveObserversManager {
    * @param oneshotObserver - A {@link OneshotObserver} to track
    */
   upsertOneshotObserver(oneshotObserver: OneshotObserver): PageObserver {
-    const existingOneshotObserver = this.oneshotObservers.find((oneshotOb) =>
-      oneshotOb.equals(oneshotObserver)
-    );
+    const existingOneshotObserver = this.oneshotObservers.find((oneshotOb) => oneshotOb.equals(oneshotObserver));
     if (existingOneshotObserver) {
       existingOneshotObserver.disconnect();
-      this.oneshotObservers = this.oneshotObservers.filter(
-        (oneshotOb) => !oneshotOb.equals(existingOneshotObserver)
-      );
+      this.oneshotObservers = this.oneshotObservers.filter((oneshotOb) => !oneshotOb.equals(existingOneshotObserver));
     }
     this.oneshotObservers.push(oneshotObserver);
     return oneshotObserver;
@@ -61,10 +57,7 @@ export class ActiveObserversManager {
    * existing mutation observers.
    */
   disconnectAll(): void {
-    const observers: PageObserver[] = [
-      ...this.backgroundObservers,
-      ...this.oneshotObservers.map((oneshotOb) => oneshotOb),
-    ];
+    const observers: PageObserver[] = [...this.backgroundObservers, ...this.oneshotObservers.map((oneshotOb) => oneshotOb)];
     observers.forEach((observer) => observer.disconnect());
 
     this.oneshotObservers = [];

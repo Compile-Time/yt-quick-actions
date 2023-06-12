@@ -14,12 +14,8 @@ export class NavigationFiltersToProcessQueue {
     this.filtersToProcess = filters;
   }
 
-  static fromFilters(
-    navigationFilters: NavigationFilter[]
-  ): NavigationFiltersToProcessQueue {
-    return new NavigationFiltersToProcessQueue(
-      navigationFilters.map((filter) => new NavigationFilterToProcess(filter))
-    );
+  static fromFilters(navigationFilters: NavigationFilter[]): NavigationFiltersToProcessQueue {
+    return new NavigationFiltersToProcessQueue(navigationFilters.map((filter) => new NavigationFilterToProcess(filter)));
   }
 
   getCurrentOrNextUnprocessedFilter(): NavigationFilterToProcess | undefined {
@@ -36,16 +32,12 @@ export class NavigationFiltersToProcessQueue {
   }
 
   areAllFiltersProcessed(): boolean {
-    return this.filtersToProcess.every(
-      (filterProcessed) => filterProcessed.isProcessed() === true
-    );
+    return this.filtersToProcess.every((filterProcessed) => filterProcessed.isProcessed() === true);
   }
 
   cloneWithoutProcessed(): NavigationFiltersToProcessQueue {
     return new NavigationFiltersToProcessQueue(
-      this.filtersToProcess
-        .filter((toProcess) => !toProcess.isProcessed())
-        .map((toProcess) => toProcess.clone())
+      this.filtersToProcess.filter((toProcess) => !toProcess.isProcessed()).map((toProcess) => toProcess.clone())
     );
   }
 }

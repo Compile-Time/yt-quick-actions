@@ -2,10 +2,7 @@ import { buffer, debounceTime, first, Subject } from "rxjs";
 import { YtdMenuServiceItemRendererSvgExtractor } from "./ytd-menu-service-item-renderer-svg-extractor";
 import { OneshotObserver } from "../observation/observer-types";
 import { OneshotObserverId } from "../enums/oneshot-observer-id";
-import {
-  SvgDrawPathNavigationFilter,
-  TagNavigationFilter,
-} from "../html-navigation/filter/navigation-filter";
+import { SvgDrawPathNavigationFilter, TagNavigationFilter } from "../html-navigation/filter/navigation-filter";
 import { SvgDrawPath, Tags } from "../html-element-processing/element-data";
 import { MutationSummary } from "mutation-summary";
 import { contentScriptObserversManager } from "../content_scripts/init-globals";
@@ -30,30 +27,20 @@ export class YtdPopupContainerClicker {
     return new OneshotObserver(oneshotObserverId, () => {
       const svgPathFilter = new SvgDrawPathNavigationFilter(svgToClick);
       const summary = new MutationSummary({
-        callback: (summaries) =>
-          clicker.pushMutationsExtractor(
-            new YtdMenuServiceItemRendererSvgExtractor(svgPathFilter, summaries)
-          ),
+        callback: (summaries) => clicker.pushMutationsExtractor(new YtdMenuServiceItemRendererSvgExtractor(svgPathFilter, summaries)),
         rootNode: clicker.popupContainer,
-        queries: [
-          { element: `path[d="${svgToClick}"]` },
-          { attribute: "hidden" },
-        ],
+        queries: [{ element: `path[d="${svgToClick}"]` }, { attribute: "hidden" }],
       });
       summary.disconnect();
       return summary;
     });
   }
 
-  pushMutationsExtractor(
-    mutations: YtdMenuServiceItemRendererSvgExtractor
-  ): void {
+  pushMutationsExtractor(mutations: YtdMenuServiceItemRendererSvgExtractor): void {
     this.subject.next(mutations);
   }
 
-  connectToMutationsExtractorEmitterOneshotObserver(
-    oneshotObserver: OneshotObserver
-  ): void {
+  connectToMutationsExtractorEmitterOneshotObserver(oneshotObserver: OneshotObserver): void {
     this.connectedOneshotMutationsExtractorEmitter = oneshotObserver;
   }
 
@@ -81,29 +68,18 @@ export class YtdPopupContainerClicker {
    * @param clickCallback Optional: Custom callback to run on the found `svgToClick` element instead of calling
    * `HTMLElement.click()` on it.
    */
-  observeAndBufferMutationChangesThenClickSvg(
-    clickCallback?: SvgOptionFn
-  ): void {
+  observeAndBufferMutationChangesThenClickSvg(clickCallback?: SvgOptionFn): void {
     if (this.connectedOneshotMutationsExtractorEmitter) {
-      contentScriptObserversManager
-        .upsertOneshotObserver(this.connectedOneshotMutationsExtractorEmitter)
-        .observe();
+      contentScriptObserversManager.upsertOneshotObserver(this.connectedOneshotMutationsExtractorEmitter).observe();
     }
 
-    this.subject
-      .pipe(buffer(this.subject.pipe(debounceTime(10))), first())
-      .subscribe(
-        (mutationChanges: YtdMenuServiceItemRendererSvgExtractor[]) => {
-          this.clickTargetSvgFromMatchingMutationsElementExtractor(
-            mutationChanges,
-            clickCallback
-          );
-          if (this.connectedOneshotMutationsExtractorEmitter) {
-            this.connectedOneshotMutationsExtractorEmitter.disconnect();
-          }
-          this.popupContainer.removeAttribute("hidden");
-        }
-      );
+    this.subject.pipe(buffer(this.subject.pipe(debounceTime(10))), first()).subscribe((mutationChanges: YtdMenuServiceItemRendererSvgExtractor[]) => {
+      this.clickTargetSvgFromMatchingMutationsElementExtractor(mutationChanges, clickCallback);
+      if (this.connectedOneshotMutationsExtractorEmitter) {
+        this.connectedOneshotMutationsExtractorEmitter.disconnect();
+      }
+      this.popupContainer.removeAttribute("hidden");
+    });
 
     // Hide the popup container so there is no drop-down flicker when triggering a quick action.
     this.popupContainer.setAttribute("hidden", "");
@@ -129,22 +105,13 @@ export class YtdPopupContainerClicker {
     extractors: YtdMenuServiceItemRendererSvgExtractor[],
     clickCallback?: SvgOptionFn
   ): void {
-    const addedSvgElements = extractors
-      .map((extractor) => extractor.extractSvgFromAddedMutations())
-      .filter((addedSvgElement) => !!addedSvgElement);
+    const addedSvgElements = extractors.map((extractor) => extractor.extractSvgFromAddedMutations()).filter((addedSvgElement) => !!addedSvgElement);
     const svgsOfUnHiddenYtdMenuServiceItemRenderers = extractors
-      .map((extractor) =>
-        extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()
-      )
-      .filter(
-        (unHiddenYtdServiceMenuItemRenderer) =>
-          !!unHiddenYtdServiceMenuItemRenderer
-      );
+      .map((extractor) => extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer())
+      .filter((unHiddenYtdServiceMenuItemRenderer) => !!unHiddenYtdServiceMenuItemRenderer);
 
     if (addedSvgElements.length === 1) {
-      const tpYtPaperItem = HtmlParentNavigator.startFrom(addedSvgElements[0])
-        .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
-        .consume();
+      const tpYtPaperItem = HtmlParentNavigator.startFrom(addedSvgElements[0]).find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM)).consume();
 
       if (clickCallback) {
         clickCallback(tpYtPaperItem);
@@ -152,8 +119,7 @@ export class YtdPopupContainerClicker {
         tpYtPaperItem.click();
       }
     } else if (svgsOfUnHiddenYtdMenuServiceItemRenderers.length === 1) {
-      const matchingYtdMenuServiceItemRenderer =
-        svgsOfUnHiddenYtdMenuServiceItemRenderers[0];
+      const matchingYtdMenuServiceItemRenderer = svgsOfUnHiddenYtdMenuServiceItemRenderers[0];
       if (clickCallback) {
         clickCallback(svgsOfUnHiddenYtdMenuServiceItemRenderers[0]);
       } else {

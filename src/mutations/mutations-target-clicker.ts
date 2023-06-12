@@ -5,10 +5,7 @@ export abstract class MutationsElementExtractor {
   protected mutationSummaries: SummaryLike[];
   protected targetFilter: NavigationFilter;
 
-  protected constructor(
-    mutationSummaries: SummaryLike[],
-    targetElement: NavigationFilter
-  ) {
+  protected constructor(mutationSummaries: SummaryLike[], targetElement: NavigationFilter) {
     this.mutationSummaries = mutationSummaries;
     this.targetFilter = targetElement;
   }

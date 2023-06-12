@@ -1,8 +1,5 @@
 import { HtmlTreeNavigator } from "../html-navigation/html-tree-navigator";
-import {
-  SvgDrawPathNavigationFilter,
-  TagNavigationFilter,
-} from "../html-navigation/filter/navigation-filter";
+import { SvgDrawPathNavigationFilter, TagNavigationFilter } from "../html-navigation/filter/navigation-filter";
 import { Tags } from "../html-element-processing/element-data";
 import { SummaryLike } from "./summary-like";
 import { MutationsElementExtractor } from "./mutations-target-clicker";
@@ -12,10 +9,7 @@ import { MutationsElementExtractor } from "./mutations-target-clicker";
  * `svgTargetFilter`.
  */
 export class YtdMenuServiceItemRendererSvgExtractor extends MutationsElementExtractor {
-  constructor(
-    svgTargetFilter: SvgDrawPathNavigationFilter,
-    mutationSummaries: SummaryLike[]
-  ) {
+  constructor(svgTargetFilter: SvgDrawPathNavigationFilter, mutationSummaries: SummaryLike[]) {
     super(mutationSummaries, svgTargetFilter);
   }
 
@@ -31,14 +25,7 @@ export class YtdMenuServiceItemRendererSvgExtractor extends MutationsElementExtr
   extractSvgFromUnHiddenYtdMenuServiceItemRenderer(): HTMLElement {
     const ytdMenuServiceItemRenderer = this.mutationSummaries[1].removed
       .map((node) => node as HTMLElement)
-      .filter((node) =>
-        HtmlTreeNavigator.startFrom(node)
-          .filter(new TagNavigationFilter(Tags.YT_ICON))
-          .findFirst(this.targetFilter)
-          .exists()
-      );
-    return ytdMenuServiceItemRenderer.length === 1
-      ? ytdMenuServiceItemRenderer[0]
-      : null;
+      .filter((node) => HtmlTreeNavigator.startFrom(node).filter(new TagNavigationFilter(Tags.YT_ICON)).findFirst(this.targetFilter).exists());
+    return ytdMenuServiceItemRenderer.length === 1 ? ytdMenuServiceItemRenderer[0] : null;
   }
 }

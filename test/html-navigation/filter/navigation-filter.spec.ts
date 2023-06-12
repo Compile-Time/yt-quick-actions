@@ -1,8 +1,4 @@
-import {
-  IdNavigationFilter,
-  SvgDrawPathNavigationFilter,
-  TagNavigationFilter,
-} from "../../../src/html-navigation/filter/navigation-filter";
+import { IdNavigationFilter, SvgDrawPathNavigationFilter, TagNavigationFilter } from "../../../src/html-navigation/filter/navigation-filter";
 
 class FakeDocument {
   private elementMap: Map<string, HTMLElement> = new Map<string, HTMLElement>();

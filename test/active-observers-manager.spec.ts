@@ -1,16 +1,10 @@
 import { ActiveObserversManager } from "../src/observation/active-observers-manager";
-import {
-  OneshotObserver,
-  PageObserver,
-} from "../src/observation/observer-types";
+import { OneshotObserver, PageObserver } from "../src/observation/observer-types";
 import { createSpyObj } from "jest-createspyobj";
 
 describe("ActiveObserversManager", () => {
   function mockObserver(): MutationObserver {
-    return createSpyObj("MutationObserver", [
-      "disconnect",
-      "observer",
-    ]) as unknown as MutationObserver;
+    return createSpyObj("MutationObserver", ["disconnect", "observer"]) as unknown as MutationObserver;
   }
 
   it("should disconnect previous oneshot observer for same id", () => {
@@ -18,12 +12,8 @@ describe("ActiveObserversManager", () => {
     const mockObserver1 = mockObserver();
     const mockObserver2 = mockObserver();
 
-    manager.upsertOneshotObserver(
-      new OneshotObserver("test", () => mockObserver1)
-    );
-    manager.upsertOneshotObserver(
-      new OneshotObserver("test", () => mockObserver2)
-    );
+    manager.upsertOneshotObserver(new OneshotObserver("test", () => mockObserver1));
+    manager.upsertOneshotObserver(new OneshotObserver("test", () => mockObserver2));
 
     expect(mockObserver1.disconnect).toHaveBeenCalled();
     expect(mockObserver2.disconnect).not.toHaveBeenCalled();
@@ -36,12 +26,8 @@ describe("ActiveObserversManager", () => {
     const mockObserver3 = mockObserver();
     const mockObserver4 = mockObserver();
 
-    manager.upsertOneshotObserver(
-      new OneshotObserver("test", () => mockObserver1)
-    );
-    manager.upsertOneshotObserver(
-      new OneshotObserver("test2", () => mockObserver2)
-    );
+    manager.upsertOneshotObserver(new OneshotObserver("test", () => mockObserver1));
+    manager.upsertOneshotObserver(new OneshotObserver("test2", () => mockObserver2));
     manager.addBackgroundObserver(new PageObserver(() => mockObserver3));
     manager.addBackgroundObserver(new PageObserver(() => mockObserver4));
 

@@ -6,19 +6,15 @@ import { setupYtdMenuServiceItemRendererSample } from "../setup-data/dom-element
 describe("YtdMenuServiceItemRendererSvgExtractor", () => {
   describe("extractSvgFromAddedMutations", () => {
     it("should return null from mutations with no added SVG path", () => {
-      const { path, ytdMenuServiceItemRenderer } =
-        setupYtdMenuServiceItemRendererSample();
+      const { path, ytdMenuServiceItemRenderer } = setupYtdMenuServiceItemRendererSample();
 
       path.setAttribute("class", "valid");
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        [
-          { added: [ytdMenuServiceItemRenderer], removed: [] },
-          { added: [], removed: [] },
-        ]
-      );
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
+        { added: [ytdMenuServiceItemRenderer], removed: [] },
+        { added: [], removed: [] },
+      ]);
       expect(extractor.extractSvgFromAddedMutations()).toBeNull();
     });
 
@@ -28,13 +24,10 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("class", "valid");
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        [
-          { added: [path], removed: [] },
-          { added: [], removed: [] },
-        ]
-      );
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
+        { added: [path], removed: [] },
+        { added: [], removed: [] },
+      ]);
       expect(extractor.extractSvgFromAddedMutations()).toEqual(path);
     });
 
@@ -44,13 +37,10 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("class", "valid");
       path.setAttribute("d", SvgDrawPath.WATCH_LATER);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        [
-          { added: [path], removed: [] },
-          { added: [], removed: [] },
-        ]
-      );
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
+        { added: [path], removed: [] },
+        { added: [], removed: [] },
+      ]);
       expect(extractor.extractSvgFromAddedMutations()).toBeNull();
     });
 
@@ -60,13 +50,10 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("class", "");
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        [
-          { added: [path], removed: [] },
-          { added: [], removed: [] },
-        ]
-      );
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
+        { added: [path], removed: [] },
+        { added: [], removed: [] },
+      ]);
       expect(extractor.extractSvgFromAddedMutations()).toBeNull();
     });
   });
@@ -77,52 +64,35 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
 
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        [
-          { added: [path], removed: [] },
-          { added: [], removed: [] },
-        ]
-      );
-      expect(
-        extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()
-      ).toBeNull();
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
+        { added: [path], removed: [] },
+        { added: [], removed: [] },
+      ]);
+      expect(extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()).toBeNull();
     });
 
     it("should extract ytd-menu-service-item-renderer from mutations with un-hidden ytd-menu-service-item-renderer matching filter", () => {
-      const { path, ytdMenuServiceItemRenderer } =
-        setupYtdMenuServiceItemRendererSample();
+      const { path, ytdMenuServiceItemRenderer } = setupYtdMenuServiceItemRendererSample();
 
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        [
-          { added: [], removed: [] },
-          { added: [], removed: [ytdMenuServiceItemRenderer] },
-        ]
-      );
-      expect(
-        extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()
-      ).toEqual(ytdMenuServiceItemRenderer);
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
+        { added: [], removed: [] },
+        { added: [], removed: [ytdMenuServiceItemRenderer] },
+      ]);
+      expect(extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()).toEqual(ytdMenuServiceItemRenderer);
     });
 
     it("should return null from mutations with un-hidden ytd-menu-service-item-renderer not matching filter", () => {
-      const { path, ytdMenuServiceItemRenderer } =
-        setupYtdMenuServiceItemRendererSample();
+      const { path, ytdMenuServiceItemRenderer } = setupYtdMenuServiceItemRendererSample();
 
       path.setAttribute("d", SvgDrawPath.WATCH_LATER);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        [
-          { added: [], removed: [] },
-          { added: [], removed: [ytdMenuServiceItemRenderer] },
-        ]
-      );
-      expect(
-        extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()
-      ).toBeNull();
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
+        { added: [], removed: [] },
+        { added: [], removed: [ytdMenuServiceItemRenderer] },
+      ]);
+      expect(extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()).toBeNull();
     });
   });
 });

@@ -19,18 +19,12 @@ function init() {
   contentScriptObserversManager.disconnectAll();
 
   const pathAndQueryParams = `${location.pathname}${location.search}`;
-  if (
-    pathAndQueryParams.includes("watch") &&
-    pathAndQueryParams.includes("list=WL")
-  ) {
+  if (pathAndQueryParams.includes("watch") && pathAndQueryParams.includes("list=WL")) {
     initWatchingPlaylistObservers();
     initVideoObservers();
   } else if (pathAndQueryParams.includes("watch")) {
     initVideoObservers();
-  } else if (
-    pathAndQueryParams.includes("playlist") &&
-    pathAndQueryParams.includes("list=WL")
-  ) {
+  } else if (pathAndQueryParams.includes("playlist") && pathAndQueryParams.includes("list=WL")) {
     initPlaylistObservers();
   } else if (pathAndQueryParams.includes("subscriptions")) {
     initHomeOrSubscriptionsObservers();

@@ -20,9 +20,7 @@ export class MutationElementExistsWatcher extends ElementWatcher<MutationElement
     return this;
   }
 
-  observeFn(
-    mutationObserverFn: MutationObserverFn
-  ): MutationElementExistsWatcher {
+  observeFn(mutationObserverFn: MutationObserverFn): MutationElementExistsWatcher {
     this.mutationObserverFn = mutationObserverFn;
     return this;
   }
@@ -36,8 +34,7 @@ export class MutationElementExistsWatcher extends ElementWatcher<MutationElement
         return reject(new Error("No observe function was provided"));
       }
 
-      const initialElementQueryResult: ElementWatcherResult =
-        this.elementQueryFn();
+      const initialElementQueryResult: ElementWatcherResult = this.elementQueryFn();
       if (this.isValidQueryResult(initialElementQueryResult)) {
         return resolve(initialElementQueryResult);
       }
@@ -54,9 +51,7 @@ export class MutationElementExistsWatcher extends ElementWatcher<MutationElement
     });
   }
 
-  private isValidQueryResult(
-    elementQueryResult: ElementWatcherResult
-  ): boolean {
+  private isValidQueryResult(elementQueryResult: ElementWatcherResult): boolean {
     const objectValues = Object.values(elementQueryResult);
     return (
       objectValues.length > 0 &&
@@ -69,9 +64,7 @@ export class MutationElementExistsWatcher extends ElementWatcher<MutationElement
     );
   }
 
-  private isHtmlElementArray(
-    elements: HTMLElement | HTMLElement[]
-  ): elements is Array<HTMLElement> {
+  private isHtmlElementArray(elements: HTMLElement | HTMLElement[]): elements is Array<HTMLElement> {
     return (elements as Array<HTMLElement>).length !== undefined;
   }
 }
