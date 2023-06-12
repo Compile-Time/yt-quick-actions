@@ -1,7 +1,11 @@
 import { Ids, SvgDrawPath, Tags } from "../../html-element-processing/element-data";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
-import { IdNavigationFilter, SvgDrawPathNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
+import {
+  IdNavigationFilter,
+  SvgDrawPathNavigationFilter,
+  TagNavigationFilter,
+} from "../../html-navigation/filter/navigation-filter";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { OneshotObserver, PageObserver } from "../../observation/observer-types";
 import { OneshotObserverId } from "../../enums/oneshot-observer-id";
@@ -28,7 +32,11 @@ function setupRemoveButtonIfNotPresent(moreOptionsButton: HTMLElement): void {
     .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_RENDERER))
     .consume();
 
-  if (HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer).findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON)).notExists()) {
+  if (
+    HtmlTreeNavigator.startFrom(ytdPlaylistVideoRenderer)
+      .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_REMOVE_BUTTON))
+      .notExists()
+  ) {
     setupRemoveButton(moreOptionsButton, ytdPlaylistVideoRenderer);
   }
 }
@@ -52,7 +60,9 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
         summaries[0].removed
           .map((ytdMenuServiceItem) => ytdMenuServiceItem as HTMLElement)
           .filter((ytdMenuServiceItem) =>
-            HtmlTreeNavigator.startFrom(ytdMenuServiceItem).findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON)).exists()
+            HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
+              .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
+              .exists()
           )
           // Only a single element should match the above filter.
           .forEach((removeMenuEntry) => {
@@ -111,7 +121,9 @@ function initContentScript(moreOptionsButtons: HTMLElement[]): void {
   const ytdPlaylistVideoListRenderer = HtmlParentNavigator.startFrom(firstMenuButton)
     .find(new TagNavigationFilter(Tags.YTD_PLAYLIST_VIDEO_LIST_RENDERER))
     .consume();
-  const popupMenu = HtmlTreeNavigator.startFrom(document.body).findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER)).consume();
+  const popupMenu = HtmlTreeNavigator.startFrom(document.body)
+    .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+    .consume();
 
   initMoreOptionsMenuObserver(popupMenu);
   initPlaylistObserver(ytdPlaylistVideoListRenderer);

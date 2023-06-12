@@ -10,7 +10,10 @@ export class PageObserver {
   protected readonly mutationObserverArgs?: MutationObserverArgs;
   protected disconnected: boolean;
 
-  constructor(observerProvider: (disconnectFn: () => void) => MutationObserver | MutationSummary, mutationObserverArgs?: MutationObserverArgs) {
+  constructor(
+    observerProvider: (disconnectFn: () => void) => MutationObserver | MutationSummary,
+    mutationObserverArgs?: MutationObserverArgs
+  ) {
     this.observer = observerProvider(() => this.disconnect());
     this.mutationObserverArgs = mutationObserverArgs;
     this.disconnected = false;

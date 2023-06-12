@@ -55,7 +55,10 @@ function registerEventListeners(): void {
     .findFirst(new IdNavigationFilter("select", "log-level"))
     .consume()
     .addEventListener("change", updateLogLevel);
-  HtmlTreeNavigator.startFrom(document.body).findFirst(new TagNavigationFilter("form")).consume().addEventListener("submit", saveOptions);
+  HtmlTreeNavigator.startFrom(document.body)
+    .findFirst(new TagNavigationFilter("form"))
+    .consume()
+    .addEventListener("submit", saveOptions);
 }
 
 function init(): void {

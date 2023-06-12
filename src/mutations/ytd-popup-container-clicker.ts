@@ -27,7 +27,8 @@ export class YtdPopupContainerClicker {
     return new OneshotObserver(oneshotObserverId, () => {
       const svgPathFilter = new SvgDrawPathNavigationFilter(svgToClick);
       const summary = new MutationSummary({
-        callback: (summaries) => clicker.pushMutationsExtractor(new YtdMenuServiceItemRendererSvgExtractor(svgPathFilter, summaries)),
+        callback: (summaries) =>
+          clicker.pushMutationsExtractor(new YtdMenuServiceItemRendererSvgExtractor(svgPathFilter, summaries)),
         rootNode: clicker.popupContainer,
         queries: [{ element: `path[d="${svgToClick}"]` }, { attribute: "hidden" }],
       });
@@ -73,13 +74,15 @@ export class YtdPopupContainerClicker {
       contentScriptObserversManager.upsertOneshotObserver(this.connectedOneshotMutationsExtractorEmitter).observe();
     }
 
-    this.subject.pipe(buffer(this.subject.pipe(debounceTime(10))), first()).subscribe((mutationChanges: YtdMenuServiceItemRendererSvgExtractor[]) => {
-      this.clickTargetSvgFromMatchingMutationsElementExtractor(mutationChanges, clickCallback);
-      if (this.connectedOneshotMutationsExtractorEmitter) {
-        this.connectedOneshotMutationsExtractorEmitter.disconnect();
-      }
-      this.popupContainer.removeAttribute("hidden");
-    });
+    this.subject
+      .pipe(buffer(this.subject.pipe(debounceTime(10))), first())
+      .subscribe((mutationChanges: YtdMenuServiceItemRendererSvgExtractor[]) => {
+        this.clickTargetSvgFromMatchingMutationsElementExtractor(mutationChanges, clickCallback);
+        if (this.connectedOneshotMutationsExtractorEmitter) {
+          this.connectedOneshotMutationsExtractorEmitter.disconnect();
+        }
+        this.popupContainer.removeAttribute("hidden");
+      });
 
     // Hide the popup container so there is no drop-down flicker when triggering a quick action.
     this.popupContainer.setAttribute("hidden", "");
@@ -105,13 +108,17 @@ export class YtdPopupContainerClicker {
     extractors: YtdMenuServiceItemRendererSvgExtractor[],
     clickCallback?: SvgOptionFn
   ): void {
-    const addedSvgElements = extractors.map((extractor) => extractor.extractSvgFromAddedMutations()).filter((addedSvgElement) => !!addedSvgElement);
+    const addedSvgElements = extractors
+      .map((extractor) => extractor.extractSvgFromAddedMutations())
+      .filter((addedSvgElement) => !!addedSvgElement);
     const svgsOfUnHiddenYtdMenuServiceItemRenderers = extractors
       .map((extractor) => extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer())
       .filter((unHiddenYtdServiceMenuItemRenderer) => !!unHiddenYtdServiceMenuItemRenderer);
 
     if (addedSvgElements.length === 1) {
-      const tpYtPaperItem = HtmlParentNavigator.startFrom(addedSvgElements[0]).find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM)).consume();
+      const tpYtPaperItem = HtmlParentNavigator.startFrom(addedSvgElements[0])
+        .find(new TagNavigationFilter(Tags.TP_YT_PAPER_ITEM))
+        .consume();
 
       if (clickCallback) {
         clickCallback(tpYtPaperItem);

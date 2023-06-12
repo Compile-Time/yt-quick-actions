@@ -45,7 +45,9 @@ export class HtmlTreeNavigator {
     }
 
     this.filter(targetElementFilter);
-    return this.navigateTree(this.initialFilterQueue, this.element.children).map((element) => new HtmlFindResult(element));
+    return this.navigateTree(this.initialFilterQueue, this.element.children).map(
+      (element) => new HtmlFindResult(element)
+    );
   }
 
   /**

@@ -11,10 +11,13 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("class", "valid");
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
-        { added: [ytdMenuServiceItemRenderer], removed: [] },
-        { added: [], removed: [] },
-      ]);
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
+        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
+        [
+          { added: [ytdMenuServiceItemRenderer], removed: [] },
+          { added: [], removed: [] },
+        ]
+      );
       expect(extractor.extractSvgFromAddedMutations()).toBeNull();
     });
 
@@ -24,10 +27,13 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("class", "valid");
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
-        { added: [path], removed: [] },
-        { added: [], removed: [] },
-      ]);
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
+        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
+        [
+          { added: [path], removed: [] },
+          { added: [], removed: [] },
+        ]
+      );
       expect(extractor.extractSvgFromAddedMutations()).toEqual(path);
     });
 
@@ -37,10 +43,13 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("class", "valid");
       path.setAttribute("d", SvgDrawPath.WATCH_LATER);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
-        { added: [path], removed: [] },
-        { added: [], removed: [] },
-      ]);
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
+        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
+        [
+          { added: [path], removed: [] },
+          { added: [], removed: [] },
+        ]
+      );
       expect(extractor.extractSvgFromAddedMutations()).toBeNull();
     });
 
@@ -50,10 +59,13 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("class", "");
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
-        { added: [path], removed: [] },
-        { added: [], removed: [] },
-      ]);
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
+        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
+        [
+          { added: [path], removed: [] },
+          { added: [], removed: [] },
+        ]
+      );
       expect(extractor.extractSvgFromAddedMutations()).toBeNull();
     });
   });
@@ -64,10 +76,13 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
 
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
-        { added: [path], removed: [] },
-        { added: [], removed: [] },
-      ]);
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
+        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
+        [
+          { added: [path], removed: [] },
+          { added: [], removed: [] },
+        ]
+      );
       expect(extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()).toBeNull();
     });
 
@@ -76,10 +91,13 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
 
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
-        { added: [], removed: [] },
-        { added: [], removed: [ytdMenuServiceItemRenderer] },
-      ]);
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
+        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
+        [
+          { added: [], removed: [] },
+          { added: [], removed: [ytdMenuServiceItemRenderer] },
+        ]
+      );
       expect(extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()).toEqual(ytdMenuServiceItemRenderer);
     });
 
@@ -88,10 +106,13 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
 
       path.setAttribute("d", SvgDrawPath.WATCH_LATER);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE), [
-        { added: [], removed: [] },
-        { added: [], removed: [ytdMenuServiceItemRenderer] },
-      ]);
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
+        new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
+        [
+          { added: [], removed: [] },
+          { added: [], removed: [ytdMenuServiceItemRenderer] },
+        ]
+      );
       expect(extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()).toBeNull();
     });
   });

@@ -1,6 +1,10 @@
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
-import { IdNavigationFilter, SvgDrawPathNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
+import {
+  IdNavigationFilter,
+  SvgDrawPathNavigationFilter,
+  TagNavigationFilter,
+} from "../../html-navigation/filter/navigation-filter";
 import { Ids, SvgDrawPath, Tags } from "../../html-element-processing/element-data";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { OneshotObserver, PageObserver } from "../../observation/observer-types";
@@ -18,7 +22,9 @@ function setupRemoveButton(ytIconButton: HTMLElement): HTMLButtonElement {
   const button = QaHtmlElements.removeButtonInWatchingPlaylist();
   button.onclick = () => {
     ytIconButton.click();
-    const popupMenu = HtmlTreeNavigator.startFrom(document.body).findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS)).consume();
+    const popupMenu = HtmlTreeNavigator.startFrom(document.body)
+      .findFirst(new IdNavigationFilter(Tags.TP_YT_PAPER_LISTBOX, Ids.ITEMS))
+      .consume();
 
     if (!popupMenu) {
       logger.error("Could not find popup menu trigger");
@@ -67,7 +73,9 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
 }
 
 function initContentScript(ytMenuIconButtons: HTMLElement[]): void {
-  const ytdPopupContainer = HtmlTreeNavigator.startFrom(document.body).findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER)).consume();
+  const ytdPopupContainer = HtmlTreeNavigator.startFrom(document.body)
+    .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+    .consume();
 
   initMoreOptionsMenuObserver(ytdPopupContainer);
 

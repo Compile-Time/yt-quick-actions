@@ -57,7 +57,10 @@ export class ActiveObserversManager {
    * existing mutation observers.
    */
   disconnectAll(): void {
-    const observers: PageObserver[] = [...this.backgroundObservers, ...this.oneshotObservers.map((oneshotOb) => oneshotOb)];
+    const observers: PageObserver[] = [
+      ...this.backgroundObservers,
+      ...this.oneshotObservers.map((oneshotOb) => oneshotOb),
+    ];
     observers.forEach((observer) => observer.disconnect());
 
     this.oneshotObservers = [];

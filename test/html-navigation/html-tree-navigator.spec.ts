@@ -1,5 +1,9 @@
 import { HtmlTreeNavigator } from "../../src/html-navigation/html-tree-navigator";
-import { IdNavigationFilter, SvgDrawPathNavigationFilter, TagNavigationFilter } from "../../src/html-navigation/filter/navigation-filter";
+import {
+  IdNavigationFilter,
+  SvgDrawPathNavigationFilter,
+  TagNavigationFilter,
+} from "../../src/html-navigation/filter/navigation-filter";
 import { Tags } from "../../src/html-element-processing/element-data";
 
 describe("HtmlTreeNavigator", () => {
@@ -144,40 +148,44 @@ describe("HtmlTreeNavigator", () => {
     expect(elements).toEqual([path1]);
   });
 
-  it("should return the element whose path matches the most with the given filters even if it is not the" + " last element in the tree", () => {
-    const rootContainer = document.createElement("div");
-    rootContainer.id = "root-container";
+  it(
+    "should return the element whose path matches the most with the given filters even if it is not the" +
+      " last element in the tree",
+    () => {
+      const rootContainer = document.createElement("div");
+      rootContainer.id = "root-container";
 
-    const div1 = document.createElement("div");
-    div1.id = "div1";
-    const div2 = document.createElement("div");
-    div2.id = "div2";
-    const div3 = document.createElement("div");
-    div3.id = "div3";
+      const div1 = document.createElement("div");
+      div1.id = "div1";
+      const div2 = document.createElement("div");
+      div2.id = "div2";
+      const div3 = document.createElement("div");
+      div3.id = "div3";
 
-    const button1 = document.createElement("button");
-    button1.id = "button1";
-    const button2 = document.createElement("button");
-    const button3 = document.createElement("button");
+      const button1 = document.createElement("button");
+      button1.id = "button1";
+      const button2 = document.createElement("button");
+      const button3 = document.createElement("button");
 
-    const span1 = document.createElement("span");
-    span1.textContent = "Span1";
+      const span1 = document.createElement("span");
+      span1.textContent = "Span1";
 
-    button1.appendChild(span1);
+      button1.appendChild(span1);
 
-    div1.appendChild(button1);
-    div2.appendChild(button2);
-    div3.appendChild(button3);
+      div1.appendChild(button1);
+      div2.appendChild(button2);
+      div3.appendChild(button3);
 
-    rootContainer.appendChild(div1);
-    rootContainer.appendChild(div2);
-    rootContainer.appendChild(div3);
+      rootContainer.appendChild(div1);
+      rootContainer.appendChild(div2);
+      rootContainer.appendChild(div3);
 
-    const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
-      .filter(new TagNavigationFilter(Tags.DIV))
-      .findAll(new IdNavigationFilter("button", "button1"))
-      .map((result) => result.consume());
+      const elements: Element[] = HtmlTreeNavigator.startFrom(rootContainer)
+        .filter(new TagNavigationFilter(Tags.DIV))
+        .findAll(new IdNavigationFilter("button", "button1"))
+        .map((result) => result.consume());
 
-    expect(elements).toEqual([button1]);
-  });
+      expect(elements).toEqual([button1]);
+    }
+  );
 });

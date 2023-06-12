@@ -15,7 +15,9 @@ export class NavigationFiltersToProcessQueue {
   }
 
   static fromFilters(navigationFilters: NavigationFilter[]): NavigationFiltersToProcessQueue {
-    return new NavigationFiltersToProcessQueue(navigationFilters.map((filter) => new NavigationFilterToProcess(filter)));
+    return new NavigationFiltersToProcessQueue(
+      navigationFilters.map((filter) => new NavigationFilterToProcess(filter))
+    );
   }
 
   getCurrentOrNextUnprocessedFilter(): NavigationFilterToProcess | undefined {

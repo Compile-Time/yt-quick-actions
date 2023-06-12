@@ -25,7 +25,12 @@ export class YtdMenuServiceItemRendererSvgExtractor extends MutationsElementExtr
   extractSvgFromUnHiddenYtdMenuServiceItemRenderer(): HTMLElement {
     const ytdMenuServiceItemRenderer = this.mutationSummaries[1].removed
       .map((node) => node as HTMLElement)
-      .filter((node) => HtmlTreeNavigator.startFrom(node).filter(new TagNavigationFilter(Tags.YT_ICON)).findFirst(this.targetFilter).exists());
+      .filter((node) =>
+        HtmlTreeNavigator.startFrom(node)
+          .filter(new TagNavigationFilter(Tags.YT_ICON))
+          .findFirst(this.targetFilter)
+          .exists()
+      );
     return ytdMenuServiceItemRenderer.length === 1 ? ytdMenuServiceItemRenderer[0] : null;
   }
 }

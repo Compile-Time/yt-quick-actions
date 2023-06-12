@@ -1,6 +1,10 @@
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { AttributeNames, Ids, SvgDrawPath, Tags } from "../../html-element-processing/element-data";
-import { IdNavigationFilter, SvgDrawPathNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
+import {
+  IdNavigationFilter,
+  SvgDrawPathNavigationFilter,
+  TagNavigationFilter,
+} from "../../html-navigation/filter/navigation-filter";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 import { MutationElementExistsWatcher } from "../../html-element-processing/element-watcher/mutation-element-exists-watcher";
@@ -61,7 +65,9 @@ function initFullScreenSaveObserver(ytdPopupContainer: Node) {
           summaries[1].removed
             .map((tpYtPaperDialog) => tpYtPaperDialog as HTMLElement)
             .filter((removedFromElement) =>
-              HtmlTreeNavigator.startFrom(removedFromElement).findFirst(new TagNavigationFilter(Tags.YTD_PLAYLIST_ADD_TO_OPTION_RENDERER)).exists()
+              HtmlTreeNavigator.startFrom(removedFromElement)
+                .findFirst(new TagNavigationFilter(Tags.YTD_PLAYLIST_ADD_TO_OPTION_RENDERER))
+                .exists()
             )
             .forEach((tpYtPaperDialog) => {
               disconnectFn();
@@ -114,7 +120,9 @@ function clickSaveToWatchLaterCheckboxForHalfScreenSize(moreOptionsButton: HTMLE
 
 function setupWatchLaterButton(moreOptionsButton: HTMLElement): HTMLButtonElement {
   const quickActionsWatchLater = QaHtmlElements.watchLaterUnderVideoButton(() => {
-    const ytdMenuRenderer = HtmlParentNavigator.startFrom(moreOptionsButton).find(new TagNavigationFilter(Tags.YTD_MENU_RENDERER)).consume();
+    const ytdMenuRenderer = HtmlParentNavigator.startFrom(moreOptionsButton)
+      .find(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
+      .consume();
 
     if (!ytdMenuRenderer) {
       logger.error("Could not find ytd-menu-renderer as a parent");
@@ -144,7 +152,9 @@ function initContentScript(moreOptionsButton: HTMLElement): void {
   // Remove existing buttons otherwise duplicates are present on the page.
   createdElements.forEach((element) => element.remove());
 
-  const popupContainer = HtmlTreeNavigator.startFrom(document.body).findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER)).consume();
+  const popupContainer = HtmlTreeNavigator.startFrom(document.body)
+    .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
+    .consume();
 
   if (!popupContainer) {
     logger.error("Could not find popup container on page");
