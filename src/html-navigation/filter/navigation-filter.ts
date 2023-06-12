@@ -1,7 +1,4 @@
-import {
-  AttributeNames,
-  Tags,
-} from "../../html-element-processing/element-data";
+import { AttributeNames, Tags } from "../../html-element-processing/element-data";
 
 export abstract class NavigationFilter {
   apply(htmlCollection: HTMLCollection): HTMLElement[] {
@@ -44,10 +41,7 @@ export class IdNavigationFilter extends NavigationFilter {
   }
 
   applyCondition(element: HTMLElement): boolean {
-    return (
-      element.id === this.id &&
-      this.lowercaseEquals(element.tagName, this.tagName)
-    );
+    return element.id === this.id && this.lowercaseEquals(element.tagName, this.tagName);
   }
 
   equals(other: IdNavigationFilter): boolean {
@@ -75,10 +69,7 @@ export class SvgDrawPathNavigationFilter extends NavigationFilter {
   }
 
   protected applyCondition(element: HTMLElement): boolean {
-    return (
-      this.lowercaseEquals(element.tagName, Tags.PATH) &&
-      element.getAttribute(AttributeNames.D) === this.drawPath
-    );
+    return this.lowercaseEquals(element.tagName, Tags.PATH) && element.getAttribute(AttributeNames.D) === this.drawPath;
   }
 
   equals(other: SvgDrawPathNavigationFilter): boolean {

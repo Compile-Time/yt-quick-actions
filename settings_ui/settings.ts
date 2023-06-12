@@ -3,19 +3,14 @@ import { LogLevel, LogLevelMapper } from "../src/enums/log-level";
 import { SettingsData } from "../src/storage/settings-data";
 import { LogProvider } from "../src/logging/log-provider";
 import { HtmlTreeNavigator } from "../src/html-navigation/html-tree-navigator";
-import {
-  IdNavigationFilter,
-  TagNavigationFilter,
-} from "../src/html-navigation/filter/navigation-filter";
+import { IdNavigationFilter, TagNavigationFilter } from "../src/html-navigation/filter/navigation-filter";
 
 const settingsLogProvider = new LogProvider();
 const logger = settingsLogProvider.getLogger(LogProvider.SETTINGS_PAGE);
 
 const settingsData = new SettingsData();
 
-function generateLogLevelsForSelect(
-  selectedOption: string
-): HTMLOptionElement[] {
+function generateLogLevelsForSelect(selectedOption: string): HTMLOptionElement[] {
   return Object.values(LogLevel).map((level) => {
     const option = document.createElement("option");
     option.innerText = level.toUpperCase();
@@ -29,9 +24,7 @@ function generateLogLevelsForSelect(
 
 function updateLogLevel(event: Event) {
   const select = event.target as HTMLSelectElement;
-  const level = LogLevelMapper.fromStr(
-    select.options[select.selectedIndex].value
-  );
+  const level = LogLevelMapper.fromStr(select.options[select.selectedIndex].value);
   logger.setLevel(level);
   settingsData.logLevel = level;
 }
@@ -46,12 +39,9 @@ function initLogLevel(): void {
       } else {
         logLevel = LogLevel.WARN;
       }
-      generateLogLevelsForSelect(logLevel).forEach((option) =>
-        select.append(option)
-      );
+      generateLogLevelsForSelect(logLevel).forEach((option) => select.append(option));
     },
-    (error) =>
-      logger.error(`Could not retrieve log level from storage API: ${error}`)
+    (error) => logger.error(`Could not retrieve log level from storage API: ${error}`)
   );
 }
 

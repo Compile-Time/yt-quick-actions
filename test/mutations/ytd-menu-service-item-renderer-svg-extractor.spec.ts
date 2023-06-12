@@ -6,8 +6,7 @@ import { setupYtdMenuServiceItemRendererSample } from "../setup-data/dom-element
 describe("YtdMenuServiceItemRendererSvgExtractor", () => {
   describe("extractSvgFromAddedMutations", () => {
     it("should return null from mutations with no added SVG path", () => {
-      const { path, ytdMenuServiceItemRenderer } =
-        setupYtdMenuServiceItemRendererSample();
+      const { path, ytdMenuServiceItemRenderer } = setupYtdMenuServiceItemRendererSample();
 
       path.setAttribute("class", "valid");
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
@@ -84,14 +83,11 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
           { added: [], removed: [] },
         ]
       );
-      expect(
-        extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()
-      ).toBeNull();
+      expect(extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()).toBeNull();
     });
 
     it("should extract ytd-menu-service-item-renderer from mutations with un-hidden ytd-menu-service-item-renderer matching filter", () => {
-      const { path, ytdMenuServiceItemRenderer } =
-        setupYtdMenuServiceItemRendererSample();
+      const { path, ytdMenuServiceItemRenderer } = setupYtdMenuServiceItemRendererSample();
 
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
@@ -102,14 +98,11 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
           { added: [], removed: [ytdMenuServiceItemRenderer] },
         ]
       );
-      expect(
-        extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()
-      ).toEqual(ytdMenuServiceItemRenderer);
+      expect(extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()).toEqual(ytdMenuServiceItemRenderer);
     });
 
     it("should return null from mutations with un-hidden ytd-menu-service-item-renderer not matching filter", () => {
-      const { path, ytdMenuServiceItemRenderer } =
-        setupYtdMenuServiceItemRendererSample();
+      const { path, ytdMenuServiceItemRenderer } = setupYtdMenuServiceItemRendererSample();
 
       path.setAttribute("d", SvgDrawPath.WATCH_LATER);
 
@@ -120,9 +113,7 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
           { added: [], removed: [ytdMenuServiceItemRenderer] },
         ]
       );
-      expect(
-        extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()
-      ).toBeNull();
+      expect(extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()).toBeNull();
     });
   });
 });

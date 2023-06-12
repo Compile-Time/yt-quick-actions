@@ -6,8 +6,7 @@ import { HtmlFindResult } from "./html-find-result";
  * Builder-like class for HTML tree navigation.
  */
 export class HtmlTreeNavigator {
-  private initialFilterQueue: NavigationFiltersToProcessQueue =
-    new NavigationFiltersToProcessQueue();
+  private initialFilterQueue: NavigationFiltersToProcessQueue = new NavigationFiltersToProcessQueue();
 
   constructor(private element: HTMLElement) {}
 
@@ -46,10 +45,9 @@ export class HtmlTreeNavigator {
     }
 
     this.filter(targetElementFilter);
-    return this.navigateTree(
-      this.initialFilterQueue,
-      this.element.children
-    ).map((element) => new HtmlFindResult(element));
+    return this.navigateTree(this.initialFilterQueue, this.element.children).map(
+      (element) => new HtmlFindResult(element)
+    );
   }
 
   /**
@@ -61,9 +59,7 @@ export class HtmlTreeNavigator {
    */
   findFirst(filter: NavigationFilter): HtmlFindResult {
     const foundElements = this.findAll(filter);
-    return foundElements.length > 0
-      ? foundElements[0]
-      : HtmlFindResult.noResult();
+    return foundElements.length > 0 ? foundElements[0] : HtmlFindResult.noResult();
   }
 
   /**
@@ -75,15 +71,10 @@ export class HtmlTreeNavigator {
    */
   findLast(filter: NavigationFilter): HtmlFindResult {
     const foundElements = this.findAll(filter);
-    return foundElements.length > 0
-      ? foundElements[foundElements.length - 1]
-      : HtmlFindResult.noResult();
+    return foundElements.length > 0 ? foundElements[foundElements.length - 1] : HtmlFindResult.noResult();
   }
 
-  private navigateTree(
-    filterQueue: NavigationFiltersToProcessQueue,
-    htmlCollection: HTMLCollection
-  ): HTMLElement[] {
+  private navigateTree(filterQueue: NavigationFiltersToProcessQueue, htmlCollection: HTMLCollection): HTMLElement[] {
     if (htmlCollection.length === 0) {
       return [];
     }
@@ -104,9 +95,7 @@ export class HtmlTreeNavigator {
 
     return Array.from(htmlCollection)
       .flatMap((element) => element.children)
-      .flatMap((children) =>
-        this.navigateTree(filterQueue.cloneWithoutProcessed(), children)
-      )
+      .flatMap((children) => this.navigateTree(filterQueue.cloneWithoutProcessed(), children))
       .filter((element) => !!element);
   }
 }

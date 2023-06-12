@@ -6,8 +6,6 @@ export class StorageAccessor {
   static getLogLevel(): Promise<LogLevel> {
     return Browser.storage.local
       .get(SettingsData.LOG_LEVEL_ATTR)
-      .then((storage: Record<string, string>) =>
-        LogLevelMapper.fromStrOrDefault(storage.logLevel)
-      );
+      .then((storage: Record<string, string>) => LogLevelMapper.fromStrOrDefault(storage.logLevel));
   }
 }

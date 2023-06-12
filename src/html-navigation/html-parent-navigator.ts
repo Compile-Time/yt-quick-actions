@@ -16,18 +16,13 @@ export class HtmlParentNavigator {
     return new HtmlFindResult(this.navigateToParent(this.element, filter));
   }
 
-  private navigateToParent(
-    element: HTMLElement,
-    filter: NavigationFilter
-  ): HTMLElement {
+  private navigateToParent(element: HTMLElement, filter: NavigationFilter): HTMLElement {
     const foundElement = filter.applySingle(element);
 
     if (foundElement) {
       return foundElement;
     } else {
-      return !element.parentElement
-        ? null
-        : this.navigateToParent(element.parentElement, filter);
+      return !element.parentElement ? null : this.navigateToParent(element.parentElement, filter);
     }
   }
 }

@@ -11,9 +11,7 @@ export class PageObserver {
   protected disconnected: boolean;
 
   constructor(
-    observerProvider: (
-      disconnectFn: () => void
-    ) => MutationObserver | MutationSummary,
+    observerProvider: (disconnectFn: () => void) => MutationObserver | MutationSummary,
     mutationObserverArgs?: MutationObserverArgs
   ) {
     this.observer = observerProvider(() => this.disconnect());
@@ -35,16 +33,11 @@ export class PageObserver {
     if (this.isMutationSummary(this.observer)) {
       this.observer.reconnect();
     } else {
-      this.observer.observe(
-        this.mutationObserverArgs.targetNode,
-        this.mutationObserverArgs.initOptions
-      );
+      this.observer.observe(this.mutationObserverArgs.targetNode, this.mutationObserverArgs.initOptions);
     }
   }
 
-  private isMutationSummary(
-    observer: MutationObserver | MutationSummary
-  ): observer is MutationSummary {
+  private isMutationSummary(observer: MutationObserver | MutationSummary): observer is MutationSummary {
     return (observer as MutationSummary).reconnect !== undefined;
   }
 }
@@ -52,9 +45,7 @@ export class PageObserver {
 export class OneshotObserver extends PageObserver {
   constructor(
     private readonly id: string,
-    observerProvider: (
-      disconnectFn: () => void
-    ) => MutationObserver | MutationSummary,
+    observerProvider: (disconnectFn: () => void) => MutationObserver | MutationSummary,
     mutationObserverArgs?: MutationObserverArgs
   ) {
     super(observerProvider, mutationObserverArgs);

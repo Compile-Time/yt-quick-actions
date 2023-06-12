@@ -1,13 +1,6 @@
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
-import {
-  IdNavigationFilter,
-  TagNavigationFilter,
-} from "../../html-navigation/filter/navigation-filter";
-import {
-  Ids,
-  SvgDrawPath,
-  Tags,
-} from "../../html-element-processing/element-data";
+import { IdNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
+import { Ids, SvgDrawPath, Tags } from "../../html-element-processing/element-data";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { PageObserver } from "../../observation/observer-types";
@@ -31,11 +24,10 @@ function setupWatchLaterButtonIfNotPresent(menuButton: HTMLElement): void {
       .findFirst(new IdNavigationFilter(Tags.BUTTON, Ids.QA_HOME_WATCH_LATER))
       .notExists()
   ) {
-    const watchLaterButtonInContainer =
-      QaHtmlElements.watchLaterHomeVideoButton(() => {
-        watchLaterClicker.observeAndBufferMutationChangesThenClickSvg();
-        menuButton.click();
-      });
+    const watchLaterButtonInContainer = QaHtmlElements.watchLaterHomeVideoButton(() => {
+      watchLaterClicker.observeAndBufferMutationChangesThenClickSvg();
+      menuButton.click();
+    });
 
     divDismissible.appendChild(watchLaterButtonInContainer.completeHtmlElement);
   }
@@ -65,9 +57,7 @@ export function initHomeOrSubscriptionsObservers(): void {
                 );
               })
               .forEach((ytdRichGridMediaOptionsButton) =>
-                setupWatchLaterButtonIfNotPresent(
-                  ytdRichGridMediaOptionsButton as HTMLElement
-                )
+                setupWatchLaterButtonIfNotPresent(ytdRichGridMediaOptionsButton as HTMLElement)
               );
           },
           rootNode: document.body,
@@ -83,9 +73,7 @@ export function initHomeOrSubscriptionsObservers(): void {
     .findFirst(new TagNavigationFilter(Tags.YTD_POPUP_CONTAINER))
     .consume();
 
-  watchLaterClicker = new YtdPopupContainerClicker(
-    ytdPopupContainer as HTMLElement
-  );
+  watchLaterClicker = new YtdPopupContainerClicker(ytdPopupContainer as HTMLElement);
   watchLaterClicker.connectToMutationsExtractorEmitterOneshotObserver(
     YtdPopupContainerClicker.createOneshotObserverForClicker(
       OneshotObserverId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,

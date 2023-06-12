@@ -8,16 +8,11 @@ describe("YtdPopupContainerClicker", () => {
   describe("observeAndBufferMutationChangesThenClickSvg", () => {
     it("should click the tp-yt-paper-element when the SVG is initialized (added or changed)", (done) => {
       const popupContainer = document.createElement("div");
-      const ytdPopupContainerClicker = new YtdPopupContainerClicker(
-        popupContainer
-      );
+      const ytdPopupContainerClicker = new YtdPopupContainerClicker(popupContainer);
       ytdPopupContainerClicker.observeAndBufferMutationChangesThenClickSvg();
-      const svgTargetFilter = new SvgDrawPathNavigationFilter(
-        SvgDrawPath.WATCH_LATER
-      );
+      const svgTargetFilter = new SvgDrawPathNavigationFilter(SvgDrawPath.WATCH_LATER);
 
-      const { path, ytdMenuServiceItemRenderer, tpYtPaperItem } =
-        setupYtdMenuServiceItemRendererSample();
+      const { path, ytdMenuServiceItemRenderer, tpYtPaperItem } = setupYtdMenuServiceItemRendererSample();
 
       tpYtPaperItem.addEventListener("click", () => {
         done();
@@ -41,16 +36,11 @@ describe("YtdPopupContainerClicker", () => {
 
     it("should click the ytd-menu-service-item-renderer when the SVG is unhidden", (done) => {
       const popupContainer = document.createElement("div");
-      const ytdPopupContainerClicker = new YtdPopupContainerClicker(
-        popupContainer
-      );
+      const ytdPopupContainerClicker = new YtdPopupContainerClicker(popupContainer);
       ytdPopupContainerClicker.observeAndBufferMutationChangesThenClickSvg();
-      const svgTargetFilter = new SvgDrawPathNavigationFilter(
-        SvgDrawPath.WATCH_LATER
-      );
+      const svgTargetFilter = new SvgDrawPathNavigationFilter(SvgDrawPath.WATCH_LATER);
 
-      const { path, ytdMenuServiceItemRenderer } =
-        setupYtdMenuServiceItemRendererSample();
+      const { path, ytdMenuServiceItemRenderer } = setupYtdMenuServiceItemRendererSample();
 
       ytdMenuServiceItemRenderer.addEventListener("click", () => {
         done();

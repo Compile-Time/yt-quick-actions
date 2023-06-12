@@ -10,9 +10,7 @@ describe("HtmlParentNavigator", () => {
     div.appendChild(unorderedList);
     unorderedList.appendChild(list);
 
-    const foundDiv = HtmlParentNavigator.startFrom(list)
-      .find(new TagNavigationFilter("div"))
-      .consume();
+    const foundDiv = HtmlParentNavigator.startFrom(list).find(new TagNavigationFilter("div")).consume();
 
     expect(foundDiv).toEqual(div);
   });

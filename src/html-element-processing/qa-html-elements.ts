@@ -3,10 +3,7 @@ import { Ids, Tags } from "./element-data";
 export type QaButtonClickCallback = () => void;
 
 export class QaButtonInContainer {
-  constructor(
-    public completeHtmlElement: HTMLElement,
-    public buttonElement: HTMLButtonElement
-  ) {}
+  constructor(public completeHtmlElement: HTMLElement, public buttonElement: HTMLButtonElement) {}
 }
 
 export class QaHtmlElements {
@@ -26,9 +23,7 @@ export class QaHtmlElements {
     return button;
   }
 
-  static watchLaterUnderVideoButton(
-    clickCallback: QaButtonClickCallback
-  ): HTMLButtonElement {
+  static watchLaterUnderVideoButton(clickCallback: QaButtonClickCallback): HTMLButtonElement {
     const button = document.createElement(Tags.BUTTON);
     button.id = Ids.QA_VIDEO_WATCH_LATER;
     button.innerHTML = `<i class="fa-solid fa-clock fa-lg"></i>`;
@@ -37,9 +32,7 @@ export class QaHtmlElements {
     return button;
   }
 
-  static watchLaterHomeVideoButton(
-    clickCallback: QaButtonClickCallback
-  ): QaButtonInContainer {
+  static watchLaterHomeVideoButton(clickCallback: QaButtonClickCallback): QaButtonInContainer {
     const flexContainer = document.createElement("div");
     flexContainer.id = Ids.QA_FLEX_CONTAINER;
     flexContainer.setAttribute("class", "qa-home-watch-later");
