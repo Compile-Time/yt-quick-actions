@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YT Quick Actions",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Provide quick access to hidden YouTube actions.",
   "icons": {
     "16": "assets/extension-icons/chrome/icon16.png",

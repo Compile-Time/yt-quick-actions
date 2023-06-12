@@ -8,6 +8,14 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.0]
+
+Single-click watch later for YouTube's new subscription page design.
+
+### Added
+
+- Quick action watch later button for the subscriptions page
+
 ## [1.0.1]
 
 This is mostly a bugfix release to make the extension work for all languages
