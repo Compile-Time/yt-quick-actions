@@ -100,7 +100,7 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
 
 /**
  * Initialize a {@link PageObserver} with a {@link MutationSummary} for long playlists where items are loaded in
- * afterwards and immediately disconnect from it.
+ * afterward and immediately disconnect from it.
  *
  * The created {@link MutationSummary} will observe changes to the playlist container and set up the Quick Actions
  * remove button for new videos added to the playlist container. A playlist always loads videos in batches of 100.
