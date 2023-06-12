@@ -132,7 +132,7 @@ export class YtdPopupContainerClicker {
     const addedSvgElements = extractors
       .map((extractor) => extractor.extractSvgFromAddedMutations())
       .filter((addedSvgElement) => !!addedSvgElement);
-    const svgsOfunHiddenYtdMenuServiceItemRenderers = extractors
+    const svgsOfUnHiddenYtdMenuServiceItemRenderers = extractors
       .map((extractor) =>
         extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()
       )
@@ -151,11 +151,11 @@ export class YtdPopupContainerClicker {
       } else {
         tpYtPaperItem.click();
       }
-    } else if (svgsOfunHiddenYtdMenuServiceItemRenderers.length === 1) {
+    } else if (svgsOfUnHiddenYtdMenuServiceItemRenderers.length === 1) {
       const matchingYtdMenuServiceItemRenderer =
-        svgsOfunHiddenYtdMenuServiceItemRenderers[0];
+        svgsOfUnHiddenYtdMenuServiceItemRenderers[0];
       if (clickCallback) {
-        clickCallback(svgsOfunHiddenYtdMenuServiceItemRenderers[0]);
+        clickCallback(svgsOfUnHiddenYtdMenuServiceItemRenderers[0]);
       } else {
         matchingYtdMenuServiceItemRenderer.click();
       }

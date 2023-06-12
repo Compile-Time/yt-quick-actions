@@ -21,7 +21,7 @@ Version changes can be found here: [CHANGELOG.md](./CHANGELOG.md)
   - From release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
 - Google Chrome
   - From Chrome Web Store:
-    [chrome web store](https://chrome.google.com/webstore/detail/yt-quick-actions/lopaoogidddnpogjngfhbaklhdecmcii)
+    [Chrome web store](https://chrome.google.com/webstore/detail/yt-quick-actions/lopaoogidddnpogjngfhbaklhdecmcii)
 
 ## Permissions
 
