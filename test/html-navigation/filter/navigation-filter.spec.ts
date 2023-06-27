@@ -1,8 +1,34 @@
 import {
+  AnyFilter,
   IdNavigationFilter,
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
 } from "../../../src/html-navigation/filter/navigation-filter";
+
+class FakeHtmlCollection<T extends Element> implements HTMLCollection {
+  elements: T[];
+
+  [index: number]: Element;
+
+  readonly length: number;
+
+  constructor(elements: T[]) {
+    this.elements = elements;
+    this.length = elements.length;
+  }
+
+  [Symbol.iterator](): IterableIterator<Element> {
+    return this.elements.values();
+  }
+
+  item(index: number): T | null {
+    return this.elements[index];
+  }
+
+  namedItem(name: string): T | null {
+    return null;
+  }
+}
 
 class FakeDocument {
   private elementMap: Map<string, HTMLElement> = new Map<string, HTMLElement>();
@@ -45,21 +71,25 @@ class FakeDocument {
     return div.children;
   }
 
-  getSvg(): HTMLCollection {
+  getSvg(drawPath = "M 10 10"): HTMLCollection {
+    return this.getSvgAsElement(drawPath).children;
+  }
+
+  getSvgAsElement(drawPath = "M 10 10"): HTMLElement {
     const svg = document.createElement("svg");
     const path = document.createElement("path");
 
     svg.id = "svg";
 
     path.id = "path";
-    path.setAttribute("d", "M 10 10");
+    path.setAttribute("d", drawPath);
 
     svg.appendChild(path);
 
     this.elementMap.set(svg.id, svg);
     this.elementMap.set(path.id, path);
 
-    return svg.children;
+    return svg;
   }
 
   getElementById(id: string): HTMLElement {
@@ -128,6 +158,44 @@ describe("NavigationFilter", () => {
 
       const result = filter.applySingle(path);
       expect(result).toEqual(path);
+    });
+
+    it("should be empty for draw path not present in filter", () => {
+      const anyFilter = new AnyFilter([
+        new SvgDrawPathNavigationFilter("M 10 10"),
+        new SvgDrawPathNavigationFilter("M 20 20"),
+        new SvgDrawPathNavigationFilter("M 30 30"),
+      ]);
+      const htmlCollection = fakeDocument.getSvg("M 40 40");
+
+      const result: Element[] = anyFilter.apply(htmlCollection);
+      expect(result.length).toEqual(0);
+      expect(result[0]).toBeUndefined();
+    });
+
+    it("should find multiple svg elements matching filter", () => {
+      const anyFilter = new AnyFilter([
+        new SvgDrawPathNavigationFilter("M 10 10"),
+        new SvgDrawPathNavigationFilter("M 20 20"),
+        new SvgDrawPathNavigationFilter("M 30 30"),
+      ]);
+
+      const svg1 = fakeDocument.getSvgAsElement();
+      const svg2 = fakeDocument.getSvgAsElement("M 20 20");
+      const div = document.createElement("div");
+      div.appendChild(svg1);
+      div.appendChild(svg2);
+
+      const res = Object.values(div.children).flatMap((svg) =>
+        Object.values(svg.children)
+      );
+
+      const fakeHtmlCollection = new FakeHtmlCollection<Element>(res);
+
+      const result: Element[] = anyFilter.apply(fakeHtmlCollection);
+      expect(result.length).toEqual(2);
+      expect(result[0]).toEqual(svg1.children.item(0));
+      expect(result[1]).toEqual(svg2.children.item(0));
     });
   });
 });

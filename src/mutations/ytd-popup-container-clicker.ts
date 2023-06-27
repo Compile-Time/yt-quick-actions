@@ -3,11 +3,12 @@ import { YtdMenuServiceItemRendererSvgExtractor } from "./ytd-menu-service-item-
 import { OneshotObserver } from "../observation/observer-types";
 import { OneshotObserverId } from "../enums/oneshot-observer-id";
 import {
+  AnyFilter,
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
 } from "../html-navigation/filter/navigation-filter";
 import { SvgDrawPath, Tags } from "../html-element-processing/element-data";
-import { MutationSummary } from "mutation-summary";
+import { IQuery, MutationSummary } from "mutation-summary";
 import { contentScriptObserversManager } from "../content_scripts/init-globals";
 import { HtmlParentNavigator } from "../html-navigation/html-parent-navigator";
 
@@ -24,21 +25,30 @@ export class YtdPopupContainerClicker {
 
   static createOneshotObserverForClicker(
     oneshotObserverId: OneshotObserverId,
-    svgToClick: SvgDrawPath,
+    anySvgToClick: SvgDrawPath[],
     clicker: YtdPopupContainerClicker
   ): OneshotObserver {
+    const mutationSummaryQueries: IQuery[] = anySvgToClick.map((svg) => ({
+      element: `path[d='${svg}']`,
+    }));
+    mutationSummaryQueries.push({ attribute: "hidden" });
+
     return new OneshotObserver(oneshotObserverId, () => {
-      const svgPathFilter = new SvgDrawPathNavigationFilter(svgToClick);
       const summary = new MutationSummary({
         callback: (summaries) =>
           clicker.pushMutationsExtractor(
-            new YtdMenuServiceItemRendererSvgExtractor(svgPathFilter, summaries)
+            new YtdMenuServiceItemRendererSvgExtractor(
+              new AnyFilter(
+                anySvgToClick.map((svg) => new SvgDrawPathNavigationFilter(svg))
+              ),
+              {
+                addedSvgs: [summaries[0], summaries[1]],
+                ytdMenuServiceItemRendererHiddenAttribute: summaries[2],
+              }
+            )
           ),
         rootNode: clicker.popupContainer,
-        queries: [
-          { element: `path[d="${svgToClick}"]` },
-          { attribute: "hidden" },
-        ],
+        queries: mutationSummaryQueries,
       });
       summary.disconnect();
       return summary;

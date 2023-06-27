@@ -1,13 +1,8 @@
-import {
-  Ids,
-  SvgDrawPath,
-  Tags,
-} from "../../html-element-processing/element-data";
+import { Ids, Tags } from "../../html-element-processing/element-data";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 import {
   IdNavigationFilter,
-  SvgDrawPathNavigationFilter,
   TagNavigationFilter,
 } from "../../html-navigation/filter/navigation-filter";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
@@ -23,6 +18,7 @@ import {
 } from "../init-globals";
 import { LogProvider } from "../../logging/log-provider";
 import { MutationSummary } from "mutation-summary";
+import { ANY_TRASH_ICON_FILTER } from "../../html-navigation/filter/filter-groups";
 
 const logger = contentLogProvider.getLogger(LogProvider.PLAYLIST);
 
@@ -78,9 +74,7 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
             .map((ytdMenuServiceItem) => ytdMenuServiceItem as HTMLElement)
             .filter((ytdMenuServiceItem) =>
               HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
-                .findFirst(
-                  new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON)
-                )
+                .findFirst(ANY_TRASH_ICON_FILTER)
                 .exists()
             )
             // Only a single element should match the above filter.

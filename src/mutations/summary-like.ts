@@ -5,3 +5,8 @@ export interface SummaryLike {
   added: Node[];
   removed: Node[];
 }
+
+export interface YtdPopupContainerMutationSummary {
+  addedSvgs: SummaryLike[];
+  ytdMenuServiceItemRendererHiddenAttribute: SummaryLike;
+}

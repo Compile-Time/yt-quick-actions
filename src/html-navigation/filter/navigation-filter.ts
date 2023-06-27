@@ -7,7 +7,7 @@ export abstract class NavigationFilter {
   apply(htmlCollection: HTMLCollection): HTMLElement[] {
     const filteredElements: HTMLElement[] = [];
     for (let i = 0; i < htmlCollection.length; i++) {
-      const element: HTMLElement = htmlCollection[i] as HTMLElement;
+      const element: HTMLElement = htmlCollection.item(i) as HTMLElement;
 
       if (this.applyCondition(element)) {
         filteredElements.push(element);
@@ -83,5 +83,19 @@ export class SvgDrawPathNavigationFilter extends NavigationFilter {
 
   equals(other: SvgDrawPathNavigationFilter): boolean {
     return this.drawPath === other.drawPath;
+  }
+}
+
+export class AnyFilter<T extends NavigationFilter> extends NavigationFilter {
+  constructor(private readonly filterList: T[]) {
+    super();
+  }
+
+  protected applyCondition(element: HTMLElement): boolean {
+    return this.filterList.some((filter) => !!filter.applySingle(element));
+  }
+
+  equals(other: AnyFilter<T>): boolean {
+    return other.filterList.every((filter) => this.filterList.includes(filter));
   }
 }

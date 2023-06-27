@@ -1,14 +1,10 @@
-import { SummaryLike } from "./summary-like";
 import { NavigationFilter } from "../html-navigation/filter/navigation-filter";
 
-export abstract class MutationsElementExtractor {
-  protected mutationSummaries: SummaryLike[];
+export abstract class MutationsElementExtractor<T> {
+  protected mutationSummaries: T;
   protected targetFilter: NavigationFilter;
 
-  protected constructor(
-    mutationSummaries: SummaryLike[],
-    targetElement: NavigationFilter
-  ) {
+  protected constructor(mutationSummaries: T, targetElement: NavigationFilter) {
     this.mutationSummaries = mutationSummaries;
     this.targetFilter = targetElement;
   }

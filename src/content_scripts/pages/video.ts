@@ -1,13 +1,7 @@
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
-import {
-  AttributeNames,
-  Ids,
-  SvgDrawPath,
-  Tags,
-} from "../../html-element-processing/element-data";
+import { Ids, Tags } from "../../html-element-processing/element-data";
 import {
   IdNavigationFilter,
-  SvgDrawPathNavigationFilter,
   TagNavigationFilter,
 } from "../../html-navigation/filter/navigation-filter";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
@@ -25,6 +19,12 @@ import {
 } from "../../observation/observer-types";
 import { OneshotObserverId } from "../../enums/oneshot-observer-id";
 import { YtdPopupContainerClicker } from "../../mutations/ytd-popup-container-clicker";
+import {
+  ANY_POPUP_CLOSE_ICON_FILTER,
+  ANY_VIDEO_MORE_ACTIONS_ICON_FILTER,
+  ANY_VIDEO_SAVE_ICON,
+  ANY_VIDEO_SAVE_ICON_FILTER,
+} from "../../html-navigation/filter/filter-groups";
 
 const createdElements: HTMLElement[] = [];
 const logger = contentLogProvider.getLogger(LogProvider.VIDEO);
@@ -53,9 +53,8 @@ function initFullScreenSaveObserver(ytdPopupContainer: Node) {
           const popupCloseSvgPaths: HTMLElement[] = summaries[0].added
             .map((pathNode) => pathNode as HTMLElement)
             .filter(
-              (pathElement) =>
-                pathElement.getAttribute(AttributeNames.D) ===
-                SvgDrawPath.POPUP_CLOSE
+              (htmlElement) =>
+                !!ANY_POPUP_CLOSE_ICON_FILTER.applySingle(htmlElement)
             );
 
           if (popupCloseSvgPaths.length > 0) {
@@ -147,7 +146,7 @@ function initHalfScreenSaveObserver(ytdPopupContainer: Node) {
   halfScreenSavePlaylistClicker.connectToMutationsExtractorEmitterOneshotObserver(
     YtdPopupContainerClicker.createOneshotObserverForClicker(
       OneshotObserverId.SAVE_TO_HALF_SCREEN_POPUP_READY,
-      SvgDrawPath.VIDEO_SAVE,
+      ANY_VIDEO_SAVE_ICON,
       halfScreenSavePlaylistClicker
     )
   );
@@ -189,7 +188,7 @@ function setupWatchLaterButton(
       const saveButton = HtmlTreeNavigator.startFrom(ytdMenuRenderer)
         .filter(new TagNavigationFilter(Tags.YTD_BUTTON_RENDERER))
         .filter(new TagNavigationFilter(Tags.YT_ICON))
-        .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
+        .findFirst(ANY_VIDEO_SAVE_ICON_FILTER)
         .intoParentNavigator()
         .find(new TagNavigationFilter(Tags.BUTTON))
         .consume();
@@ -242,7 +241,7 @@ function getMoreOptionsButton(): HTMLElement {
     .filter(new IdNavigationFilter(Tags.DIV, Ids.ACTIONS))
     .filter(new TagNavigationFilter(Tags.YTD_MENU_RENDERER))
     .filter(new IdNavigationFilter(Tags.YT_BUTTON_SHAPE, Ids.BUTTON_SHAPE))
-    .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_MORE_ACTIONS))
+    .findFirst(ANY_VIDEO_MORE_ACTIONS_ICON_FILTER)
     .intoParentNavigator()
     .find(new TagNavigationFilter(Tags.BUTTON))
     .consume();
