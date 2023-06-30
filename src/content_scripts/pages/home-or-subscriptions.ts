@@ -1,6 +1,7 @@
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
-import { IdNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
-import { Ids, SvgDrawPath, Tags } from "../../html-element-processing/element-data";
+import { IdNavigationFilter, TagNavigationFilter
+} from "../../html-navigation/filter/navigation-filter";
+import { Ids, Tags } from "../../html-element-processing/element-data";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { PageObserver } from "../../observation/observer-types";
@@ -8,6 +9,7 @@ import { OneshotObserverId } from "../../enums/oneshot-observer-id";
 import { contentScriptObserversManager } from "../init-globals";
 import { MutationSummary } from "mutation-summary";
 import { YtdPopupContainerClicker } from "../../mutations/ytd-popup-container-clicker";
+import { ANY_WATCH_LATER_ICON } from "../../html-navigation/filter/filter-groups";
 
 let watchLaterClicker: YtdPopupContainerClicker;
 
@@ -77,7 +79,7 @@ export function initHomeOrSubscriptionsObservers(): void {
   watchLaterClicker.connectToMutationsExtractorEmitterOneshotObserver(
     YtdPopupContainerClicker.createOneshotObserverForClicker(
       OneshotObserverId.SAVE_TO_WATCH_LATER_POPUP_ENTRY,
-      SvgDrawPath.WATCH_LATER,
+      ANY_WATCH_LATER_ICON,
       watchLaterClicker
     )
   );
