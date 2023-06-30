@@ -14,19 +14,6 @@ Concretely, YT Quick Actions offers the following features:
 Having problems with the extension? See the [FAQ](#faq) section for more
 information.
 
-## Changelog
-
-Version changes can be found here: [CHANGELOG.md](./CHANGELOG.md)
-
-## Installation
-
-- Firefox
-  - From addons.mozilla.org: [AMO](https://addons.mozilla.org/en-US/firefox/addon/yt-quick-actions/)
-  - From release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
-- Google Chrome
-  - From Chrome Web Store:
-    [Chrome web store](https://chrome.google.com/webstore/detail/yt-quick-actions/lopaoogidddnpogjngfhbaklhdecmcii)
-
 ## Permissions
 
 The following permissions are required for the extension to work:
@@ -61,6 +48,16 @@ The following permissions are required for the extension to work:
 ### Remove button in currently playing playlist
 
 ![Remove button in currently playing playlist](documentation/images/watching_playlist_remove_sample.png "Remove button in currently playing playlist")
+
+## Installation
+
+- Firefox
+  - From addons.mozilla.org: [AMO](https://addons.mozilla.org/en-US/firefox/addon/yt-quick-actions/)
+  - From release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
+- Google Chrome
+  - From Chrome Web Store:
+    [Chrome web store](https://chrome.google.com/webstore/detail/yt-quick-actions/lopaoogidddnpogjngfhbaklhdecmcii)
+  - From release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
 
 ## Building
 
@@ -98,6 +95,10 @@ The production builds can also be found under `/dist`:
 
 - `/dist/firefox-prod`
 - `/dist/chrome-prod`
+
+## Changelog
+
+Version changes can be found here: [CHANGELOG.md](./CHANGELOG.md)
 
 ## FAQ
 
