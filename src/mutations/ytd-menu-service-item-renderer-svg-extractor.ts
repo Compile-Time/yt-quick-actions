@@ -34,7 +34,10 @@ export class YtdMenuServiceItemRendererSvgExtractor extends MutationsElementExtr
       })
       .filter((svgPathElement) => !!svgPathElement);
 
-    return svgPathElements.length === 1 ? svgPathElements[0] : undefined;
+    // Usually, `svgPathElements` should only contain a single element under the assumption that we are looking for
+    // a specific SVG of the current YouTube UI version. However, in the case that we should find more than one element
+    // that fits our filter the first element is used as well.
+    return svgPathElements.length > 0 ? svgPathElements[0] : undefined;
   }
 
   extractSvgFromUnHiddenYtdMenuServiceItemRenderer(): HTMLElement | undefined {

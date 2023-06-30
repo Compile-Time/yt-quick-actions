@@ -159,7 +159,9 @@ describe("NavigationFilter", () => {
       const result = filter.applySingle(path);
       expect(result).toEqual(path);
     });
+  });
 
+  describe("AnyFilter", () => {
     it("should be empty for draw path not present in filter", () => {
       const anyFilter = new AnyFilter([
         new SvgDrawPathNavigationFilter("M 10 10"),

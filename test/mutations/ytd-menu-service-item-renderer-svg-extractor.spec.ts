@@ -5,6 +5,7 @@ import {
   SvgDrawPathNavigationFilter,
 } from "../../src/html-navigation/filter/navigation-filter";
 import { setupYtdMenuServiceItemRendererSample } from "../setup-data/dom-elements";
+import { ANY_VIDEO_SAVE_ICON_FILTER } from "../../src/html-navigation/filter/filter-groups";
 
 describe("YtdMenuServiceItemRendererSvgExtractor", () => {
   describe("extractSvgFromAddedMutations", () => {
@@ -152,6 +153,49 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       expect(
         extractor.extractSvgFromUnHiddenYtdMenuServiceItemRenderer()
       ).toBeUndefined();
+    });
+
+    it("should extract SVG path from mutations where second added SVG path matches the filter", () => {
+      const { path } = setupYtdMenuServiceItemRendererSample();
+
+      path.setAttribute("class", "valid");
+      path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
+
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
+        new AnyFilter([
+          new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
+        ]),
+        {
+          addedSvgs: [
+            { added: [], removed: [] },
+            { added: [path], removed: [] },
+          ],
+          ytdMenuServiceItemRendererHiddenAttribute: { added: [], removed: [] },
+        }
+      );
+      expect(extractor.extractSvgFromAddedMutations()).toEqual(path);
+    });
+
+    it("should handle extraction of two added SVG paths which match both filters", () => {
+      const { path: path1 } = setupYtdMenuServiceItemRendererSample();
+      const { path: path2 } = setupYtdMenuServiceItemRendererSample();
+
+      path1.setAttribute("class", "valid");
+      path1.setAttribute("d", SvgDrawPath.VIDEO_SAVE_20230629);
+      path2.setAttribute("class", "valid");
+      path2.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
+
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
+        ANY_VIDEO_SAVE_ICON_FILTER,
+        {
+          addedSvgs: [
+            { added: [path1], removed: [] },
+            { added: [path2], removed: [] },
+          ],
+          ytdMenuServiceItemRendererHiddenAttribute: { added: [], removed: [] },
+        }
+      );
+      expect(extractor.extractSvgFromAddedMutations()).toEqual(path1);
     });
   });
 });
