@@ -2,7 +2,8 @@ import { HtmlTreeNavigator } from "../html-navigation/html-tree-navigator";
 import {
   AnyFilter,
   SvgDrawPathNavigationFilter,
-  TagNavigationFilter} from "../html-navigation/filter/navigation-filter";
+  TagNavigationFilter,
+} from "../html-navigation/filter/navigation-filter";
 import { Tags } from "../html-element-processing/element-data";
 import { YtdPopupContainerMutationSummary } from "./summary-like";
 import { MutationsElementExtractor } from "./mutations-target-clicker";
@@ -12,7 +13,10 @@ import { MutationsElementExtractor } from "./mutations-target-clicker";
  * `svgTargetFilter`.
  */
 export class YtdMenuServiceItemRendererSvgExtractor extends MutationsElementExtractor<YtdPopupContainerMutationSummary> {
-  constructor(svgTargetFilter: AnyFilter<SvgDrawPathNavigationFilter>, mutationSummaries: YtdPopupContainerMutationSummary) {
+  constructor(
+    svgTargetFilter: AnyFilter<SvgDrawPathNavigationFilter>,
+    mutationSummaries: YtdPopupContainerMutationSummary
+  ) {
     super(mutationSummaries, svgTargetFilter);
   }
 
@@ -24,9 +28,7 @@ export class YtdMenuServiceItemRendererSvgExtractor extends MutationsElementExtr
           // The class attribute is non-empty on valid path elements.
           .filter((pathElement) => !!pathElement.getAttribute("class"))
           .filter((pathElement) => this.targetFilter.applySingle(pathElement));
-        return svgPathSummaryElement.length === 1
-          ? svgPathSummaryElement[0]
-          : undefined;
+        return svgPathSummaryElement.length === 1 ? svgPathSummaryElement[0] : undefined;
       })
       .filter((svgPathElement) => !!svgPathElement);
 
@@ -37,15 +39,14 @@ export class YtdMenuServiceItemRendererSvgExtractor extends MutationsElementExtr
   }
 
   extractSvgFromUnHiddenYtdMenuServiceItemRenderer(): HTMLElement | undefined {
-    const ytdMenuServiceItemRenderer =
-      this.mutationSummaries.ytdMenuServiceItemRendererHiddenAttribute.removed
-        .map((node) => node as HTMLElement)
-        .filter((node) =>
-          HtmlTreeNavigator.startFrom(node)
-            .filter(new TagNavigationFilter(Tags.YT_ICON))
-            .findFirst(this.targetFilter)
-            .exists()
-        );
+    const ytdMenuServiceItemRenderer = this.mutationSummaries.ytdMenuServiceItemRendererHiddenAttribute.removed
+      .map((node) => node as HTMLElement)
+      .filter((node) =>
+        HtmlTreeNavigator.startFrom(node)
+          .filter(new TagNavigationFilter(Tags.YT_ICON))
+          .findFirst(this.targetFilter)
+          .exists()
+      );
     return ytdMenuServiceItemRenderer.length === 1 ? ytdMenuServiceItemRenderer[0] : undefined;
   }
 }

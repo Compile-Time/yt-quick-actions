@@ -1,9 +1,6 @@
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { Ids, Tags } from "../../html-element-processing/element-data";
-import {
-  IdNavigationFilter,
-  TagNavigationFilter,
-} from "../../html-navigation/filter/navigation-filter";
+import { IdNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 import { MutationElementExistsWatcher } from "../../html-element-processing/element-watcher/mutation-element-exists-watcher";

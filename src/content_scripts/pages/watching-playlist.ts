@@ -1,9 +1,6 @@
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
-import {
-  IdNavigationFilter,
-  TagNavigationFilter,
-} from "../../html-navigation/filter/navigation-filter";
+import { IdNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
 import { Ids, Tags } from "../../html-element-processing/element-data";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { OneshotObserver, PageObserver } from "../../observation/observer-types";
@@ -47,17 +44,15 @@ function setupRemoveButton(ytIconButton: HTMLElement): HTMLButtonElement {
  * @param ytdPopupContainer - A YouTube ytd-popup-container HTML element that should be watched for changes
  */
 function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
-  moreOptionsMenuObserver = new OneshotObserver(
-    OneshotObserverId.REMOVE_POPUP_ENTRY_READY,
-    (disconnectFn) => {
-      const summary = new MutationSummary({
-        callback: (summaries) => {
-          summaries[0].removed
-            .map((ytdMenuServiceItem) => ytdMenuServiceItem as HTMLElement)
-            .filter((ytdMenuServiceItem) =>
-              HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
-                .filter(new TagNavigationFilter(Tags.YT_ICON))
-                .findFirst(ANY_TRASH_ICON_FILTER)
+  moreOptionsMenuObserver = new OneshotObserver(OneshotObserverId.REMOVE_POPUP_ENTRY_READY, (disconnectFn) => {
+    const summary = new MutationSummary({
+      callback: (summaries) => {
+        summaries[0].removed
+          .map((ytdMenuServiceItem) => ytdMenuServiceItem as HTMLElement)
+          .filter((ytdMenuServiceItem) =>
+            HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
+              .filter(new TagNavigationFilter(Tags.YT_ICON))
+              .findFirst(ANY_TRASH_ICON_FILTER)
               .exists()
           )
           // Only a single entry should remain after the filter.

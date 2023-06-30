@@ -1,9 +1,6 @@
 import { YtdMenuServiceItemRendererSvgExtractor } from "../../src/mutations/ytd-menu-service-item-renderer-svg-extractor";
 import { SvgDrawPath } from "../../src/html-element-processing/element-data";
-import {
-  AnyFilter,
-  SvgDrawPathNavigationFilter,
-} from "../../src/html-navigation/filter/navigation-filter";
+import { AnyFilter, SvgDrawPathNavigationFilter } from "../../src/html-navigation/filter/navigation-filter";
 import { setupYtdMenuServiceItemRendererSample } from "../setup-data/dom-elements";
 import { ANY_VIDEO_SAVE_ICON_FILTER } from "../../src/html-navigation/filter/filter-groups";
 
@@ -16,9 +13,7 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
       const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new AnyFilter<SvgDrawPathNavigationFilter>([
-          new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        ]),
+        new AnyFilter<SvgDrawPathNavigationFilter>([new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE)]),
         {
           addedSvgs: [],
           ytdMenuServiceItemRendererHiddenAttribute: {
@@ -37,9 +32,7 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
       const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new AnyFilter([
-          new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        ]),
+        new AnyFilter([new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE)]),
         {
           addedSvgs: [{ added: [path], removed: [] }],
           ytdMenuServiceItemRendererHiddenAttribute: { added: [], removed: [] },
@@ -55,9 +48,7 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("d", SvgDrawPath.WATCH_LATER);
 
       const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new AnyFilter([
-          new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        ]),
+        new AnyFilter([new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE)]),
         {
           addedSvgs: [{ added: [path], removed: [] }],
           ytdMenuServiceItemRendererHiddenAttribute: { added: [], removed: [] },
@@ -73,9 +64,7 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
       const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new AnyFilter([
-          new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        ]),
+        new AnyFilter([new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE)]),
         {
           addedSvgs: [{ added: [path], removed: [] }],
           ytdMenuServiceItemRendererHiddenAttribute: {
@@ -95,9 +84,7 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
       const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new AnyFilter([
-          new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        ]),
+        new AnyFilter([new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE)]),
         {
           addedSvgs: [{ added: [path], removed: [] }],
           ytdMenuServiceItemRendererHiddenAttribute: { added: [], removed: [] },
@@ -112,9 +99,7 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
       const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new AnyFilter([
-          new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        ]),
+        new AnyFilter([new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE)]),
         {
           addedSvgs: [{ added: [], removed: [] }],
           ytdMenuServiceItemRendererHiddenAttribute: {
@@ -132,9 +117,7 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("d", SvgDrawPath.WATCH_LATER);
 
       const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new AnyFilter([
-          new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        ]),
+        new AnyFilter([new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE)]),
         {
           addedSvgs: [{ added: [], removed: [] }],
           ytdMenuServiceItemRendererHiddenAttribute: {
@@ -153,9 +136,7 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
       const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        new AnyFilter([
-          new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE),
-        ]),
+        new AnyFilter([new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE)]),
         {
           addedSvgs: [
             { added: [], removed: [] },
@@ -176,16 +157,13 @@ describe("YtdMenuServiceItemRendererSvgExtractor", () => {
       path2.setAttribute("class", "valid");
       path2.setAttribute("d", SvgDrawPath.VIDEO_SAVE);
 
-      const extractor = new YtdMenuServiceItemRendererSvgExtractor(
-        ANY_VIDEO_SAVE_ICON_FILTER,
-        {
-          addedSvgs: [
-            { added: [path1], removed: [] },
-            { added: [path2], removed: [] },
-          ],
-          ytdMenuServiceItemRendererHiddenAttribute: { added: [], removed: [] },
-        }
-      );
+      const extractor = new YtdMenuServiceItemRendererSvgExtractor(ANY_VIDEO_SAVE_ICON_FILTER, {
+        addedSvgs: [
+          { added: [path1], removed: [] },
+          { added: [path2], removed: [] },
+        ],
+        ytdMenuServiceItemRendererHiddenAttribute: { added: [], removed: [] },
+      });
       expect(extractor.extractSvgFromAddedMutations()).toEqual(path1);
     });
   });

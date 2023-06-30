@@ -1,6 +1,5 @@
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
-import { IdNavigationFilter, TagNavigationFilter
-} from "../../html-navigation/filter/navigation-filter";
+import { IdNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
 import { Ids, Tags } from "../../html-element-processing/element-data";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
