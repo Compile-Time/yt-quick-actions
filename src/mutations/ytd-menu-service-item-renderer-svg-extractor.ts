@@ -5,19 +5,19 @@ import {
   TagNavigationFilter,
 } from "../html-navigation/filter/navigation-filter";
 import { Tags } from "../html-element-processing/element-data";
-import { SummaryLike, YtdPopupContainerMutationSummary } from "./summary-like";
+import { YtdPopupContainerMutationSummary } from "./summary-like";
 import { MutationsElementExtractor } from "./mutations-target-clicker";
 
 /**
- * Convenience class aggregating {@link SummaryLike} changes and providing extraction methods for a given
+ * Convenience class aggregating {@link YtdPopupContainerMutationSummary} changes and providing extraction methods for a given
  * `svgTargetFilter`.
  */
 export class YtdMenuServiceItemRendererSvgExtractor extends MutationsElementExtractor<YtdPopupContainerMutationSummary> {
   constructor(
-    targetFilter: AnyFilter<SvgDrawPathNavigationFilter>,
+    svgTargetFilter: AnyFilter<SvgDrawPathNavigationFilter>,
     mutationSummaries: YtdPopupContainerMutationSummary
   ) {
-    super(mutationSummaries, targetFilter);
+    super(mutationSummaries, svgTargetFilter);
   }
 
   extractSvgFromAddedMutations(): HTMLElement | undefined {
