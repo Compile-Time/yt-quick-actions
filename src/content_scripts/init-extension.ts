@@ -3,7 +3,6 @@ import { initVideoObservers } from "./pages/video";
 import { initWatchingPlaylistObservers } from "./pages/watching-playlist";
 import { initHomeOrSubscriptionsObservers } from "./pages/home-or-subscriptions";
 import { contentScriptObserversManager } from "./init-globals";
-import { MutationSummary } from "mutation-summary";
 
 /**
  * Initialize the relevant observers for the current YouTube page based on location path.
@@ -18,14 +17,6 @@ import { MutationSummary } from "mutation-summary";
  */
 function init() {
   contentScriptObserversManager.disconnectAll();
-
-  const summary = new MutationSummary({
-    callback: (summaries) => {
-      // console.log("all", summaries);
-    },
-    rootNode: document.body,
-    queries: [{ all: true }],
-  });
 
   const pathAndQueryParams = `${location.pathname}${location.search}`;
   if (

@@ -1,9 +1,6 @@
 import { SvgDrawPath } from "../../html-element-processing/element-data";
 import { AnyFilter, SvgDrawPathNavigationFilter } from "./navigation-filter";
 
-// TODO: Since the structure of the new icons is different we also need to know which icon matched to trigger the
-//  click on the right element. Unless clicking the SVG element directly properly bubbles the click event.
-
 function drawPathToFilter(drawPath: SvgDrawPath): SvgDrawPathNavigationFilter {
   return new SvgDrawPathNavigationFilter(drawPath);
 }
