@@ -1,7 +1,10 @@
 import { YtdPopupContainerClicker } from "../../src/mutations/ytd-popup-container-clicker";
 import { SvgDrawPath } from "../../src/html-element-processing/element-data";
 import { YtdMenuServiceItemRendererSvgExtractor } from "../../src/mutations/ytd-menu-service-item-renderer-svg-extractor";
-import { SvgDrawPathNavigationFilter } from "../../src/html-navigation/filter/navigation-filter";
+import {
+  AnyFilter,
+  SvgDrawPathNavigationFilter,
+} from "../../src/html-navigation/filter/navigation-filter";
 import { setupYtdMenuServiceItemRendererSample } from "../setup-data/dom-elements";
 
 describe("YtdPopupContainerClicker", () => {
@@ -21,16 +24,33 @@ describe("YtdPopupContainerClicker", () => {
       path.setAttribute("d", SvgDrawPath.WATCH_LATER);
 
       ytdPopupContainerClicker.pushMutationsExtractor(
-        new YtdMenuServiceItemRendererSvgExtractor(svgTargetFilter, [
-          { added: [ytdMenuServiceItemRenderer], removed: [] },
-          { added: [], removed: [] },
-        ])
+        new YtdMenuServiceItemRendererSvgExtractor(
+          new AnyFilter([svgTargetFilter]),
+          {
+            addedSvgs: [],
+            ytdMenuServiceItemRendererHiddenAttribute: {
+              added: [ytdMenuServiceItemRenderer],
+              removed: [],
+            },
+          }
+        )
       );
       ytdPopupContainerClicker.pushMutationsExtractor(
-        new YtdMenuServiceItemRendererSvgExtractor(svgTargetFilter, [
-          { added: [path], removed: [] },
-          { added: [], removed: [] },
-        ])
+        new YtdMenuServiceItemRendererSvgExtractor(
+          new AnyFilter([svgTargetFilter]),
+          {
+            addedSvgs: [
+              {
+                added: [path],
+                removed: [],
+              },
+            ],
+            ytdMenuServiceItemRendererHiddenAttribute: {
+              added: [],
+              removed: [],
+            },
+          }
+        )
       );
     }, 1000);
 
@@ -49,10 +69,16 @@ describe("YtdPopupContainerClicker", () => {
       path.setAttribute("d", SvgDrawPath.WATCH_LATER);
 
       ytdPopupContainerClicker.pushMutationsExtractor(
-        new YtdMenuServiceItemRendererSvgExtractor(svgTargetFilter, [
-          { added: [], removed: [] },
-          { added: [], removed: [ytdMenuServiceItemRenderer] },
-        ])
+        new YtdMenuServiceItemRendererSvgExtractor(
+          new AnyFilter([svgTargetFilter]),
+          {
+            addedSvgs: [],
+            ytdMenuServiceItemRendererHiddenAttribute: {
+              added: [],
+              removed: [ytdMenuServiceItemRenderer],
+            },
+          }
+        )
       );
     }, 1000);
   });

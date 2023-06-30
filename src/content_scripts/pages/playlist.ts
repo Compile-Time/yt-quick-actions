@@ -1,9 +1,8 @@
-import { Ids, SvgDrawPath, Tags } from "../../html-element-processing/element-data";
+import { Ids, Tags } from "../../html-element-processing/element-data";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 import {
   IdNavigationFilter,
-  SvgDrawPathNavigationFilter,
   TagNavigationFilter,
 } from "../../html-navigation/filter/navigation-filter";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
@@ -13,6 +12,7 @@ import { MutationElementExistsWatcher } from "../../html-element-processing/elem
 import { contentLogProvider, contentScriptObserversManager } from "../init-globals";
 import { LogProvider } from "../../logging/log-provider";
 import { MutationSummary } from "mutation-summary";
+import { ANY_TRASH_ICON_FILTER } from "../../html-navigation/filter/filter-groups";
 
 const logger = contentLogProvider.getLogger(LogProvider.PLAYLIST);
 
@@ -54,14 +54,16 @@ function setupRemoveButtonIfNotPresent(moreOptionsButton: HTMLElement): void {
  * @param ytdPopupContainer - A YouTube ytd-popup-container HTML element that should be watched for changes
  */
 function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
-  moreOptionsMenuObserver = new OneshotObserver(OneshotObserverId.PLAYLIST_MENU_UPDATED_OBSERVER, (disconnectFn) => {
-    const summary = new MutationSummary({
-      callback: (summaries) => {
-        summaries[0].removed
-          .map((ytdMenuServiceItem) => ytdMenuServiceItem as HTMLElement)
-          .filter((ytdMenuServiceItem) =>
-            HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
-              .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
+  moreOptionsMenuObserver = new OneshotObserver(
+    OneshotObserverId.PLAYLIST_MENU_UPDATED_OBSERVER,
+    (disconnectFn) => {
+      const summary = new MutationSummary({
+        callback: (summaries) => {
+          summaries[0].removed
+            .map((ytdMenuServiceItem) => ytdMenuServiceItem as HTMLElement)
+            .filter((ytdMenuServiceItem) =>
+              HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
+                .findFirst(ANY_TRASH_ICON_FILTER)
               .exists()
           )
           // Only a single element should match the above filter.
