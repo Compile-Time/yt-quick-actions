@@ -8,7 +8,11 @@ Concretely, YT Quick Actions offers the following features:
 - Add a remove button in playlists next to the more options button
 - Add a watch later button as an action under videos
 - Add a watch later button as an action in home page videos
+- Add a watch later button as an action in the subscriptions feed
 - Add a remove button for playlists being watched
+
+Having problems with the extension? See the [FAQ](#faq) section for more
+information.
 
 ## Changelog
 
@@ -94,3 +98,22 @@ The production builds can also be found under `/dist`:
 
 - `/dist/firefox-prod`
 - `/dist/chrome-prod`
+
+## FAQ
+
+### The extension is not working!
+
+YT Quick Actions relies on existing icons present on the YouTube page to
+perform the different quick actions it provides. If these icons are changed
+in minor or major ways, the extension will fail to function.
+
+Therefore, if the extension does not work for you, it would be nice if you
+create an issue on this Github or write an E-Mail to `socialcoms@posteo.de`
+or `socialcoms.ch@gmail.com` (E-Mail for the Chrome Webstore version).
+
+### YouTube has a new design
+
+In the case that YouTube updates their design or changes it in major ways,
+it should be assumed that the extension will probably not function. The
+reason why the extension might not function can be read up on in
+[The extension is not working!](#the-extension-is-not-working)
