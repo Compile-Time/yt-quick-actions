@@ -8,7 +8,23 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.1]
+
+### Added
+
+FAQ section in README.md.
+
+### Changed
+
+Re-structured the README.md.
+
+### Fixed
+
+Extension not working due SVG draw path changes in YouTube's icons.
+
 ## [1.1.0]
+
+### Added
 
 Single-click watch later for YouTube's new subscription page design.
 
