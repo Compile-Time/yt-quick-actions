@@ -1,10 +1,7 @@
 import { Ids, Tags } from "../../html-element-processing/element-data";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
-import {
-  IdNavigationFilter,
-  TagNavigationFilter,
-} from "../../html-navigation/filter/navigation-filter";
+import { IdNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { OneshotObserver, PageObserver } from "../../observation/observer-types";
 import { OneshotObserverId } from "../../enums/oneshot-observer-id";
@@ -54,17 +51,13 @@ function setupRemoveButtonIfNotPresent(moreOptionsButton: HTMLElement): void {
  * @param ytdPopupContainer - A YouTube ytd-popup-container HTML element that should be watched for changes
  */
 function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
-  moreOptionsMenuObserver = new OneshotObserver(
-    OneshotObserverId.PLAYLIST_MENU_UPDATED_OBSERVER,
-    (disconnectFn) => {
-      const summary = new MutationSummary({
-        callback: (summaries) => {
-          summaries[0].removed
-            .map((ytdMenuServiceItem) => ytdMenuServiceItem as HTMLElement)
-            .filter((ytdMenuServiceItem) =>
-              HtmlTreeNavigator.startFrom(ytdMenuServiceItem)
-                .findFirst(ANY_TRASH_ICON_FILTER)
-              .exists()
+  moreOptionsMenuObserver = new OneshotObserver(OneshotObserverId.PLAYLIST_MENU_UPDATED_OBSERVER, (disconnectFn) => {
+    const summary = new MutationSummary({
+      callback: (summaries) => {
+        summaries[0].removed
+          .map((ytdMenuServiceItem) => ytdMenuServiceItem as HTMLElement)
+          .filter((ytdMenuServiceItem) =>
+            HtmlTreeNavigator.startFrom(ytdMenuServiceItem).findFirst(ANY_TRASH_ICON_FILTER).exists()
           )
           // Only a single element should match the above filter.
           .forEach((removeMenuEntry) => {

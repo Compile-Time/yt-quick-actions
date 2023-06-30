@@ -188,9 +188,7 @@ describe("NavigationFilter", () => {
       div.appendChild(svg1);
       div.appendChild(svg2);
 
-      const res = Object.values(div.children).flatMap((svg) =>
-        Object.values(svg.children)
-      );
+      const res = Object.values(div.children).flatMap((svg) => Object.values(svg.children));
 
       const fakeHtmlCollection = new FakeHtmlCollection<Element>(res);
 

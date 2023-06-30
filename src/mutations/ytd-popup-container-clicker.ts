@@ -5,7 +5,8 @@ import { OneshotObserverId } from "../enums/oneshot-observer-id";
 import {
   AnyFilter,
   SvgDrawPathNavigationFilter,
-  TagNavigationFilter} from "../html-navigation/filter/navigation-filter";
+  TagNavigationFilter,
+} from "../html-navigation/filter/navigation-filter";
 import { SvgDrawPath, Tags } from "../html-element-processing/element-data";
 import { IQuery, MutationSummary } from "mutation-summary";
 import { contentScriptObserversManager } from "../content_scripts/init-globals";
@@ -35,15 +36,15 @@ export class YtdPopupContainerClicker {
     return new OneshotObserver(oneshotObserverId, () => {
       const summary = new MutationSummary({
         callback: (summaries) =>
-          clicker.pushMutationsExtractor(new YtdMenuServiceItemRendererSvgExtractor(
-              new AnyFilter(
-                anySvgToClick.map((svg) => new SvgDrawPathNavigationFilter(svg))
-              ),
+          clicker.pushMutationsExtractor(
+            new YtdMenuServiceItemRendererSvgExtractor(
+              new AnyFilter(anySvgToClick.map((svg) => new SvgDrawPathNavigationFilter(svg))),
               {
                 addedSvgs: [summaries[0], summaries[1]],
                 ytdMenuServiceItemRendererHiddenAttribute: summaries[2],
               }
-            )),
+            )
+          ),
         rootNode: clicker.popupContainer,
         queries: mutationSummaryQueries,
       });
