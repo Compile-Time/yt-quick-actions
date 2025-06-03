@@ -3,9 +3,11 @@ autolabeler:
     branch:
       - "/^fix/"
       - "/^bugfix/"
+      - "/^hotfix/"
     title:
       - "/^fix/i"
       - "/^bugfix/i"
+      - "/^hotfix/i"
   - label: "enhancement"
     branch:
       - "/^feature/"
@@ -21,6 +23,7 @@ categories:
       - "fix"
       - "bugfix"
       - "bug"
+      - "hotfix"
 exclude-labels:
   - "skip-changelog"
 category-template: "### $TITLE"
