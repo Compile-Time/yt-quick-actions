@@ -30,8 +30,7 @@
   "web_accessible_resources": [
     {
       "resources": ["/assets/fontawesome/webfonts/*"],
-      "matches": ["https://www.youtube.com/*"],
-      "use_dynamic_url": true
+      "matches": ["https://www.youtube.com/*"]
     }
   ]
 }
