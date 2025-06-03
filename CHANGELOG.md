@@ -8,6 +8,13 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.2]
+
+### Fixed
+
+Icon resources are not loaded and displayed in Chrome versions 130+ due to 
+`use_dynamic_urls` being functionally implemented.
+
 ## [1.1.1]
 
 ### Added
