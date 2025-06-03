@@ -3,3 +3,4 @@ dist
 node_modules
 assets
 package-lock.json
+*.md

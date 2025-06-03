@@ -4,3 +4,4 @@ coverage/
 karma.conf.js
 .eslintrc.js
 tailwind.config.js
+*.md
