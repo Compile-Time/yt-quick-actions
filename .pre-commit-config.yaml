@@ -15,12 +15,23 @@ repos:
         exclude_types:
           - svg
           - pofile
-        exclude: "(^LICENSE$)"
+          - markdown
+          - json
+        exclude: |
+          (?x)^(
+              LICENSE|
+              \.eslintignore|
+              \.eslintrc.js|
+              \.parcelrc|
+              \.prettierignore|
+          )$
       - id: mixed-line-ending
         args:
           - "--fix=lf"
       - id: trailing-whitespace
         exclude_types:
           - svg
+          - markdown
+          - json
       - id: check-case-conflict
       - id: detect-private-key
