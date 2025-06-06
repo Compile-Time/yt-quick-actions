@@ -54,6 +54,8 @@
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@parcel/config-webextension": "^2.7.0",
     "@types/jest": "^29.2.3",
     "@types/webextension-polyfill": "^0.9.1",
