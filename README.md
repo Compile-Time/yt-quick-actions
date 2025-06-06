@@ -96,6 +96,13 @@ The production builds can also be found under `/dist`:
 - `/dist/firefox-prod`
 - `/dist/chrome-prod`
 
+## Build / CI tools
+
+- `act` - The tool [`act`](https://nektosact.com/introduction.html) can be used to
+  test the Github Action workflows of this project.
+- `husky` - Run CI tasks locally (`commitlint`).
+- `semantic-release` - Version bumping & release management.
+
 ## Changelog
 
 Version changes can be found here: [CHANGELOG.md](./CHANGELOG.md)
