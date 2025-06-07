@@ -1,5 +1,6 @@
 {
   "name": "yt-quick-actions",
+  "repository": "https://github.com/Compile-Time/yt-quick-actions.git",
   "browserslist": [
     "defaults"
   ],
@@ -52,8 +53,61 @@
       "@commitlint/config-conventional"
     ],
     "rules": {
-      "subject-case": [2, "never", ["start-case", "pascal-case", "upper-case"]]
+      "subject-case": [
+        2,
+        "never",
+        [
+          "start-case",
+          "pascal-case",
+          "upper-case"
+        ]
+      ]
     }
+  },
+  "release": {
+    "branches": [
+      "master"
+    ],
+    "tagFormat": "${version}",
+    "plugins": [
+      [
+        "@semantic-release/commit-analyzer",
+        {
+          "preset": "angular",
+          "parserOpts": {
+            "noteKeywords": [
+              "BREAKING CHANGE",
+              "BREAKING CHANGES",
+              "BREAKING"
+            ]
+          },
+          "releaseRules": [
+            {
+              "type": "refactor",
+              "release": "patch"
+            },
+            {
+              "scope": "no-release",
+              "release": false
+            }
+          ]
+        }
+      ],
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/git",
+      [
+        "@semantic-release/github",
+        {
+          "assets": [
+            "yt-quick-actions-firefox.zip",
+            "yt-quick-actions-firefox.sha512sum",
+            "yt-quick-actions-chrome.zip",
+            "yt-quick-actions-chrome.sha512sum"
+          ]
+        }
+      ]
+    ]
   },
   "dependencies": {
     "loglevel": "^1.8.0",
@@ -66,6 +120,8 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@parcel/config-webextension": "^2.7.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/jest": "^29.2.3",
     "@types/webextension-polyfill": "^0.9.1",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
@@ -84,6 +140,7 @@
     "parcel": "^2.7.0",
     "parcel-namer-rewrite": "^2.0.0-rc.3",
     "prettier": "2.8.8",
+    "semantic-release": "^24.2.5",
     "tailwindcss": "^3.2.1",
     "ts-jest": "^29.0.3",
     "typescript": "^4.8.4"

@@ -2,26 +2,23 @@ name: "Release"
 run-name: "Release ${{ github.ref_name }}"
 on:
   push:
-    tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
+    branches:
+      - master
 
 jobs:
   linting:
     name: Linting Checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          python-version: 3.x
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: "npm"
+          node-version: 22
+          cache: npm
       - name: Install npm dependencies
         run: npm ci
-      - name: Run pre-commit hooks
-        uses: pre-commit/action@v3.0.0
+      - name: Run commitlint
+        run: npx commitlint --last --verbose
       - name: Run Eslint
         run: npm run eslint
       - name: Run prettier check
@@ -32,10 +29,10 @@ jobs:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
           cache: npm
       - name: Install npm dependencies
         run: npm ci
@@ -47,10 +44,10 @@ jobs:
     name: create releases
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
           cache: "npm"
       - name: Install npm dependencies
         run: npm ci
@@ -68,49 +65,7 @@ jobs:
         run: sha512sum yt-quick-actions-firefox.zip > yt-quick-actions-firefox.sha512sum
       - name: Create Checksum of chrome package
         run: sha512sum yt-quick-actions-chrome.zip > yt-quick-actions-chrome.sha512sum
-      - name: Create Release
-        id: create-release
-        uses: release-drafter/release-drafter@v5
-        with:
-          name: Release ${{ github.ref_name }}
-          tag: ${{ github.ref_name}}
-          version: ${{ github.ref_name }}
-          publish: true
+      - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload Release Firefox Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ./yt-quick-actions-firefox.zip
-          asset_name: yt-quick-actions-firefox.zip
-          asset_content_type: application/zip
-      - name: Upload Release Firefox Asset Checksum
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ./yt-quick-actions-firefox.sha512sum
-          asset_name: yt-quick-actions-firefox.sha512sum
-          asset_content_type: text/plain
-      - name: Upload Release Chrome Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ./yt-quick-actions-chrome.zip
-          asset_name: yt-quick-actions-chrome.zip
-          asset_content_type: application/zip
-      - name: Upload Release Chrome Asset Checksum
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ./yt-quick-actions-chrome.sha512sum
-          asset_name: yt-quick-actions-chrome.sha512sum
-          asset_content_type: text/plain
+        run: npx semantic-release
