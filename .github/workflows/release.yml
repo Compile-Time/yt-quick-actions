@@ -51,6 +51,13 @@ jobs:
           cache: "npm"
       - name: Install npm dependencies
         run: npm ci
+      - name: Update version in manifest files
+        run: |
+          npx semantic-release -d > dry-run.txt
+          NEXT_VERSION=$(awk '/The next release version is/{print $NF}' dry-run.txt)
+          sed -i "s/\"version\": \".*\"/\"version\": \"$NEXT_VERSION\"/" manifest-firefox.json
+          sed -i "s/\"version\": \".*\"/\"version\": \"$NEXT_VERSION\"/" manifest-chrome.json
+          rm dry-run.txt
       - name: Build Firefox
         run: npm run build
       - name: Build Chrome
