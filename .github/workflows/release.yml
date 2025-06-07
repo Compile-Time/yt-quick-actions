@@ -52,6 +52,8 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
       - name: Update version in manifest files
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx semantic-release -d > dry-run.txt
           NEXT_VERSION=$(awk '/The next release version is/{print $NF}' dry-run.txt)
