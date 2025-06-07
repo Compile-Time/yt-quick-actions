@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/Compile-Time/yt-quick-actions/compare/1.1.3...1.1.4) (2025-06-07)
+
+
+### Bug Fixes
+
+* Bump manifest*.json version on release ([34d4106](https://github.com/Compile-Time/yt-quick-actions/commit/34d410666d72bed57d3c2696de01b25c4f91caa3))
+
 ## [1.1.3](https://github.com/Compile-Time/yt-quick-actions/compare/1.1.2...1.1.3) (2025-06-07)
 
 
