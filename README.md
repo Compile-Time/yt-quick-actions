@@ -105,7 +105,9 @@ The production builds can also be found under `/dist`:
 
 ## Changelog
 
-Version changes can be found here: [CHANGELOG.md](./CHANGELOG.md)
+Version changes can be found here: 
+- Obsolete manual change log: [Obsolete CHANGELOG.md](manual-CHANGELOG-obsolete.md)
+- [CHANGELOG.md](CHANGELOG.md)
 
 ## FAQ
 
