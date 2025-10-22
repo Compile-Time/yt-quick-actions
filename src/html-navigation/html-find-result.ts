@@ -2,13 +2,13 @@ import { HtmlParentNavigator } from "./html-parent-navigator";
 import { HtmlTreeNavigator } from "./html-tree-navigator";
 
 export class HtmlFindResult {
-  constructor(private element: HTMLElement) {}
+  constructor(private element: HTMLElement | null) {}
 
   static noResult(): HtmlFindResult {
     return new HtmlFindResult(null);
   }
 
-  consume(): HTMLElement {
+  consume(): HTMLElement | null {
     return this.element;
   }
 

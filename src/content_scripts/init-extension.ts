@@ -3,6 +3,9 @@ import { initVideoObservers } from "./pages/video";
 import { initWatchingPlaylistObservers } from "./pages/watching-playlist";
 import { initHomeOrSubscriptionsObservers } from "./pages/home-or-subscriptions";
 import { contentScriptObserversManager } from "./init-globals";
+import { fromEvent } from "rxjs";
+import { initHomeObserverNew } from "./pages/home-new";
+import { PageSubscription } from "./types/page-subscription";
 
 /**
  * Initialize the relevant observers for the current YouTube page based on location path.
@@ -33,10 +36,22 @@ function init() {
   }
 }
 
-document.addEventListener("yt-navigate-start", () => {
-  init();
+const mutationObservers: PageSubscription[] = [];
+
+fromEvent(document, "yt-navigate-start").subscribe(() => {
+  console.log("rech");
+  mutationObservers.forEach((sub) => {
+    sub.mutationObservers.forEach((observer) => observer.disconnect());
+    sub.subscriptions.forEach((subscription) => subscription.unsubscribe());
+  });
+  mutationObservers.push(initHomeObserverNew());
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  init();
+fromEvent(document, "DOMContentLoaded").subscribe(() => {
+  console.log("rech");
+  mutationObservers.forEach((sub) => {
+    sub.mutationObservers.forEach((observer) => observer.disconnect());
+    sub.subscriptions.forEach((subject) => subject.unsubscribe());
+  });
+  mutationObservers.push(initHomeObserverNew());
 });
