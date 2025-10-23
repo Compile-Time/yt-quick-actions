@@ -5,7 +5,11 @@ function drawPathToFilter(drawPath: SvgDrawPath): SvgDrawPathNavigationFilter {
   return new SvgDrawPathNavigationFilter(drawPath);
 }
 
-export const ANY_TRASH_ICON = [SvgDrawPath.TRASH_ICON_20230629, SvgDrawPath.TRASH_ICON];
+export const ANY_TRASH_ICON = [
+  SvgDrawPath.TRASH_ICON,
+  SvgDrawPath.TRASH_ICON_20230629,
+  SvgDrawPath.TRASH_ICON_20251023,
+];
 
 export const ANY_VIDEO_SAVE_ICON = [SvgDrawPath.VIDEO_SAVE_20230629, SvgDrawPath.VIDEO_SAVE];
 
