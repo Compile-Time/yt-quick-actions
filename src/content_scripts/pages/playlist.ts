@@ -39,14 +39,14 @@ function setupRemoveButtonIfNotPresent(moreOptionsButton: HTMLElement): void {
 }
 
 /**
- * Initialize a {@link OneshotObserver} with a {@link MutationSummary} for YouTube's more options button ("...") and
+ * Initialize a {@link OneshotObserver} with a {@link MutationSummary} for YouTube's more options button ('...') and
  * immediately disconnect from it.
  *
  * The created {@link MutationSummary} will observe changes to YouTube's more options button drop-down content and
  * click the remove entry as soon as it is available.
  *
  * One important implementation detail is that the drop-down content will initialize all its HTML on the first
- * appearance and only removes/adds tags or changes tag attributes on subsequent appearances.
+ * appearance and only removes/adds tags or changes tag attributes on later appearances.
  *
  * @param ytdPopupContainer - A YouTube ytd-popup-container HTML element that should be watched for changes
  */
@@ -79,7 +79,7 @@ function initMoreOptionsMenuObserver(ytdPopupContainer: Node): void {
  *
  * The created {@link MutationSummary} will observe changes to the playlist container and set up the Quick Actions
  * remove button for new videos added to the playlist container. A playlist always loads videos in batches of 100.
- * If the end of the playlist is reached then the next 100 videos will be loaded.
+ * If the end of the playlist is reached, then the next 100 videos will be loaded.
  *
  * @param ytdPlaylistVideoListRenderer - A YouTube ytd-playlist-video-list-renderer HTML element to watch for changes.
  */
