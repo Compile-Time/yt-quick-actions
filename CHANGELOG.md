@@ -1,3 +1,10 @@
+## [1.1.5](https://github.com/Compile-Time/yt-quick-actions/compare/1.1.4...1.1.5) (2025-10-24)
+
+
+### Bug Fixes
+
+* Support the latest trash icon for the playlist view ([b9c34ea](https://github.com/Compile-Time/yt-quick-actions/commit/b9c34eaca66cd8d80507eae2f06c2228364ef470))
+
 ## [1.1.4](https://github.com/Compile-Time/yt-quick-actions/compare/1.1.3...1.1.4) (2025-06-07)
 
 
