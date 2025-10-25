@@ -1,9 +1,0 @@
-.git/*
-.gitignore
-.idea/*
-node_modules/*
-.parcel-cache/*
-dist/*
-package-lock.json
-documentation/*
-release-management/*
