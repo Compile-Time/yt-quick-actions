@@ -1,4 +1,4 @@
-import { filter, map, sample, Subject, tap } from "rxjs";
+import { BehaviorSubject, debounceTime, filter, first, Subject, tap } from "rxjs";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 import {
   IdNavigationFilter,
@@ -8,11 +8,12 @@ import {
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { SvgDrawPath } from "../../html-element-processing/element-data";
-import { Disconnectable, disonnectable } from "../types/disconnectable";
+import { DisconnectFn } from "../types/disconnectable";
 
 const contentMutationSubject = new Subject<MutationRecord>();
 const popupMutationSubject = new Subject<MutationRecord>();
-const watchLaterClickSubject = new Subject<void>();
+
+const watchLaterButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
 const createWatchLaterButtons = contentMutationSubject.pipe(
   filter((mutationRecord) => {
@@ -39,49 +40,97 @@ const createWatchLaterButtons = contentMutationSubject.pipe(
 
     const qaButton = QaHtmlElements.watchLaterHomeVideoButton(() => {
       optionsButton.click();
-      watchLaterClickSubject.next();
+      watchLaterButtonClickedSubject.next(true);
     });
     div.appendChild(qaButton.completeHtmlElement);
   })
 );
+
+/**
+ * Click the watch later button in the popup.
+ *
+ * Implementation details:
+ * - We check with a behavior subject if the watch later button was clicked, so the popup can still be used the
+ *   normal way
+ * - The popup container visibility is set to hidden to prevent the popup from flashing in YouTube. It is necessary
+ *   to debounce the changes of the mutation observer, or else the process of clicking the watch later button might
+ *   fail. Adding a debounce operation, however, makes the popup flash.
+ * - Because the popup is being hidden, and we are listening to attribute changes with a mutation observer, we need
+ *   to exclude changes caused by the style attribute, or we are stuck in a loop.
+ * - We are only interested in the first change that manages to go through the filters, so we use the first()
+ *   operator. This means we need to manually re-subscribe onto the subject afterward. There may be better appraoches
+ *   but this keeps the code simple.
+ */
 const clickPopupWatchLaterButton = popupMutationSubject.pipe(
-  map((mutationRecord) =>
-    HtmlTreeNavigator.startFrom(mutationRecord.target as HTMLElement)
-      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
-      .consume()
-  ),
-  filter((svg) => !!svg),
-  sample(watchLaterClickSubject),
-  tap((svg) => {
-    HtmlParentNavigator.startFrom(svg).find(new TagNavigationFilter("YT-LIST-ITEM-VIEW-MODEL")).consume().click();
+  filter(() => watchLaterButtonClickedSubject.value === true),
+  filter((record) => record.target.nodeName === "TP-YT-IRON-DROPDOWN"),
+  tap(record => {
+    const popup = record.target as HTMLElement;
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`)
+  }),
+  debounceTime(300),
+  first(),
+  tap(() => {
+    const xpath = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue;
+
+    const svg = HtmlTreeNavigator
+      .startFrom
+      // "Reload" the DOM element for its children.
+      (xpath as HTMLElement)
+      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.WATCH_LATER_HOME_PAGE))
+      .consume();
+
+    const button = HtmlParentNavigator.startFrom(svg)
+      .find(new TagNavigationFilter("yt-list-item-view-model"))
+      .consume();
+    button.click();
+  }),
+  tap((record) => {
+    const popup = record.target as HTMLElement;
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`)
+    watchLaterButtonClickedSubject.next(false);
+    clickPopupWatchLaterButton.subscribe();
   })
 );
 
-export function initHomeObserverNew(): Disconnectable[] {
-  const contentObserverConf = { attributes: false, childList: true, subtree: true };
-  const richItemsContainer = document.body;
+export function initHomeObserverNew(): DisconnectFn {
   const contentMutationObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       contentMutationSubject.next(mutation);
     });
-  })
-  contentMutationObserver.observe(richItemsContainer, contentObserverConf)
+  });
+  const richItemsContainer = document.body;
+  const contentObserverConf = { attributes: false, childList: true, subtree: true };
+  contentMutationObserver.observe(richItemsContainer, contentObserverConf);
 
-  const popupObserverConf = { attributes: true, childList: false, subtree: true };
-  const popupContainer = HtmlTreeNavigator.startFrom(document.body).findFirst(
-    new TagNavigationFilter("YTD-POPUP-CONTAINER")
-  );
   const popupMutationObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
-      popupMutationSubject.next(mutation);
+      // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
+      // ignore it.
+      if (mutation.attributeName !== "style") {
+        popupMutationSubject.next(mutation);
+      }
     });
-  })
-  popupMutationObserver.observe(popupContainer, popupObserverConf)
+  });
+  const popupContainer = HtmlTreeNavigator.startFrom(document.body)
+    .findFirst(new TagNavigationFilter("ytd-popup-container"))
+    .consume();
+  const popupObserverConf = { attributes: true, childList: false, subtree: true };
+  popupMutationObserver.observe(popupContainer, popupObserverConf);
 
-  return [
-    disonnectable(contentMutationObserver.disconnect),
-    disonnectable(popupMutationObserver.disconnect),
-    disonnectable(createWatchLaterButtons.subscribe().unsubscribe),
-    disonnectable(clickPopupWatchLaterButton.subscribe().unsubscribe),
-  ];
+  const createWatchLaterButtonSubscription = createWatchLaterButtons.subscribe();
+  const clickPopupWatchLaterSubscription = clickPopupWatchLaterButton.subscribe();
+
+  return () => {
+    contentMutationObserver.disconnect();
+    popupMutationObserver.disconnect();
+    createWatchLaterButtonSubscription.unsubscribe();
+    clickPopupWatchLaterSubscription.unsubscribe();
+  };
 }

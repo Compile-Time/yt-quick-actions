@@ -6,7 +6,7 @@ import { contentScriptObserversManager } from "./init-globals";
 import { fromEvent } from "rxjs";
 import { initHomeObserverNew } from "./pages/home-new";
 import { initPlaylistObserversNew } from "./pages/playlist-new";
-import { Disconnectable } from "./types/disconnectable";
+import { DisconnectFn } from "./types/disconnectable";
 
 /**
  * Initialize the relevant observers for the current YouTube page based on location path.
@@ -37,19 +37,19 @@ function init() {
   }
 }
 
-const disconnectables: Disconnectable[] = [];
+const disconnectFns: DisconnectFn[] = [];
 
 function setupPageSubscription(): void {
-  disconnectables.forEach((disconnectable) => {
-    disconnectable.disconnect();
+  disconnectFns.forEach((fn) => {
+    fn();
   });
   const pathAndQueryParams = `${location.pathname}${location.search}`;
 
   if (pathAndQueryParams.includes("list=WL")) {
     console.log("paths", pathAndQueryParams);
-    disconnectables.push(...initPlaylistObserversNew());
+    disconnectFns.push(initPlaylistObserversNew());
   } else if (pathAndQueryParams === "/") {
-    disconnectables.push(...initHomeObserverNew());
+    disconnectFns.push(initHomeObserverNew());
   }
 }
 

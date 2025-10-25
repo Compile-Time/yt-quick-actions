@@ -8,9 +8,7 @@ import {
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { SvgDrawPath } from "../../html-element-processing/element-data";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
-import { Disconnectable, disonnectable } from "../types/disconnectable";
-
-const popupXpath = "/html/body/ytd-app/ytd-popup-container";
+import { DisconnectFn } from "../types/disconnectable";
 
 const videoListMutationSubject = new Subject<MutationRecord>();
 const popupOpenedSubject = new Subject<MutationRecord>();
@@ -18,13 +16,7 @@ const popupOpenedSubject = new Subject<MutationRecord>();
 const removeButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
 const addRemoveButtonToPlaylistEntries = videoListMutationSubject.pipe(
-  filter((record) => {
-    return (
-      record.target.nodeName === "YTD-PLAYLIST-VIDEO-RENDERER" &&
-      // A button is added to the DOM by the extension which can be caught by the observer causing an infinite loop.
-      Array.from(record.addedNodes).every((node) => node.nodeName !== "BUTTON")
-    );
-  }),
+  filter((record) => record.target.nodeName === "YTD-PLAYLIST-VIDEO-RENDERER"),
   map((record) =>
     HtmlTreeNavigator.startFrom(record.target as HTMLElement)
       .findFirst(new IdNavigationFilter("div", "menu"))
@@ -71,8 +63,13 @@ const clickRemoveItemInPopup = popupOpenedSubject.pipe(
       tap(() => {
         const svg = HtmlTreeNavigator.startFrom(
           // "Reload" the DOM element for its children.
-          document.evaluate(popupXpath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null)
-            .singleNodeValue as HTMLElement
+          document.evaluate(
+            "/html/body/ytd-app/ytd-popup-container",
+            document,
+            null,
+            XPathResult.ANY_UNORDERED_NODE_TYPE,
+            null
+          ).singleNodeValue as HTMLElement
         )
           .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
           .consume();
@@ -80,8 +77,6 @@ const clickRemoveItemInPopup = popupOpenedSubject.pipe(
         button.click();
       }),
       tap(() => {
-        // Setup subscription again.
-        // clickRemoveItemInPopup.subscribe();
         removeButtonClickedSubject.next(false);
       })
     );
@@ -89,30 +84,36 @@ const clickRemoveItemInPopup = popupOpenedSubject.pipe(
   concatAll()
 );
 
-export function initPlaylistObserversNew(): Disconnectable[] {
-  const videoListObserverConfig: MutationObserverInit = { attributes: false, childList: true, subtree: true };
+export function initPlaylistObserversNew(): DisconnectFn {
   const videoListMutationObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
-      videoListMutationSubject.next(mutation);
+      // A button is added to the DOM by the extension which can be caught by the observer causing an infinite loop.
+      if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== "BUTTON")) {
+        videoListMutationSubject.next(mutation);
+      }
     });
   });
+  const videoListObserverConfig: MutationObserverInit = { attributes: false, childList: true, subtree: true };
   videoListMutationObserver.observe(document.body, videoListObserverConfig);
 
-  const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-    .findFirst(new TagNavigationFilter("ytd-popup-container"))
-    .consume();
-  const popupObserverConfig: MutationObserverInit = { attributes: true, childList: true, subtree: true };
   const popupMutationObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       popupOpenedSubject.next(mutation);
     });
   });
+  const popupContainer = HtmlTreeNavigator.startFrom(document.body)
+    .findFirst(new TagNavigationFilter("ytd-popup-container"))
+    .consume();
+  const popupObserverConfig: MutationObserverInit = { attributes: true, childList: true, subtree: true };
   popupMutationObserver.observe(popupContainer, popupObserverConfig);
 
-  return [
-    disonnectable(videoListMutationObserver.disconnect),
-    disonnectable(popupMutationObserver.disconnect),
-    disonnectable(addRemoveButtonToPlaylistEntries.subscribe().unsubscribe),
-    disonnectable(clickRemoveItemInPopup.subscribe().unsubscribe),
-  ];
+  const addRemoveButtonToPlaylistSubscription = addRemoveButtonToPlaylistEntries.subscribe();
+  const clickRemoveItemSubscritpition = clickRemoveItemInPopup.subscribe();
+
+  return () => {
+    videoListMutationObserver.disconnect();
+    popupMutationObserver.disconnect();
+    addRemoveButtonToPlaylistSubscription.unsubscribe();
+    clickRemoveItemSubscritpition.unsubscribe();
+  };
 }
