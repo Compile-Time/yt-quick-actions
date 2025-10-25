@@ -54,6 +54,8 @@ function setupPageSubscription(): void {
     disconnectFns.push(initPlaylistObserversNew());
   } else if (pathAndQueryParams.includes("watch")) {
     disconnectFns.push(initWatchVideoNew());
+  } else if (pathAndQueryParams.includes("subscriptions")) {
+    disconnectFns.push(initHomeObserverNew());
   } else if (pathAndQueryParams === "/") {
     disconnectFns.push(initHomeObserverNew());
   }
