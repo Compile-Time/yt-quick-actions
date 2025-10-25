@@ -8,6 +8,7 @@ import { initHomeObserverNew } from "./pages/home-new";
 import { initPlaylistObserversNew } from "./pages/playlist-new";
 import { DisconnectFn } from "./types/disconnectable";
 import { initWatchVideoNew } from "./pages/video-new";
+import { initWatchingPlaylistNew } from "./pages/watching-playlist-new";
 
 /**
  * Initialize the relevant observers for the current YouTube page based on location path.
@@ -44,13 +45,15 @@ function setupPageSubscription(): void {
   disconnectFns.forEach((fn) => {
     fn();
   });
-  const pathAndQueryParams = `${location.pathname}${location.search}`;
 
-  if (pathAndQueryParams.includes("list=WL")) {
-    console.log("paths", pathAndQueryParams);
+  const pathAndQueryParams = `${location.pathname}${location.search}`;
+  if (pathAndQueryParams.includes("watch") && pathAndQueryParams.includes("list=WL")) {
+    disconnectFns.push(initWatchingPlaylistNew());
+    disconnectFns.push(initWatchVideoNew());
+  } else if (pathAndQueryParams.includes("list=WL")) {
     disconnectFns.push(initPlaylistObserversNew());
   } else if (pathAndQueryParams.includes("watch")) {
-    initWatchVideoNew();
+    disconnectFns.push(initWatchVideoNew());
   } else if (pathAndQueryParams === "/") {
     disconnectFns.push(initHomeObserverNew());
   }

@@ -15,7 +15,7 @@ const popupOpenedSubject = new Subject<MutationRecord>();
 
 const removeButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
-const addRemoveButtonToPlaylistEntries = videoListMutationSubject.pipe(
+const addRemoveButtonToPlaylistEntries$ = videoListMutationSubject.pipe(
   filter((record) => record.target.nodeName === "YTD-PLAYLIST-VIDEO-RENDERER"),
   map((record) =>
     HtmlTreeNavigator.startFrom(record.target as HTMLElement)
@@ -53,7 +53,7 @@ const addRemoveButtonToPlaylistEntries = videoListMutationSubject.pipe(
  *   stale references/data.
  * - Finally, set the state of the behavior subject to false so that the dialog is usable for other actions again.
  */
-const clickRemoveItemInPopup = popupOpenedSubject.pipe(
+const clickRemoveItemInPopup$ = popupOpenedSubject.pipe(
   filter(() => removeButtonClickedSubject.value === true),
   filter((record) => record.target.nodeName === "SPAN"),
   windowCount(1),
@@ -107,8 +107,8 @@ export function initPlaylistObserversNew(): DisconnectFn {
   const popupObserverConfig: MutationObserverInit = { attributes: true, childList: true, subtree: true };
   popupMutationObserver.observe(popupContainer, popupObserverConfig);
 
-  const addRemoveButtonToPlaylistSubscription = addRemoveButtonToPlaylistEntries.subscribe();
-  const clickRemoveItemSubscritpition = clickRemoveItemInPopup.subscribe();
+  const addRemoveButtonToPlaylistSubscription = addRemoveButtonToPlaylistEntries$.subscribe();
+  const clickRemoveItemSubscritpition = clickRemoveItemInPopup$.subscribe();
 
   return () => {
     videoListMutationObserver.disconnect();

@@ -33,7 +33,7 @@ const createWatchLaterButtons = contentMutationSubject.pipe(
   })
 );
 
-const clickPopupVideoSaveButton = popupMutationSubject.pipe(
+const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
   filter(() => watchLaterButtonClickedSubject.value === true && saveVideoInOptionsClickedSubject.value === false),
   filter((record) => record.target.nodeName === "TP-YT-IRON-DROPDOWN"),
   tap((record) => {
@@ -62,11 +62,11 @@ const clickPopupVideoSaveButton = popupMutationSubject.pipe(
     saveVideoInOptionsClickedSubject.next(true);
   }),
   tap((record) => {
-    clickPopupVideoSaveButton.subscribe();
+    clickPopupVideoSaveButton$.subscribe();
   })
 );
 
-const clickPopupWatchLaterPlaylist = popupMutationSubject.pipe(
+const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
   filter(() => saveVideoInOptionsClickedSubject.value === true),
   filter((record) => record.target.nodeName === "TP-YT-IRON-DROPDOWN"),
   tap((record) => {
@@ -96,7 +96,7 @@ const clickPopupWatchLaterPlaylist = popupMutationSubject.pipe(
     popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
     watchLaterButtonClickedSubject.next(false);
     saveVideoInOptionsClickedSubject.next(false);
-    clickPopupWatchLaterPlaylist.subscribe();
+    clickPopupWatchLaterPlaylist$.subscribe();
   })
 );
 
@@ -128,8 +128,8 @@ export function initWatchVideoNew(): DisconnectFn {
   popupMutationObserver.observe(popupContainer, popupObserverConf);
 
   const createWatchLaterButtonSubscription = createWatchLaterButtons.subscribe();
-  const clickPopupVideoSaveSubscription = clickPopupVideoSaveButton.subscribe();
-  const clickPopupWatchLaterPlaylistSubscription = clickPopupWatchLaterPlaylist.subscribe();
+  const clickPopupVideoSaveSubscription = clickPopupVideoSaveButton$.subscribe();
+  const clickPopupWatchLaterPlaylistSubscription = clickPopupWatchLaterPlaylist$.subscribe();
 
   return () => {
     contentMutationObserver.disconnect();

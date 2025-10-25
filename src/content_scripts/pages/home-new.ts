@@ -15,7 +15,7 @@ const popupMutationSubject = new Subject<MutationRecord>();
 
 const watchLaterButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
-const createWatchLaterButtons = contentMutationSubject.pipe(
+const createWatchLaterButtons$ = contentMutationSubject.pipe(
   filter((mutationRecord) => {
     return mutationRecord.target.nodeName === "YTD-RICH-ITEM-RENDERER";
   }),
@@ -61,12 +61,12 @@ const createWatchLaterButtons = contentMutationSubject.pipe(
  *   operator. This means we need to manually re-subscribe onto the subject afterward. There may be better appraoches
  *   but this keeps the code simple.
  */
-const clickPopupWatchLaterButton = popupMutationSubject.pipe(
+const clickPopupWatchLaterButton$ = popupMutationSubject.pipe(
   filter(() => watchLaterButtonClickedSubject.value === true),
   filter((record) => record.target.nodeName === "TP-YT-IRON-DROPDOWN"),
-  tap(record => {
+  tap((record) => {
     const popup = record.target as HTMLElement;
-    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`)
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
   }),
   debounceTime(300),
   first(),
@@ -80,8 +80,7 @@ const clickPopupWatchLaterButton = popupMutationSubject.pipe(
       null
     ).singleNodeValue;
 
-    const svg = HtmlTreeNavigator
-      .startFrom(xpath as HTMLElement)
+    const svg = HtmlTreeNavigator.startFrom(xpath as HTMLElement)
       .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.WATCH_LATER_HOME_PAGE))
       .consume();
 
@@ -92,9 +91,9 @@ const clickPopupWatchLaterButton = popupMutationSubject.pipe(
   }),
   tap((record) => {
     const popup = record.target as HTMLElement;
-    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`)
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
     watchLaterButtonClickedSubject.next(false);
-    clickPopupWatchLaterButton.subscribe();
+    clickPopupWatchLaterButton$.subscribe();
   })
 );
 
@@ -123,8 +122,8 @@ export function initHomeObserverNew(): DisconnectFn {
   const popupObserverConf = { attributes: true, childList: false, subtree: true };
   popupMutationObserver.observe(popupContainer, popupObserverConf);
 
-  const createWatchLaterButtonSubscription = createWatchLaterButtons.subscribe();
-  const clickPopupWatchLaterSubscription = clickPopupWatchLaterButton.subscribe();
+  const createWatchLaterButtonSubscription = createWatchLaterButtons$.subscribe();
+  const clickPopupWatchLaterSubscription = clickPopupWatchLaterButton$.subscribe();
 
   return () => {
     contentMutationObserver.disconnect();
