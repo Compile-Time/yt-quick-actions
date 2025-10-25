@@ -7,6 +7,7 @@ import { fromEvent } from "rxjs";
 import { initHomeObserverNew } from "./pages/home-new";
 import { initPlaylistObserversNew } from "./pages/playlist-new";
 import { DisconnectFn } from "./types/disconnectable";
+import { initWatchVideoNew } from "./pages/video-new";
 
 /**
  * Initialize the relevant observers for the current YouTube page based on location path.
@@ -48,6 +49,8 @@ function setupPageSubscription(): void {
   if (pathAndQueryParams.includes("list=WL")) {
     console.log("paths", pathAndQueryParams);
     disconnectFns.push(initPlaylistObserversNew());
+  } else if (pathAndQueryParams.includes("watch")) {
+    initWatchVideoNew();
   } else if (pathAndQueryParams === "/") {
     disconnectFns.push(initHomeObserverNew());
   }

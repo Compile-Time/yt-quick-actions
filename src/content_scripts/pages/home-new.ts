@@ -71,6 +71,7 @@ const clickPopupWatchLaterButton = popupMutationSubject.pipe(
   debounceTime(300),
   first(),
   tap(() => {
+    // "Reload" the DOM element for its children.
     const xpath = document.evaluate(
       "/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown",
       document,
@@ -80,9 +81,7 @@ const clickPopupWatchLaterButton = popupMutationSubject.pipe(
     ).singleNodeValue;
 
     const svg = HtmlTreeNavigator
-      .startFrom
-      // "Reload" the DOM element for its children.
-      (xpath as HTMLElement)
+      .startFrom(xpath as HTMLElement)
       .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.WATCH_LATER_HOME_PAGE))
       .consume();
 
