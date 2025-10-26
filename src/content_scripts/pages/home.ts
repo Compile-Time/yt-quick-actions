@@ -14,11 +14,7 @@ import {
   windowCount,
 } from "rxjs";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
-import {
-  IdNavigationFilter,
-  SvgDrawPathNavigationFilter,
-  TagNavigationFilter,
-} from "../../html-navigation/filter/navigation-filter";
+import { SvgDrawPathNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { SvgDrawPath } from "../../html-element-processing/element-data";
@@ -29,7 +25,13 @@ const queueWatchLaterClickSubject = new Subject<HTMLElement>();
 const contentMutationSubject = new Subject<MutationRecord>();
 const contentMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
-    contentMutationSubject.next(mutation);
+    if (
+      !Array.from(mutation.addedNodes).some(
+        (node) => node.nodeName === "DIV" && (node as HTMLElement).classList.contains("qa-home-watch-later")
+      )
+    ) {
+      contentMutationSubject.next(mutation);
+    }
   });
 });
 
@@ -48,7 +50,7 @@ const watchLaterButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
 const createWatchLaterButtons$ = contentMutationSubject.pipe(
   filter((mutationRecord) => {
-    return mutationRecord.target.nodeName === "YTD-RICH-ITEM-RENDERER";
+    return mutationRecord.target.nodeName === "DIV" && (mutationRecord.target as HTMLElement).id === "content";
   }),
   filter((mutationRecord) => {
     return HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
@@ -61,10 +63,8 @@ const createWatchLaterButtons$ = contentMutationSubject.pipe(
       .notExists()
   ),
   tap((mutationRecord) => {
-    const div = HtmlTreeNavigator.startFrom(mutationRecord.target as HTMLElement)
-      .findFirst(new IdNavigationFilter("DIV", "content"))
-      .consume();
-    const optionsButton = HtmlTreeNavigator.startFrom(mutationRecord.target as HTMLElement)
+    const divContent = mutationRecord.target as HTMLElement;
+    const optionsButton = HtmlTreeNavigator.startFrom(divContent)
       .filter(new TagNavigationFilter("BUTTON-VIEW-MODEL"))
       .findFirst(new TagNavigationFilter("BUTTON"))
       .consume();
@@ -72,7 +72,7 @@ const createWatchLaterButtons$ = contentMutationSubject.pipe(
     const qaButton = QaHtmlElements.watchLaterHomeVideoButton(() => {
       queueWatchLaterClickSubject.next(optionsButton);
     });
-    div.appendChild(qaButton.completeHtmlElement);
+    divContent.appendChild(qaButton.completeHtmlElement);
   }),
   catchError((error) => {
     contentMutationObserver.disconnect();
