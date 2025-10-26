@@ -1,3 +1,10 @@
+## [1.1.7](https://github.com/Compile-Time/yt-quick-actions/compare/1.1.6...1.1.7) (2025-10-26)
+
+
+### Bug Fixes
+
+* Home page script fails when clicking on YouTube logo ([d3bf390](https://github.com/Compile-Time/yt-quick-actions/commit/d3bf390633c0f0f0df52eadbed37bf80b0ea71c8))
+
 ## [1.1.6](https://github.com/Compile-Time/yt-quick-actions/compare/1.1.5...1.1.6) (2025-10-26)
 
 
