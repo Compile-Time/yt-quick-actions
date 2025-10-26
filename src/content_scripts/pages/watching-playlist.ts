@@ -34,6 +34,11 @@ const removeButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
 const createRemoveButtons$ = contentMutationSubject.pipe(
   filter((record) => record.target.nodeName === "DIV" && (record.target as HTMLElement).id === "menu"),
+  filter((record) =>
+    HtmlParentNavigator.startFrom(record.target as HTMLElement)
+      .find(new IdNavigationFilter("div", "items"))
+      .exists()
+  ),
   tap((record) => {
     const menuElement = record.target as HTMLElement;
     const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
