@@ -1,15 +1,4 @@
-import {
-  BehaviorSubject,
-  catchError,
-  concatAll,
-  filter,
-  first,
-  map,
-  Subject,
-  tap,
-  throwError,
-  windowCount,
-} from "rxjs";
+import { BehaviorSubject, catchError, filter, first, map, of, Subject, tap, throwError } from "rxjs";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import {
   IdNavigationFilter,
@@ -77,7 +66,7 @@ const addRemoveButtonToPlaylistEntries$ = videoListMutationSubject.pipe(
  *   We listen to the SVG element for this since other elements yield unreliable results.
  * - The span mutation records are windowed into new observables so that we can immediately click the remove button
  *   and stop listening to further span records - `first()`. This also helps with isolating the remove
- *   operation for multiple videos since they will end up in new observables.
+ *   operation for multiple videos since they will end up in new subscriptions.
  * - The DOM element for the popup container is "reloaded" with an XPath query because mutation records can have
  *   stale references/data.
  * - Finally, set the state of the behavior subject to false so that the dialog is usable for other actions again.
@@ -85,32 +74,31 @@ const addRemoveButtonToPlaylistEntries$ = videoListMutationSubject.pipe(
 const clickRemoveItemInPopup$ = popupOpenedSubject.pipe(
   filter(() => removeButtonClickedSubject.value === true),
   filter((record) => record.target.nodeName === "SPAN"),
-  windowCount(1),
-  map((window) => {
-    return window.pipe(
-      first(),
-      tap(() => {
-        const svg = HtmlTreeNavigator.startFrom(
-          // "Reload" the DOM element for its children.
-          document.evaluate(
-            "/html/body/ytd-app/ytd-popup-container",
-            document,
-            null,
-            XPathResult.ANY_UNORDERED_NODE_TYPE,
-            null
-          ).singleNodeValue as HTMLElement
-        )
-          .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
-          .consume();
-        const button = HtmlParentNavigator.startFrom(svg).find(new TagNavigationFilter("tp-yt-paper-item")).consume();
-        button.click();
-      }),
-      tap(() => {
-        removeButtonClickedSubject.next(false);
-      })
-    );
+  first(),
+  tap(() => {
+    // "Reload" the DOM element for its children.
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
+
+    const svg = HtmlTreeNavigator.startFrom(popup)
+      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
+      .consume();
+    const button = HtmlParentNavigator.startFrom(svg).find(new TagNavigationFilter("tp-yt-paper-item")).consume();
+    button.click();
   }),
-  concatAll()
+  catchError(() => {
+    popupMutationObserver.disconnect();
+    return of(null);
+  }),
+  tap(() => {
+    removeButtonClickedSubject.next(false);
+    clickRemoveItemInPopup$.subscribe();
+  })
 );
 
 export function initPlaylistObserversNew(): DisconnectFn {
@@ -133,12 +121,12 @@ export function initPlaylistObserversNew(): DisconnectFn {
   popupMutationObserver.observe(popupContainer, popupObserverConfig);
 
   const addRemoveButtonToPlaylistSubscription = addRemoveButtonToPlaylistEntries$.subscribe();
-  const clickRemoveItemSubscritpition = clickRemoveItemInPopup$.subscribe();
+  const clickRemoveItemSubscription = clickRemoveItemInPopup$.subscribe();
 
   return () => {
     videoListMutationObserver.disconnect();
     popupMutationObserver.disconnect();
     addRemoveButtonToPlaylistSubscription.unsubscribe();
-    clickRemoveItemSubscritpition.unsubscribe();
+    clickRemoveItemSubscription.unsubscribe();
   };
 }
