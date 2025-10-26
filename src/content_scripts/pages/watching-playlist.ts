@@ -51,7 +51,7 @@ const createRemoveButtons$ = contentMutationSubject.pipe(
 );
 
 const clickPopupRemoveButton$ = popupMutationSubject.pipe(
-  tap(r => console.log('r', r)),
+  tap((r) => console.log("r", r)),
   filter(() => removeButtonClickedSubject.value === true),
   filter((record) => record.target.nodeName === "TP-YT-IRON-DROPDOWN"),
   tap(() => {
@@ -109,7 +109,7 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
   })
 );
 
-export function initWatchingPlaylistNew(): DisconnectFn {
+export function initWatchingPlaylist(): DisconnectFn {
   // Avoid listening to the whole DOM by using the ytd-page-manager element.
   const ytdPageManager = document.evaluate(
     '//*[@id="page-manager"]',

@@ -157,17 +157,19 @@ const clickPopupWatchLaterButton$ = popupMutationSubject.pipe(
  */
 const processQueuedWatchLaterClick$ = queueWatchLaterClickSubject.pipe(
   windowCount(1),
-  map(window => window.pipe(
-    switchMap((optionsButton) => {
-      watchLaterButtonClickedSubject.next(true);
-      optionsButton.click();
-      return clickPopupWatchLaterButton$;
-    })
-  )),
+  map((window) =>
+    window.pipe(
+      switchMap((optionsButton) => {
+        watchLaterButtonClickedSubject.next(true);
+        optionsButton.click();
+        return clickPopupWatchLaterButton$;
+      })
+    )
+  ),
   concatAll()
 );
 
-export function initHomeObserverNew(): DisconnectFn {
+export function initHomeObserver(): DisconnectFn {
   // Avoid listening to the whole DOM by using the ytd-page-manager element.
   const ytdPageManager = document.evaluate(
     "/html/body/ytd-app/div[1]/ytd-page-manager",

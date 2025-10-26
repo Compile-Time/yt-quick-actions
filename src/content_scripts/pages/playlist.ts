@@ -101,7 +101,7 @@ const clickRemoveItemInPopup$ = popupOpenedSubject.pipe(
   })
 );
 
-export function initPlaylistObserversNew(): DisconnectFn {
+export function initPlaylistObservers(): DisconnectFn {
   // Avoid listening to the whole DOM by using the ytd-page-manager element.
   const ytdPopupManager = document.evaluate(
     "/html/body/ytd-app/div[1]/ytd-page-manager",

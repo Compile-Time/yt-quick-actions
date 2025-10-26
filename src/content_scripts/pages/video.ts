@@ -157,7 +157,7 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
   })
 );
 
-export function initWatchVideoNew(): DisconnectFn {
+export function initWatchVideo(): DisconnectFn {
   // Avoid listening to the whole DOM by using the ytd-page-manager element.
   const ytdPageManager = document.evaluate(
     '//*[@id="page-manager"]',

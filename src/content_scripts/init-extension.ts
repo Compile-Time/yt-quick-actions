@@ -1,9 +1,9 @@
 import { fromEvent } from "rxjs";
-import { initHomeObserverNew } from "./pages/home-new";
-import { initPlaylistObserversNew } from "./pages/playlist-new";
+import { initHomeObserver } from "./pages/home";
+import { initPlaylistObservers } from "./pages/playlist";
 import { DisconnectFn } from "./types/disconnectable";
-import { initWatchVideoNew } from "./pages/video-new";
-import { initWatchingPlaylistNew } from "./pages/watching-playlist-new";
+import { initWatchVideo } from "./pages/video";
+import { initWatchingPlaylist } from "./pages/watching-playlist";
 
 const disconnectFns: DisconnectFn[] = [];
 
@@ -25,16 +25,16 @@ function setupPageSubscription(): void {
 
   const pathAndQueryParams = `${location.pathname}${location.search}`;
   if (pathAndQueryParams.includes("watch") && pathAndQueryParams.includes("list=WL")) {
-    disconnectFns.push(initWatchingPlaylistNew());
-    disconnectFns.push(initWatchVideoNew());
+    disconnectFns.push(initWatchingPlaylist());
+    disconnectFns.push(initWatchVideo());
   } else if (pathAndQueryParams.includes("list=WL")) {
-    disconnectFns.push(initPlaylistObserversNew());
+    disconnectFns.push(initPlaylistObservers());
   } else if (pathAndQueryParams.includes("watch")) {
-    disconnectFns.push(initWatchVideoNew());
+    disconnectFns.push(initWatchVideo());
   } else if (pathAndQueryParams.includes("subscriptions")) {
-    disconnectFns.push(initHomeObserverNew());
+    disconnectFns.push(initHomeObserver());
   } else if (pathAndQueryParams === "/") {
-    disconnectFns.push(initHomeObserverNew());
+    disconnectFns.push(initHomeObserver());
   }
 }
 
