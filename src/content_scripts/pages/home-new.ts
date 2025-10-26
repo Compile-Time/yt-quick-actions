@@ -1,4 +1,18 @@
-import { BehaviorSubject, catchError, debounceTime, filter, first, of, Subject, tap, throwError } from "rxjs";
+import {
+  BehaviorSubject,
+  catchError,
+  concatAll,
+  debounceTime,
+  filter,
+  first,
+  map,
+  of,
+  Subject,
+  switchMap,
+  tap,
+  throwError,
+  windowCount,
+} from "rxjs";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 import {
   IdNavigationFilter,
@@ -9,6 +23,8 @@ import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { SvgDrawPath } from "../../html-element-processing/element-data";
 import { DisconnectFn } from "../types/disconnectable";
+
+const queueWatchLaterClickSubject = new Subject<HTMLElement>();
 
 const contentMutationSubject = new Subject<MutationRecord>();
 const contentMutationObserver = new MutationObserver((mutations) => {
@@ -54,8 +70,7 @@ const createWatchLaterButtons$ = contentMutationSubject.pipe(
       .consume();
 
     const qaButton = QaHtmlElements.watchLaterHomeVideoButton(() => {
-      optionsButton.click();
-      watchLaterButtonClickedSubject.next(true);
+      queueWatchLaterClickSubject.next(optionsButton);
     });
     div.appendChild(qaButton.completeHtmlElement);
   }),
@@ -130,8 +145,26 @@ const clickPopupWatchLaterButton$ = popupMutationSubject.pipe(
 
     const popup = record.target as HTMLElement;
     popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
-    clickPopupWatchLaterButton$.subscribe();
   })
+);
+
+/**
+ * Queue watch later clicks with `windowCount` to prevent buggy behavior.
+ *
+ * `windowCount` creates a window of observables until the specific count is reached. We use this to put each
+ * button click into a new observable and concat them with `concatAll`. `concatAll` subscribes to each observable
+ * sequentially, so the next watch later action will only be performed after the previous one is finished.
+ */
+const processQueuedWatchLaterClick$ = queueWatchLaterClickSubject.pipe(
+  windowCount(1),
+  map(window => window.pipe(
+    switchMap((optionsButton) => {
+      watchLaterButtonClickedSubject.next(true);
+      optionsButton.click();
+      return clickPopupWatchLaterButton$;
+    })
+  )),
+  concatAll()
 );
 
 export function initHomeObserverNew(): DisconnectFn {
@@ -154,12 +187,12 @@ export function initHomeObserverNew(): DisconnectFn {
   popupMutationObserver.observe(popupContainer, popupObserverConf);
 
   const createWatchLaterButtonSubscription = createWatchLaterButtons$.subscribe();
-  const clickPopupWatchLaterSubscription = clickPopupWatchLaterButton$.subscribe();
+  const queueWatchLaterClicksSubscription = processQueuedWatchLaterClick$.subscribe();
 
   return () => {
     contentMutationObserver.disconnect();
     popupMutationObserver.disconnect();
     createWatchLaterButtonSubscription.unsubscribe();
-    clickPopupWatchLaterSubscription.unsubscribe();
+    queueWatchLaterClicksSubscription.unsubscribe();
   };
 }
