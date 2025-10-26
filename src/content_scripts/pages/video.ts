@@ -3,7 +3,6 @@ import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { SvgDrawPathNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
 import { BehaviorSubject, catchError, debounceTime, filter, first, of, Subject, tap, throwError } from "rxjs";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
-import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 import { SvgDrawPath } from "../../html-element-processing/element-data";
 
 const contentMutationSubject = new Subject<MutationRecord>();
@@ -38,15 +37,26 @@ const createWatchLaterButtons = contentMutationSubject.pipe(
   // After the button is set up in the DOM, we don't need the subscription anymore.
   first(),
   tap((record) => {
+    const topLevelButtonsComputed = record.target as HTMLElement;
+
     const watchLaterButton = QaHtmlElements.watchLaterUnderVideoButton(() => {
-      // TODO: save later may be outside the options button.
-      const moreOptionsButton = document.getElementById("button-shape");
-      if (moreOptionsButton) {
-        (moreOptionsButton.children[0] as HTMLElement).click();
+      const saveToPlaylistButton = HtmlTreeNavigator.startFrom(topLevelButtonsComputed.parentElement)
+        .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
+        .intoParentNavigator()
+        .find(new TagNavigationFilter("button"))
+        .consume();
+      if (saveToPlaylistButton) {
+        saveToPlaylistButton.click();
+        saveVideoInOptionsClickedSubject.next(true);
+      } else {
+        const moreOptionsButton = document.getElementById("button-shape");
+        if (moreOptionsButton) {
+          (moreOptionsButton.children[0] as HTMLElement).click();
+        }
+        watchLaterButtonClickedSubject.next(true);
       }
-      watchLaterButtonClickedSubject.next(true);
     });
-    record.target.appendChild(watchLaterButton);
+    topLevelButtonsComputed.appendChild(watchLaterButton);
   }),
   tap(() => {
     contentMutationObserver.disconnect();
@@ -68,20 +78,20 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
   first(),
   tap(() => {
     // "Reload" the DOM element for its children.
-    const xpath = document.evaluate(
+    const tpYtIronDropdown = document.evaluate(
       "/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown",
       document,
       null,
       XPathResult.ANY_UNORDERED_NODE_TYPE,
       null
-    ).singleNodeValue;
+    ).singleNodeValue as HTMLElement;
 
-    const svg = HtmlTreeNavigator.startFrom(xpath as HTMLElement)
+    const button = HtmlTreeNavigator.startFrom(tpYtIronDropdown as HTMLElement)
       .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
+      .intoParentNavigator()
+      .find(new TagNavigationFilter("tp-yt-paper-item"))
       .consume();
 
-    const button = HtmlParentNavigator.startFrom(svg).find(new TagNavigationFilter("tp-yt-paper-item")).consume();
-    console.log("buttn?", button);
     button.click();
     saveVideoInOptionsClickedSubject.next(true);
   }),
@@ -126,7 +136,6 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
     const ytListItem = HtmlTreeNavigator.startFrom(popupContainer)
       .findFirst(new TagNavigationFilter("yt-list-item-view-model"))
       .consume();
-    console.log("ytListItem?", ytListItem, popupContainer);
     ytListItem.click();
   }),
   catchError(() => {
