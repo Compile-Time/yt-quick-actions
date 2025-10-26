@@ -5,17 +5,34 @@ import {
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
 } from "../../html-navigation/filter/navigation-filter";
-import { BehaviorSubject, debounceTime, filter, first, map, Subject, tap } from "rxjs";
+import { BehaviorSubject, catchError, debounceTime, filter, first, map, of, Subject, tap } from "rxjs";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { SvgDrawPath } from "../../html-element-processing/element-data";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 
 const contentMutationSubject = new Subject<MutationRecord>();
+const contentMutationObserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== "BUTTON")) {
+      contentMutationSubject.next(mutation);
+    }
+  });
+});
+
 const popupMutationSubject = new Subject<MutationRecord>();
+const popupMutationObserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
+    // ignore it.
+    if (mutation.attributeName !== "style") {
+      popupMutationSubject.next(mutation);
+    }
+  });
+});
 
 const removeButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
-const createRemoveButton$ = contentMutationSubject.pipe(
+const createRemoveButtons$ = contentMutationSubject.pipe(
   filter((record) => record.target.nodeName === "DIV" && (record.target as HTMLElement).id === "menu"),
   tap((record) => {
     const menuElement = record.target as HTMLElement;
@@ -68,7 +85,24 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
 
     return popup;
   }),
+  catchError(() => {
+    popupMutationObserver.disconnect();
+
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+
+    return of(null);
+  }),
   tap((popup) => {
+    if (!popup) {
+      return;
+    }
     clickPopupRemoveButton$.subscribe();
     removeButtonClickedSubject.next(false);
     popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
@@ -76,33 +110,25 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
 );
 
 export function initWatchingPlaylistNew(): DisconnectFn {
-  const contentMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== "BUTTON")) {
-        contentMutationSubject.next(mutation);
-      }
-    });
-  });
-  const richItemsContainer = document.body;
-  const contentObserverConf = { attributes: false, childList: true, subtree: true };
-  contentMutationObserver.observe(richItemsContainer, contentObserverConf);
+  // Avoid listening to the whole DOM by using the ytd-page-manager element.
+  const ytdPageManager = document.evaluate(
+    '//*[@id="page-manager"]',
+    document.body,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  ).singleNodeValue as HTMLElement;
 
-  const popupMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
-      // ignore it.
-      if (mutation.attributeName !== "style") {
-        popupMutationSubject.next(mutation);
-      }
-    });
-  });
+  const contentObserverConf = { attributes: false, childList: true, subtree: true };
+  contentMutationObserver.observe(ytdPageManager, contentObserverConf);
+
   const popupContainer = HtmlTreeNavigator.startFrom(document.body)
     .findFirst(new TagNavigationFilter("ytd-popup-container"))
     .consume();
   const popupObserverConf = { attributes: true, childList: false, subtree: true };
   popupMutationObserver.observe(popupContainer, popupObserverConf);
 
-  const createRemoveButtonSubscription = createRemoveButton$.subscribe();
+  const createRemoveButtonSubscription = createRemoveButtons$.subscribe();
   const clickPopupRemoveButtonSubscription = clickPopupRemoveButton$.subscribe();
 
   return () => {

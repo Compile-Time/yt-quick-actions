@@ -1,13 +1,30 @@
 import { DisconnectFn } from "../types/disconnectable";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import { SvgDrawPathNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
-import { BehaviorSubject, debounceTime, filter, first, Subject, tap } from "rxjs";
+import { BehaviorSubject, catchError, debounceTime, filter, first, of, Subject, tap, throwError } from "rxjs";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 import { SvgDrawPath } from "../../html-element-processing/element-data";
 
 const contentMutationSubject = new Subject<MutationRecord>();
+const contentMutationObserver = new MutationObserver((mutations, observer) => {
+  mutations.forEach((mutation) => {
+    if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== "BUTTON")) {
+      contentMutationSubject.next(mutation);
+    }
+  });
+});
+
 const popupMutationSubject = new Subject<MutationRecord>();
+const popupMutationObserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
+    // ignore it.
+    if (mutation.attributeName !== "style") {
+      popupMutationSubject.next(mutation);
+    }
+  });
+});
 
 const watchLaterButtonClickedSubject = new BehaviorSubject<boolean>(false);
 const saveVideoInOptionsClickedSubject = new BehaviorSubject<boolean>(false);
@@ -16,20 +33,27 @@ const createWatchLaterButtons = contentMutationSubject.pipe(
   filter(
     (record) => record.target.nodeName === "DIV" && (record.target as HTMLElement).id === "top-level-buttons-computed"
   ),
+  // There may be multiple changes to the "top-level-buttons-computed" element, so we debounce the changes.
+  debounceTime(400),
+  // After the button is set up in the DOM, we don't need the subscription anymore.
+  first(),
   tap((record) => {
     const watchLaterButton = QaHtmlElements.watchLaterUnderVideoButton(() => {
       // TODO: save later may be outside the options button.
-      try {
-        const moreOptionsButton = document.getElementById("button-shape");
-        if (moreOptionsButton) {
-          (moreOptionsButton.children[0] as HTMLElement).click();
-        }
-      } catch (error) {
-        console.error(error);
+      const moreOptionsButton = document.getElementById("button-shape");
+      if (moreOptionsButton) {
+        (moreOptionsButton.children[0] as HTMLElement).click();
       }
       watchLaterButtonClickedSubject.next(true);
     });
     record.target.appendChild(watchLaterButton);
+  }),
+  tap(() => {
+    contentMutationObserver.disconnect();
+  }),
+  catchError((error) => {
+    contentMutationObserver.disconnect();
+    return throwError(() => error);
   })
 );
 
@@ -38,7 +62,7 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
   filter((record) => record.target.nodeName === "TP-YT-IRON-DROPDOWN"),
   tap((record) => {
     const popup = record.target as HTMLElement;
-    // popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
   }),
   debounceTime(300),
   first(),
@@ -61,7 +85,21 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
     button.click();
     saveVideoInOptionsClickedSubject.next(true);
   }),
-  tap((record) => {
+  catchError((error) => {
+    popupMutationObserver.disconnect();
+
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+
+    return throwError(() => error);
+  }),
+  tap(() => {
     clickPopupVideoSaveButton$.subscribe();
   })
 );
@@ -77,50 +115,61 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
   first(),
   tap(() => {
     // "Reload" the DOM element for its children.
-    const xpath = document.evaluate(
+    const popupContainer = document.evaluate(
       "/html/body/ytd-app/ytd-popup-container",
       document,
       null,
       XPathResult.ANY_UNORDERED_NODE_TYPE,
       null
-    ).singleNodeValue;
+    ).singleNodeValue as HTMLElement;
 
-    const ytListItem = HtmlTreeNavigator.startFrom(xpath as HTMLElement)
+    const ytListItem = HtmlTreeNavigator.startFrom(popupContainer)
       .findFirst(new TagNavigationFilter("yt-list-item-view-model"))
       .consume();
-    console.log("ytListItem?", ytListItem, xpath);
+    console.log("ytListItem?", ytListItem, popupContainer);
     ytListItem.click();
   }),
-  tap((record) => {
-    const popup = record.target as HTMLElement;
+  catchError(() => {
+    popupMutationObserver.disconnect();
+
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
     popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+
+    return of(null);
+  }),
+  tap((record) => {
     watchLaterButtonClickedSubject.next(false);
     saveVideoInOptionsClickedSubject.next(false);
+
+    if (!record) {
+      return;
+    }
+
+    const popup = record.target as HTMLElement;
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
     clickPopupWatchLaterPlaylist$.subscribe();
   })
 );
 
 export function initWatchVideoNew(): DisconnectFn {
-  const contentMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== "BUTTON")) {
-        contentMutationSubject.next(mutation);
-      }
-    });
-  });
-  const richItemsContainer = document.body;
-  const contentObserverConf = { attributes: false, childList: true, subtree: true };
-  contentMutationObserver.observe(richItemsContainer, contentObserverConf);
+  // Avoid listening to the whole DOM by using the ytd-page-manager element.
+  const ytdPageManager = document.evaluate(
+    '//*[@id="page-manager"]',
+    document.body,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  ).singleNodeValue as HTMLElement;
 
-  const popupMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
-      // ignore it.
-      if (mutation.attributeName !== "style") {
-        popupMutationSubject.next(mutation);
-      }
-    });
-  });
+  const contentObserverConf = { attributes: false, childList: true, subtree: true };
+  contentMutationObserver.observe(ytdPageManager, contentObserverConf);
+
   const popupContainer = HtmlTreeNavigator.startFrom(document.body)
     .findFirst(new TagNavigationFilter("ytd-popup-container"))
     .consume();

@@ -1,4 +1,4 @@
-import { BehaviorSubject, debounceTime, filter, first, Subject, tap } from "rxjs";
+import { BehaviorSubject, catchError, debounceTime, filter, first, of, Subject, tap, throwError } from "rxjs";
 import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 import {
   IdNavigationFilter,
@@ -11,7 +11,22 @@ import { SvgDrawPath } from "../../html-element-processing/element-data";
 import { DisconnectFn } from "../types/disconnectable";
 
 const contentMutationSubject = new Subject<MutationRecord>();
+const contentMutationObserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    contentMutationSubject.next(mutation);
+  });
+});
+
 const popupMutationSubject = new Subject<MutationRecord>();
+const popupMutationObserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
+    // ignore it.
+    if (mutation.attributeName !== "style") {
+      popupMutationSubject.next(mutation);
+    }
+  });
+});
 
 const watchLaterButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
@@ -43,6 +58,10 @@ const createWatchLaterButtons$ = contentMutationSubject.pipe(
       watchLaterButtonClickedSubject.next(true);
     });
     div.appendChild(qaButton.completeHtmlElement);
+  }),
+  catchError((error) => {
+    contentMutationObserver.disconnect();
+    return throwError(() => error);
   })
 );
 
@@ -72,15 +91,15 @@ const clickPopupWatchLaterButton$ = popupMutationSubject.pipe(
   first(),
   tap(() => {
     // "Reload" the DOM element for its children.
-    const xpath = document.evaluate(
+    const popupContainer = document.evaluate(
       "/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown",
       document,
       null,
       XPathResult.ANY_UNORDERED_NODE_TYPE,
       null
-    ).singleNodeValue;
+    ).singleNodeValue as HTMLElement;
 
-    const svg = HtmlTreeNavigator.startFrom(xpath as HTMLElement)
+    const svg = HtmlTreeNavigator.startFrom(popupContainer)
       .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.WATCH_LATER_HOME_PAGE))
       .consume();
 
@@ -89,33 +108,45 @@ const clickPopupWatchLaterButton$ = popupMutationSubject.pipe(
       .consume();
     button.click();
   }),
+  catchError(() => {
+    popupMutationObserver.disconnect();
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+
+    return of(null);
+  }),
   tap((record) => {
+    watchLaterButtonClickedSubject.next(false);
+
+    if (!record) {
+      return;
+    }
+
     const popup = record.target as HTMLElement;
     popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
-    watchLaterButtonClickedSubject.next(false);
     clickPopupWatchLaterButton$.subscribe();
   })
 );
 
 export function initHomeObserverNew(): DisconnectFn {
-  const contentMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      contentMutationSubject.next(mutation);
-    });
-  });
-  const richItemsContainer = document.body;
-  const contentObserverConf = { attributes: false, childList: true, subtree: true };
-  contentMutationObserver.observe(richItemsContainer, contentObserverConf);
+  // Avoid listening to the whole DOM by using the ytd-page-manager element.
+  const ytdPageManager = document.evaluate(
+    "/html/body/ytd-app/div[1]/ytd-page-manager",
+    document.body,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  ).singleNodeValue as HTMLElement;
 
-  const popupMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
-      // ignore it.
-      if (mutation.attributeName !== "style") {
-        popupMutationSubject.next(mutation);
-      }
-    });
-  });
+  const contentObserverConf = { attributes: false, childList: true, subtree: true };
+  contentMutationObserver.observe(ytdPageManager, contentObserverConf);
+
   const popupContainer = HtmlTreeNavigator.startFrom(document.body)
     .findFirst(new TagNavigationFilter("ytd-popup-container"))
     .consume();

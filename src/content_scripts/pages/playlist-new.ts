@@ -1,4 +1,15 @@
-import { BehaviorSubject, concatAll, filter, first, map, Subject, tap, windowCount } from "rxjs";
+import {
+  BehaviorSubject,
+  catchError,
+  concatAll,
+  filter,
+  first,
+  map,
+  Subject,
+  tap,
+  throwError,
+  windowCount,
+} from "rxjs";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
 import {
   IdNavigationFilter,
@@ -11,7 +22,21 @@ import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator
 import { DisconnectFn } from "../types/disconnectable";
 
 const videoListMutationSubject = new Subject<MutationRecord>();
+const videoListMutationObserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    // A button is added to the DOM by the extension which can be caught by the observer causing an infinite loop.
+    if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== "BUTTON")) {
+      videoListMutationSubject.next(mutation);
+    }
+  });
+});
+
 const popupOpenedSubject = new Subject<MutationRecord>();
+const popupMutationObserver = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+    popupOpenedSubject.next(mutation);
+  });
+});
 
 const removeButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
@@ -35,6 +60,10 @@ const addRemoveButtonToPlaylistEntries$ = videoListMutationSubject.pipe(
     };
 
     menuElement.parentNode.appendChild(removeButton);
+  }),
+  catchError((error) => {
+    videoListMutationObserver.disconnect();
+    return throwError(() => error);
   })
 );
 
@@ -85,22 +114,18 @@ const clickRemoveItemInPopup$ = popupOpenedSubject.pipe(
 );
 
 export function initPlaylistObserversNew(): DisconnectFn {
-  const videoListMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      // A button is added to the DOM by the extension which can be caught by the observer causing an infinite loop.
-      if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== "BUTTON")) {
-        videoListMutationSubject.next(mutation);
-      }
-    });
-  });
-  const videoListObserverConfig: MutationObserverInit = { attributes: false, childList: true, subtree: true };
-  videoListMutationObserver.observe(document.body, videoListObserverConfig);
+  // Avoid listening to the whole DOM by using the ytd-page-manager element.
+  const ytdPopupManager = document.evaluate(
+    "/html/body/ytd-app/div[1]/ytd-page-manager",
+    document.body,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null
+  ).singleNodeValue as HTMLElement;
 
-  const popupMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      popupOpenedSubject.next(mutation);
-    });
-  });
+  const videoListObserverConfig: MutationObserverInit = { attributes: false, childList: true, subtree: true };
+  videoListMutationObserver.observe(ytdPopupManager, videoListObserverConfig);
+
   const popupContainer = HtmlTreeNavigator.startFrom(document.body)
     .findFirst(new TagNavigationFilter("ytd-popup-container"))
     .consume();
