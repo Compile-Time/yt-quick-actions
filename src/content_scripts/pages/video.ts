@@ -1,9 +1,26 @@
 import { DisconnectFn } from "../types/disconnectable";
 import { HtmlTreeNavigator } from "../../html-navigation/html-tree-navigator";
-import { SvgDrawPathNavigationFilter, TagNavigationFilter } from "../../html-navigation/filter/navigation-filter";
-import { BehaviorSubject, catchError, debounceTime, filter, first, of, Subject, tap, throwError } from "rxjs";
+import {
+  IdNavigationFilter,
+  SvgDrawPathNavigationFilter,
+  TagNavigationFilter,
+} from "../../html-navigation/filter/navigation-filter";
+import {
+  BehaviorSubject,
+  catchError,
+  combineLatest,
+  debounceTime,
+  filter,
+  first,
+  map,
+  of,
+  Subject,
+  tap,
+  throwError,
+} from "rxjs";
 import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
 import { SvgDrawPath } from "../../html-element-processing/element-data";
+import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
 
 const contentMutationSubject = new Subject<MutationRecord>();
 const contentMutationObserver = new MutationObserver((mutations, observer) => {
@@ -28,17 +45,31 @@ const popupMutationObserver = new MutationObserver((mutations) => {
 const watchLaterButtonClickedSubject = new BehaviorSubject<boolean>(false);
 const saveVideoInOptionsClickedSubject = new BehaviorSubject<boolean>(false);
 
-const createWatchLaterButtons = contentMutationSubject.pipe(
+const topLevelComputedButtonsMutations$ = contentMutationSubject.pipe(
   filter(
     (record) => record.target.nodeName === "DIV" && (record.target as HTMLElement).id === "top-level-buttons-computed"
   ),
-  // There may be multiple changes to the "top-level-buttons-computed" element, so we debounce the changes.
+  debounceTime(400),
+  map((record) => record.target as HTMLElement)
+);
+const moreOptionsMutations$ = contentMutationSubject.pipe(
+  filter((record) => {
+    const ytButton = record.target as HTMLElement;
+    return HtmlParentNavigator.startFrom(ytButton).find(new IdNavigationFilter("yt-button-shape", "button-shape")).exists();
+  }),
+  debounceTime(400),
+  map((record) => record.target as HTMLElement)
+);
+
+const createWatchLaterButton$ = combineLatest({
+  topLevelButtonsComputed: topLevelComputedButtonsMutations$,
+  moreOptionsButton: moreOptionsMutations$,
+}).pipe(
+  // There may be multiple changes to the top level buttons or more options element, so we debounce the changes.
   debounceTime(400),
   // After the button is set up in the DOM, we don't need the subscription anymore.
   first(),
-  tap((record) => {
-    const topLevelButtonsComputed = record.target as HTMLElement;
-
+  tap(({ topLevelButtonsComputed, moreOptionsButton }) => {
     const watchLaterButton = QaHtmlElements.watchLaterUnderVideoButton(() => {
       const saveToPlaylistButton = HtmlTreeNavigator.startFrom(topLevelButtonsComputed.parentElement)
         .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
@@ -49,10 +80,7 @@ const createWatchLaterButtons = contentMutationSubject.pipe(
         saveToPlaylistButton.click();
         saveVideoInOptionsClickedSubject.next(true);
       } else {
-        const moreOptionsButton = document.getElementById("button-shape");
-        if (moreOptionsButton) {
-          (moreOptionsButton.children[0] as HTMLElement).click();
-        }
+        (moreOptionsButton.children[0] as HTMLElement).click();
         watchLaterButtonClickedSubject.next(true);
       }
     });
@@ -185,7 +213,7 @@ export function initWatchVideo(): DisconnectFn {
   const popupObserverConf = { attributes: true, childList: false, subtree: true };
   popupMutationObserver.observe(popupContainer, popupObserverConf);
 
-  const createWatchLaterButtonSubscription = createWatchLaterButtons.subscribe();
+  const createWatchLaterButtonSubscription = createWatchLaterButton$.subscribe();
   const clickPopupVideoSaveSubscription = clickPopupVideoSaveButton$.subscribe();
   const clickPopupWatchLaterPlaylistSubscription = clickPopupWatchLaterPlaylist$.subscribe();
 
