@@ -5,16 +5,28 @@ import {
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
 } from "../../html-navigation/filter/navigation-filter";
-import { QaHtmlElements } from "../../html-element-processing/qa-html-elements";
-import { SvgDrawPath } from "../../html-element-processing/element-data";
-import { HtmlParentNavigator } from "../../html-navigation/html-parent-navigator";
+import {
+  QaHtmlElements,
+  qaMoveBottomButton,
+  qaMoveButtonsContainer,
+  qaMoveTopButton,
+} from "../../html-element-processing/qa-html-elements";
+import { Ids, SvgDrawPath } from "../../html-element-processing/element-data";
 import { DisconnectFn } from "../types/disconnectable";
 
 const videoListMutationSubject = new Subject<MutationRecord>();
 const videoListMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     // A button is added to the DOM by the extension which can be caught by the observer causing an infinite loop.
-    if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== "BUTTON")) {
+    if (
+      Array.from(mutation.addedNodes).every((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const element = node as HTMLElement;
+          return element.id !== Ids.QA_FLEX_CONTAINER_MOVE_BUTTONS && element.id !== Ids.QA_REMOVE_BUTTON;
+        }
+        return true;
+      })
+    ) {
       videoListMutationSubject.next(mutation);
     }
   });
@@ -23,32 +35,57 @@ const videoListMutationObserver = new MutationObserver((mutations) => {
 const popupOpenedSubject = new Subject<MutationRecord>();
 const popupMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
-    popupOpenedSubject.next(mutation);
+    if (mutation.attributeName !== "style") {
+      popupOpenedSubject.next(mutation);
+    }
   });
 });
 
-const removeButtonClickedSubject = new BehaviorSubject<boolean>(false);
+const removeButtonClicked$ = new BehaviorSubject(false);
+const moveTopButtonClicked$ = new BehaviorSubject(false);
+const moveBottomButtonClicked$ = new BehaviorSubject(false);
 
-const addRemoveButtonToPlaylistEntries$ = videoListMutationSubject.pipe(
+const addCustomButtonsToDom$ = videoListMutationSubject.pipe(
   filter((record) => record.target.nodeName === "YTD-PLAYLIST-VIDEO-RENDERER"),
-  map((record) =>
-    HtmlTreeNavigator.startFrom(record.target as HTMLElement)
+  tap((record) => {
+    const menuElement = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
       .findFirst(new IdNavigationFilter("div", "menu"))
-      .consume()
-  ),
-  filter((menuElement) => menuElement !== null),
-  tap((menuElement) => {
-    const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
-      .findFirst(new IdNavigationFilter("button", "button"))
       .consume();
+    if (menuElement) {
+      const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
+        .findFirst(new IdNavigationFilter("button", "button"))
+        .consume();
 
-    const removeButton = QaHtmlElements.removeButton();
-    removeButton.onclick = () => {
-      optionsButton.click();
-      removeButtonClickedSubject.next(true);
-    };
+      const removeButton = QaHtmlElements.removeButton();
+      removeButton.onclick = () => {
+        optionsButton.click();
+        removeButtonClicked$.next(true);
+      };
 
-    menuElement.parentNode.appendChild(removeButton);
+      menuElement.parentNode.appendChild(removeButton);
+    }
+
+    const dragContainer = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
+      .findFirst(new IdNavigationFilter("div", "index-container"))
+      .consume();
+    if (dragContainer && menuElement) {
+      dragContainer.setAttribute("style", `${dragContainer.getAttribute("style")} position: relative;`);
+      const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
+        .findFirst(new IdNavigationFilter("button", "button"))
+        .consume();
+
+      const topButton = qaMoveTopButton(() => {
+        moveTopButtonClicked$.next(true);
+        optionsButton.click();
+      });
+      const bottomButton = qaMoveBottomButton(() => {
+        moveBottomButtonClicked$.next(true);
+        optionsButton.click();
+      });
+      const qaContainer = qaMoveButtonsContainer([topButton, bottomButton]);
+
+      dragContainer.append(qaContainer);
+    }
   }),
   catchError((error) => {
     videoListMutationObserver.disconnect();
@@ -72,7 +109,7 @@ const addRemoveButtonToPlaylistEntries$ = videoListMutationSubject.pipe(
  * - Finally, set the state of the behavior subject to false so that the dialog is usable for other actions again.
  */
 const clickRemoveItemInPopup$ = popupOpenedSubject.pipe(
-  filter(() => removeButtonClickedSubject.value === true),
+  filter(() => removeButtonClicked$.value === true),
   filter((record) => record.target.nodeName === "SPAN"),
   first(),
   tap(() => {
@@ -85,19 +122,161 @@ const clickRemoveItemInPopup$ = popupOpenedSubject.pipe(
       null
     ).singleNodeValue as HTMLElement;
 
-    const svg = HtmlTreeNavigator.startFrom(popup)
+    const button = HtmlTreeNavigator.startFrom(popup)
       .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
+      .intoParentNavigator()
+      .find(new TagNavigationFilter("tp-yt-paper-item"))
       .consume();
-    const button = HtmlParentNavigator.startFrom(svg).find(new TagNavigationFilter("tp-yt-paper-item")).consume();
-    button.click();
+    if (button) {
+      button.click();
+    }
   }),
-  catchError(() => {
+  catchError((err) => {
     popupMutationObserver.disconnect();
-    return of(null);
+    console.error("yt-err", err);
+    return of(undefined);
   }),
   tap(() => {
-    removeButtonClickedSubject.next(false);
+    removeButtonClicked$.next(false);
     clickRemoveItemInPopup$.subscribe();
+  })
+);
+
+const clickMoveTopButtonInPopup$ = popupOpenedSubject.pipe(
+  filter(() => moveTopButtonClicked$.value === true),
+  tap(() => {
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
+  }),
+  filter((record) => {
+    return (
+      (record.target.nodeName === "YTD-MENU-SERVICE-ITEM-RENDERER" &&
+        HtmlTreeNavigator.startFrom(record.target as HTMLElement)
+          .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_TOP))
+          .exists()) ||
+      (record.target.nodeName === "SPAN" &&
+        record.addedNodes.length > 0 &&
+        record.addedNodes.item(0).nodeName === "DIV" &&
+        HtmlTreeNavigator.startFrom(record.addedNodes.item(0) as HTMLElement)
+          .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_TOP))
+          .exists())
+    );
+  }),
+  first(),
+  map(() => {
+    // "Reload" the DOM element for its children.
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
+
+    const button = HtmlTreeNavigator.startFrom(popup)
+      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_TOP))
+      .intoParentNavigator()
+      .find(new TagNavigationFilter("tp-yt-paper-item"))
+      .consume();
+    if (button) {
+      button.click();
+    }
+
+    return popup;
+  }),
+  catchError((err) => {
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+
+    popupMutationObserver.disconnect();
+    console.error("yt-err", err);
+    return of(null);
+  }),
+  tap((popup) => {
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+    moveTopButtonClicked$.next(false);
+    clickMoveTopButtonInPopup$.subscribe();
+  })
+);
+
+const clickMoveBottomButtonInPopup$ = popupOpenedSubject.pipe(
+  filter(() => moveBottomButtonClicked$.value === true),
+  tap((record) => {
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
+  }),
+  filter((record) => {
+    return (
+      (record.target.nodeName === "YTD-MENU-SERVICE-ITEM-RENDERER" &&
+        HtmlTreeNavigator.startFrom(record.target as HTMLElement)
+          .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_BOTTOM))
+          .exists()) ||
+      (record.target.nodeName === "SPAN" &&
+        record.addedNodes.length > 0 &&
+        record.addedNodes.item(0).nodeName === "DIV" &&
+        HtmlTreeNavigator.startFrom(record.addedNodes.item(0) as HTMLElement)
+          .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_BOTTOM))
+          .exists())
+    );
+  }),
+  first(),
+  map(() => {
+    // "Reload" the DOM element for its children.
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
+
+    const button = HtmlTreeNavigator.startFrom(popup)
+      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_BOTTOM))
+      .intoParentNavigator()
+      .find(new TagNavigationFilter("tp-yt-paper-item"))
+      .consume();
+    if (button) {
+      button.click();
+    }
+
+    return popup;
+  }),
+  catchError((err) => {
+    const popup = document.evaluate(
+      "/html/body/ytd-app/ytd-popup-container",
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+
+    popupMutationObserver.disconnect();
+    console.error("yt-err", err);
+    return of(null);
+  }),
+  tap((popup) => {
+    moveBottomButtonClicked$.next(false);
+    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+    clickMoveBottomButtonInPopup$.subscribe();
   })
 );
 
@@ -120,13 +299,17 @@ export function initPlaylistObservers(): DisconnectFn {
   const popupObserverConfig: MutationObserverInit = { attributes: true, childList: true, subtree: true };
   popupMutationObserver.observe(popupContainer, popupObserverConfig);
 
-  const addRemoveButtonToPlaylistSubscription = addRemoveButtonToPlaylistEntries$.subscribe();
+  const addRemoveButtonToPlaylistSubscription = addCustomButtonsToDom$.subscribe();
   const clickRemoveItemSubscription = clickRemoveItemInPopup$.subscribe();
+  const clickMoveTopButtonSubscription = clickMoveTopButtonInPopup$.subscribe();
+  const clickMoveBottomButtonSubscription = clickMoveBottomButtonInPopup$.subscribe();
 
   return () => {
     videoListMutationObserver.disconnect();
     popupMutationObserver.disconnect();
     addRemoveButtonToPlaylistSubscription.unsubscribe();
     clickRemoveItemSubscription.unsubscribe();
+    clickMoveTopButtonSubscription.unsubscribe();
+    clickMoveBottomButtonSubscription.unsubscribe();
   };
 }

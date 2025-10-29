@@ -10,6 +10,11 @@ YouTube variables start with '--yt-spec'.
     border: none;
     background: transparent;
     pointer-events: auto;
+
+    &.move-btn {
+        width: 36px;
+        height: 24px;
+    }
 }
 
 .qa-btn:hover {
@@ -38,6 +43,15 @@ YouTube variables start with '--yt-spec'.
     justify-content: flex-end;
     align-items: flex-end;
     pointer-events: none;
+}
+
+.qa-drag-container-overlay {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+    gap: 6rem;
 }
 
 .qa-watching-playlist-remove {

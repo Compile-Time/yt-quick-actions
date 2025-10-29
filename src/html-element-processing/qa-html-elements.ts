@@ -34,7 +34,7 @@ export class QaHtmlElements {
 
   static watchLaterHomeVideoButton(clickCallback: QaButtonClickCallback): QaButtonInContainer {
     const flexContainer = document.createElement("div");
-    flexContainer.id = Ids.QA_FLEX_CONTAINER;
+    flexContainer.id = Ids.QA_FLEX_CONTAINER_REMOVE_BUTTON;
     flexContainer.setAttribute("class", "qa-home-watch-later");
 
     const button = document.createElement(Tags.BUTTON);
@@ -46,4 +46,31 @@ export class QaHtmlElements {
     flexContainer.append(button);
     return new QaButtonInContainer(flexContainer, button);
   }
+}
+
+export function qaMoveTopButton(clickCallback: QaButtonClickCallback) {
+  const button = document.createElement(Tags.BUTTON);
+  button.id = Ids.QA_MOVE_TOP;
+  button.innerHTML = `<i class="fa-solid fa-chevron-up fa-lg"></i>`;
+  button.setAttribute("class", "qa-btn move-btn");
+  button.onclick = clickCallback;
+  return button;
+}
+
+export function qaMoveBottomButton(clickCallback: QaButtonClickCallback) {
+  const button = document.createElement(Tags.BUTTON);
+  button.id = Ids.QA_MOVE_BOTTOM;
+  button.innerHTML = `<i class="fa-solid fa-chevron-down fa-lg"></i>`;
+  button.setAttribute("class", "qa-btn move-btn");
+  button.onclick = clickCallback;
+  return button;
+}
+
+export function qaMoveButtonsContainer(buttons: HTMLButtonElement[]) {
+  const flexContainer = document.createElement("div");
+  flexContainer.id = Ids.QA_FLEX_CONTAINER_MOVE_BUTTONS;
+  flexContainer.setAttribute("class", "qa-drag-container-overlay");
+
+  flexContainer.append(...buttons);
+  return flexContainer;
 }

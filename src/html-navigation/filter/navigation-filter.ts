@@ -22,6 +22,8 @@ export abstract class NavigationFilter {
     return JSON.stringify(this);
   }
 
+  abstract equals(other: NavigationFilter): boolean;
+
   protected lowercaseEquals(stringA: string, stringB: string): boolean {
     return stringA.toLowerCase() === stringB.toLowerCase();
   }
@@ -29,8 +31,6 @@ export abstract class NavigationFilter {
   protected lowercaseContains(normalString: string, lowercaseString: string) {
     return normalString.toLowerCase().includes(lowercaseString);
   }
-
-  abstract equals(other: NavigationFilter): boolean;
 
   protected abstract applyCondition(element: HTMLElement): boolean;
 }
@@ -68,12 +68,12 @@ export class SvgDrawPathNavigationFilter extends NavigationFilter {
     super();
   }
 
-  protected applyCondition(element: HTMLElement): boolean {
-    return this.lowercaseEquals(element.tagName, Tags.PATH) && element.getAttribute(AttributeNames.D) === this.drawPath;
-  }
-
   equals(other: SvgDrawPathNavigationFilter): boolean {
     return this.drawPath === other.drawPath;
+  }
+
+  protected applyCondition(element: HTMLElement): boolean {
+    return this.lowercaseEquals(element.tagName, Tags.PATH) && element.getAttribute(AttributeNames.D) === this.drawPath;
   }
 }
 
@@ -82,11 +82,11 @@ export class AnyFilter<T extends NavigationFilter> extends NavigationFilter {
     super();
   }
 
-  protected applyCondition(element: HTMLElement): boolean {
-    return this.filterList.some((filter) => !!filter.applySingle(element));
-  }
-
   equals(other: AnyFilter<T>): boolean {
     return other.filterList.every((filter) => this.filterList.includes(filter));
+  }
+
+  protected applyCondition(element: HTMLElement): boolean {
+    return this.filterList.some((filter) => !!filter.applySingle(element));
   }
 }

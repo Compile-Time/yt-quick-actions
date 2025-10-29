@@ -7,8 +7,11 @@ export enum Tags {
 
 export enum Ids {
   BUTTON = "button",
-  QA_FLEX_CONTAINER = "yt-qa-flex-container",
+  QA_FLEX_CONTAINER_REMOVE_BUTTON = "yt-qa-flex-container-remove-button",
+  QA_FLEX_CONTAINER_MOVE_BUTTONS = "yt-qa-flex-container-move-buttons",
   QA_HOME_WATCH_LATER = "yt-qa-home-watch-later",
+  QA_MOVE_TOP = "yt-qa-move-top",
+  QA_MOVE_BOTTOM = "yt-qa-move-bottom",
   QA_REMOVE_BUTTON = "yt-qa-remove-button",
   QA_VIDEO_WATCH_LATER = "yt-qa-video-watch-later",
 }
@@ -32,5 +35,7 @@ export enum SvgDrawPath {
   WATCH_LATER_20230629 = "M14.97 16.95 10 13.87V7h2v5.76l4.03 2.49-1.06 1.7zM12 3c-4.96 0-9 4.04-9 9s4.04 9 9 9 9-4.04 9-9-4.04-9-9-9m0-1c5.52 0 10 4.48 10 10s-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z",
   POPUP_CLOSE = "M12.7,12l6.6,6.6l-0.7,0.7L12,12.7l-6.6,6.6l-0.7-0.7l6.6-6.6L4.6,5.4l0.7-0.7l6.6,6.6l6.6-6.6l0.7,0.7L12.7,12z",
   POPUP_CLOSE_20230629 = "m12.71 12 8.15 8.15-.71.71L12 12.71l-8.15 8.15-.71-.71L11.29 12 3.15 3.85l.71-.71L12 11.29l8.15-8.15.71.71L12.71 12z",
+  PLAYLIST_MOVE_TO_TOP = "M5 8h14a1 1 0 100-2H5a1 1 0 000 2Zm.293 8.293a1 1 0 101.414 1.414L12 12.414l5.293 5.293a1 1 0 001.414-1.414l-6-6L12 9.586l-.707.707-6 6Z",
+  PLAYLIST_MOVE_TO_BOTTOM = "M18.707 7.707a1 1 0 10-1.414-1.414L12 11.586 6.707 6.293a1 1 0 10-1.414 1.414L12 14.414l6.707-6.707ZM19 18a1 1 0 000-2H5a1 1 0 000 2h14Z",
   // @formatter:on
 }
