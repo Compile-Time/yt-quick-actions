@@ -1,7 +1,9 @@
-build/
-dist/
 coverage/
-karma.conf.js
+.output
+.idea
+.wxt
+assets
+node_modules
+public
 .eslintrc.js
-tailwind.config.js
 *.md
