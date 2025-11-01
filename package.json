@@ -90,6 +90,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.16",
+    "@vueuse/core": "^14.0.0",
     "daisyui": "^5.3.10",
     "loglevel": "^1.9.2",
     "loglevel-plugin-prefix": "^0.8.4",

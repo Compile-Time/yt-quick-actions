@@ -1,15 +1,14 @@
 <script lang="ts" setup>
-import { createLogger } from '@/utils/logging/log-provider';
-import { LogLevel, logLevelFromStr } from '@/utils/enums/log-level';
+import { LogLevel } from '@/utils/enums/log-level';
 import { ref } from 'vue';
-import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
-
-const logger = createLogger('settings');
-
-const logLevelOptions = Object.values(LogLevel).map((level) => ({
-  value: level,
-  label: level.toUpperCase(),
-}));
+import {
+  SETTING_LOG_LEVELS,
+  SETTING_SEARCH_STRINGS,
+  SettingLogLevels,
+  SettingSearchStrings,
+} from '@/utils/storage/settings-data';
+import LogLevels from '@/components/LogLevels.vue';
+import SearchStrings from '@/components/SearchStrings.vue';
 
 const loggers = ref<SettingLogLevels>({
   homePage: LogLevel.WARN,
@@ -17,50 +16,70 @@ const loggers = ref<SettingLogLevels>({
   watchPlaylist: LogLevel.WARN,
   playlist: LogLevel.WARN,
 });
-
-const templateLoggerNames = {
-  homePage: 'Home page',
-  watchVideo: 'Watch video',
-  watchPlaylist: 'Watch playlist',
-  playlist: 'Playlist',
-};
-
 storage.getItem<SettingLogLevels>(SETTING_LOG_LEVELS).then((levels) => {
   if (levels) {
     loggers.value = levels;
-    logger.debug(`Log level loaded "${levels}" from storage`);
   }
 });
 
-function handleLogLevelChange(event: Event, loggerName: keyof SettingLogLevels) {
-  const target = event.target as HTMLSelectElement;
-  const level = logLevelFromStr(target.value);
+const settingSearchStrings = ref<SettingSearchStrings>({
+  homePageWatchLaterEntry: undefined,
+  playlistMoveBottomEntry: undefined,
+  playlistMoveTopEntry: undefined,
+  playlistRemoveEntry: undefined,
+  videoWatchLaterEntry: undefined,
+  watchingPlaylistRemoveEntry: undefined,
+  watchingPlaylistWatchLaterEntry: undefined,
+});
+storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((strings) => {
+  if (strings) {
+    settingSearchStrings.value = strings;
+  }
+});
 
-  logger.setLevel(level);
-  logger.debug(`Log level changed to "${level}"`);
+const settingsSavedToast = ref(false);
 
+function handleLogLevelChange({ loggerName, level }: { loggerName: keyof SettingLogLevels; level: LogLevel }) {
   loggers.value[loggerName] = level;
   storage.setItem<SettingLogLevels>(SETTING_LOG_LEVELS, {
     ...loggers.value,
     [loggerName]: level,
   });
+  handleSaveSettings();
+}
+
+function handleSearchSettingsChange(data: SettingSearchStrings) {
+  storage.setItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS, data);
+  handleSaveSettings();
+}
+
+function handleSaveSettings() {
+  settingsSavedToast.value = true;
+  setTimeout(() => {
+    settingsSavedToast.value = false;
+  }, 2000);
 }
 </script>
 
 <template>
-  <h1 class="text-3xl">Settings</h1>
+  <h1 class="text-3xl mb-8">Settings</h1>
 
-  <h2 class="text-2xl">Log levels</h2>
+  <div class="tabs tabs-border w-lg">
+    <input type="radio" name="setting_tabs" class="tab" aria-label="Search strings" checked />
+    <div class="tab-content border-base-300 bg-base-200 p-10">
+      <SearchStrings :search-strings="settingSearchStrings" @change="handleSearchSettingsChange" />
+    </div>
 
-  <div class="grid grid-cols-2 gap-4 items-center">
-    <template v-for="(value, key) in loggers">
-      <label :for="key">{{ templateLoggerNames[key] }}</label>
-      <select class="select" @change="(event) => handleLogLevelChange(event, key)" :id="key">
-        <option v-for="option in logLevelOptions" :value="option.value" :selected="option.value === value">
-          {{ option.label }}
-        </option>
-      </select>
-    </template>
+    <input type="radio" name="setting_tabs" class="tab" aria-label="Logging" />
+    <div class="tab-content border-base-300 bg-base-200 p-10">
+      <LogLevels :log-levels="loggers" @logLevelChanged="handleLogLevelChange" />
+    </div>
+  </div>
+
+  <div class="toast toast-center" v-if="settingsSavedToast">
+    <div class="alert alert-success">
+      <span>Settings saved.</span>
+    </div>
   </div>
 </template>
 
