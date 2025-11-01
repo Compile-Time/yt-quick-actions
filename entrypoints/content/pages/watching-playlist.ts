@@ -1,19 +1,19 @@
-import {DisconnectFn} from "@/utils/types/disconnectable";
-import {BehaviorSubject, catchError, debounceTime, filter, first, map, of, Subject, tap} from "rxjs";
-import {HtmlParentNavigator} from "@/utils/html-navigation/html-parent-navigator";
+import { DisconnectFn } from '@/utils/types/disconnectable';
+import { BehaviorSubject, catchError, debounceTime, filter, first, map, of, Subject, tap } from 'rxjs';
+import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
 import {
-    IdNavigationFilter,
-    SvgDrawPathNavigationFilter,
-    TagNavigationFilter
-} from "@/utils/html-navigation/filter/navigation-filter";
-import {HtmlTreeNavigator} from "@/utils/html-navigation/html-tree-navigator";
-import {QaHtmlElements} from "@/utils/html-element-processing/qa-html-elements";
-import {SvgDrawPath} from "@/utils/html-element-processing/element-data";
+  IdNavigationFilter,
+  SvgDrawPathNavigationFilter,
+  TagNavigationFilter,
+} from '@/utils/html-navigation/filter/navigation-filter';
+import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
+import { QaHtmlElements } from '@/utils/html-element-processing/qa-html-elements';
+import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
 
 const contentMutationSubject = new Subject<MutationRecord>();
 const contentMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
-    if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== "BUTTON")) {
+    if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== 'BUTTON')) {
       contentMutationSubject.next(mutation);
     }
   });
@@ -24,7 +24,7 @@ const popupMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
     // ignore it.
-    if (mutation.attributeName !== "style") {
+    if (mutation.attributeName !== 'style') {
       popupMutationSubject.next(mutation);
     }
   });
@@ -33,16 +33,16 @@ const popupMutationObserver = new MutationObserver((mutations) => {
 const removeButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
 const createRemoveButtons$ = contentMutationSubject.pipe(
-  filter((record) => record.target.nodeName === "DIV" && (record.target as HTMLElement).id === "menu"),
+  filter((record) => record.target.nodeName === 'DIV' && (record.target as HTMLElement).id === 'menu'),
   filter((record) =>
     HtmlParentNavigator.startFrom(record.target as HTMLElement)
-      .find(new IdNavigationFilter("div", "items"))
-      .exists()
+      .find(new IdNavigationFilter('div', 'items'))
+      .exists(),
   ),
   tap((record) => {
     const menuElement = record.target as HTMLElement;
     const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
-      .findFirst(new IdNavigationFilter("button", "button"))
+      .findFirst(new IdNavigationFilter('button', 'button'))
       .consume()!;
 
     const removeButton = QaHtmlElements.removeButton();
@@ -52,22 +52,21 @@ const createRemoveButtons$ = contentMutationSubject.pipe(
     };
 
     menuElement.parentNode!.appendChild(removeButton);
-  })
+  }),
 );
 
 const clickPopupRemoveButton$ = popupMutationSubject.pipe(
-  tap((r) => console.log("r", r)),
   filter(() => removeButtonClickedSubject.value === true),
-  filter((record) => record.target.nodeName === "TP-YT-IRON-DROPDOWN"),
+  filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap(() => {
     const popup = document.evaluate(
-      "/html/body/ytd-app/ytd-popup-container",
+      '/html/body/ytd-app/ytd-popup-container',
       document,
       null,
       XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null
+      null,
     ).singleNodeValue as HTMLElement;
-    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: hidden;`);
     return popup;
   }),
   debounceTime(300),
@@ -75,21 +74,21 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
   map(() => {
     // "Reload" the DOM element for its children.
     const popup = document.evaluate(
-      "/html/body/ytd-app/ytd-popup-container",
+      '/html/body/ytd-app/ytd-popup-container',
       document,
       null,
       XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null
+      null,
     ).singleNodeValue as HTMLElement;
 
     const button = HtmlTreeNavigator.startFrom(popup)
       .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
-        .intoParentNavigator()
-        .find(new TagNavigationFilter("tp-yt-paper-item"))
+      .intoParentNavigator()
+      .find(new TagNavigationFilter('tp-yt-paper-item'))
       .consume();
 
     if (button) {
-        button.click();
+      button.click();
     }
 
     return popup;
@@ -98,13 +97,13 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
     popupMutationObserver.disconnect();
 
     const popup = document.evaluate(
-      "/html/body/ytd-app/ytd-popup-container",
+      '/html/body/ytd-app/ytd-popup-container',
       document,
       null,
       XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null
+      null,
     ).singleNodeValue as HTMLElement;
-    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
 
     return of(null);
   }),
@@ -115,8 +114,8 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
 
     clickPopupRemoveButton$.subscribe();
     removeButtonClickedSubject.next(false);
-    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
-  })
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+  }),
 );
 
 export function initWatchingPlaylist(): DisconnectFn {
@@ -126,14 +125,14 @@ export function initWatchingPlaylist(): DisconnectFn {
     document.body,
     null,
     XPathResult.FIRST_ORDERED_NODE_TYPE,
-    null
+    null,
   ).singleNodeValue as HTMLElement;
 
   const contentObserverConf = { attributes: false, childList: true, subtree: true };
   contentMutationObserver.observe(ytdPageManager, contentObserverConf);
 
   const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-    .findFirst(new TagNavigationFilter("ytd-popup-container"))
+    .findFirst(new TagNavigationFilter('ytd-popup-container'))
     .consume()!;
   const popupObserverConf = { attributes: true, childList: false, subtree: true };
   popupMutationObserver.observe(popupContainer, popupObserverConf);
