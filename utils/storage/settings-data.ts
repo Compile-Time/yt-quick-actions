@@ -1,6 +1,13 @@
-import { LogLevel } from "../enums/log-level";
+import { LogLevel } from '../enums/log-level';
 
-export const SETTING_LOG_LEVEL = "logLevel";
+export const SETTING_LOG_LEVELS = 'local:log-levels';
+
+export interface SettingLogLevels {
+  homePage: LogLevel;
+  watchVideo: LogLevel;
+  watchPlaylist: LogLevel;
+  playlist: LogLevel;
+}
 
 export interface SettingSearchStrings {
   playlistRemoveEntry: string;
@@ -10,9 +17,4 @@ export interface SettingSearchStrings {
   videoWatchLaterEntry: string;
   watchingPlaylistRemoveEntry: string;
   watchingPlaylistWatchLaterEntry: string;
-}
-
-export interface SettingsData extends Record<string, any> {
-  logLevel?: LogLevel;
-  searchStrings?: SettingSearchStrings;
 }

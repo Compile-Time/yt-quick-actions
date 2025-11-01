@@ -1,86 +1,94 @@
 import {
-    BehaviorSubject,
-    catchError,
-    concatAll,
-    debounceTime,
-    filter,
-    first,
-    map,
-    of,
-    Subject,
-    switchMap,
-    tap,
-    throwError,
-    windowCount,
-} from "rxjs";
-import {DisconnectFn} from "@/utils/types/disconnectable";
-import {HtmlParentNavigator} from "@/utils/html-navigation/html-parent-navigator";
-import {SvgDrawPathNavigationFilter, TagNavigationFilter} from "@/utils/html-navigation/filter/navigation-filter";
-import {HtmlTreeNavigator} from "@/utils/html-navigation/html-tree-navigator";
-import {QaHtmlElements} from "@/utils/html-element-processing/qa-html-elements";
-import {SvgDrawPath} from "@/utils/html-element-processing/element-data";
-import {ContentScriptContext} from "wxt/utils/content-script-context";
+  BehaviorSubject,
+  catchError,
+  concatAll,
+  debounceTime,
+  filter,
+  first,
+  map,
+  of,
+  Subject,
+  switchMap,
+  tap,
+  throwError,
+  windowCount,
+} from 'rxjs';
+import { DisconnectFn } from '@/utils/types/disconnectable';
+import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
+import { SvgDrawPathNavigationFilter, TagNavigationFilter } from '@/utils/html-navigation/filter/navigation-filter';
+import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
+import { QaHtmlElements } from '@/utils/html-element-processing/qa-html-elements';
+import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
+import { createLogger } from '@/utils/logging/log-provider';
+import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
+
+const logger = createLogger('home');
+storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
+  if (logLevels) {
+    logger.setLevel(logLevels.homePage);
+  }
+});
 
 const queueWatchLaterClickSubject = new Subject<HTMLElement>();
 
 const contentMutationSubject = new Subject<MutationRecord>();
 const contentMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-        if (
-            !Array.from(mutation.addedNodes).some(
-                (node) => node.nodeName === "DIV" && (node as HTMLElement).classList.contains("qa-home-watch-later")
-            )
-        ) {
-            contentMutationSubject.next(mutation);
-        }
-    });
+  mutations.forEach((mutation) => {
+    if (
+      !Array.from(mutation.addedNodes).some(
+        (node) => node.nodeName === 'DIV' && (node as HTMLElement).classList.contains('qa-home-watch-later'),
+      )
+    ) {
+      contentMutationSubject.next(mutation);
+    }
+  });
 });
 
 const popupMutationSubject = new Subject<MutationRecord>();
 const popupMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-        // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
-        // ignore it.
-        if (mutation.attributeName !== "style") {
-            popupMutationSubject.next(mutation);
-        }
-    });
+  mutations.forEach((mutation) => {
+    // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
+    // ignore it.
+    if (mutation.attributeName !== 'style') {
+      popupMutationSubject.next(mutation);
+    }
+  });
 });
 
 const watchLaterButtonClickedSubject = new BehaviorSubject<boolean>(false);
 
 const createWatchLaterButtons$ = contentMutationSubject.pipe(
-    filter((mutationRecord) => {
-        return mutationRecord.target.nodeName === "DIV" && (mutationRecord.target as HTMLElement).id === "content";
-    }),
-    filter((mutationRecord) => {
-        return HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
-            .find(new TagNavigationFilter("YTD-RICH-SECTION-RENDERER"))
-            .notExists();
-    }),
-    filter((mutationRecord) =>
-        HtmlTreeNavigator.startFrom(mutationRecord.target as HTMLElement)
-            .findFirst(new TagNavigationFilter("ytd-ad-slot-renderer"))
-            .notExists()
-    ),
-    tap((r) => console.log('yt-r', r)),
-    tap((mutationRecord) => {
-        const divContent = mutationRecord.target as HTMLElement;
-        const optionsButton = HtmlTreeNavigator.startFrom(divContent)
-            .filter(new TagNavigationFilter("BUTTON-VIEW-MODEL"))
-            .findFirst(new TagNavigationFilter("BUTTON"))
-            .consume()!;
+  filter((mutationRecord) => {
+    return mutationRecord.target.nodeName === 'DIV' && (mutationRecord.target as HTMLElement).id === 'content';
+  }),
+  filter((mutationRecord) => {
+    return HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
+      .find(new TagNavigationFilter('YTD-RICH-SECTION-RENDERER'))
+      .notExists();
+  }),
+  filter((mutationRecord) =>
+    HtmlTreeNavigator.startFrom(mutationRecord.target as HTMLElement)
+      .findFirst(new TagNavigationFilter('ytd-ad-slot-renderer'))
+      .notExists(),
+  ),
+  tap((mutationRecord) => {
+    const divContent = mutationRecord.target as HTMLElement;
+    const optionsButton = HtmlTreeNavigator.startFrom(divContent)
+      .filter(new TagNavigationFilter('BUTTON-VIEW-MODEL'))
+      .findFirst(new TagNavigationFilter('BUTTON'))
+      .consume()!;
+    logger.debug('Search for more options button yielded: ', optionsButton);
 
-        const qaButton = QaHtmlElements.watchLaterHomeVideoButton(() => {
-            queueWatchLaterClickSubject.next(optionsButton);
-        });
-        divContent.appendChild(qaButton.completeHtmlElement);
-        console.log('div content', divContent);
-    }),
-    catchError((error) => {
-        contentMutationObserver.disconnect();
-        return throwError(() => error);
-    })
+    const qaButton = QaHtmlElements.watchLaterHomeVideoButton(() => {
+      queueWatchLaterClickSubject.next(optionsButton);
+    });
+    divContent.appendChild(qaButton.completeHtmlElement);
+  }),
+  catchError((error) => {
+    logger.error('Error occurred while creating watch later buttons', error);
+    contentMutationObserver.disconnect();
+    return throwError(() => error);
+  }),
 );
 
 /**
@@ -99,57 +107,59 @@ const createWatchLaterButtons$ = contentMutationSubject.pipe(
  *   but this keeps the code simple.
  */
 const clickPopupWatchLaterButton$ = popupMutationSubject.pipe(
-    filter(() => watchLaterButtonClickedSubject.value === true),
-    filter((record) => record.target.nodeName === "TP-YT-IRON-DROPDOWN"),
-    tap((record) => {
-        const popup = record.target as HTMLElement;
-        popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
-    }),
-    debounceTime(300),
-    first(),
-    tap(() => {
-        // "Reload" the DOM element for its children.
-        const popupContainer = document.evaluate(
-            "/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown",
-            document,
-            null,
-            XPathResult.ANY_UNORDERED_NODE_TYPE,
-            null
-        ).singleNodeValue as HTMLElement;
+  filter(() => watchLaterButtonClickedSubject.value === true),
+  filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
+  tap((record) => {
+    const popup = record.target as HTMLElement;
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: hidden;`);
+  }),
+  debounceTime(300),
+  first(),
+  tap(() => {
+    // "Reload" the DOM element for its children.
+    const popupContainer = document.evaluate(
+      '/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown',
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue as HTMLElement;
 
-        const button = HtmlTreeNavigator.startFrom(popupContainer)
-            .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.WATCH_LATER_HOME_PAGE))
-            .intoParentNavigator()
-            .find(new TagNavigationFilter("yt-list-item-view-model"))
-            .consume();
+    const button = HtmlTreeNavigator.startFrom(popupContainer)
+      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.WATCH_LATER_HOME_PAGE))
+      .intoParentNavigator()
+      .find(new TagNavigationFilter('yt-list-item-view-model'))
+      .consume();
+    logger.debug('Search for watch later entry in popup yielded: ', button);
 
-        if (button) {
-            button.click();
-        }
-    }),
-    catchError(() => {
-        popupMutationObserver.disconnect();
-        const popup = document.evaluate(
-            "/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown",
-            document,
-            null,
-            XPathResult.ANY_UNORDERED_NODE_TYPE,
-            null
-        ).singleNodeValue as HTMLElement;
-        popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+    if (button) {
+      button.click();
+    }
+  }),
+  catchError((error) => {
+    logger.error('Error occurred while trying to click the watch later button in the popup', error);
+    popupMutationObserver.disconnect();
+    const popup = document.evaluate(
+      '/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown',
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
 
-        return of(null);
-    }),
-    tap((record) => {
-        watchLaterButtonClickedSubject.next(false);
+    return of(null);
+  }),
+  tap((record) => {
+    watchLaterButtonClickedSubject.next(false);
 
-        if (!record) {
-            return;
-        }
+    if (!record) {
+      return;
+    }
 
-        const popup = record.target as HTMLElement;
-        popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
-    })
+    const popup = record.target as HTMLElement;
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+  }),
 );
 
 /**
@@ -160,45 +170,45 @@ const clickPopupWatchLaterButton$ = popupMutationSubject.pipe(
  * sequentially, so the next watch later action will only be performed after the previous one is finished.
  */
 const processQueuedWatchLaterClick$ = queueWatchLaterClickSubject.pipe(
-    windowCount(1),
-    map((window) =>
-        window.pipe(
-            switchMap((optionsButton) => {
-                watchLaterButtonClickedSubject.next(true);
-                optionsButton.click();
-                return clickPopupWatchLaterButton$;
-            })
-        )
+  windowCount(1),
+  map((window) =>
+    window.pipe(
+      switchMap((optionsButton) => {
+        watchLaterButtonClickedSubject.next(true);
+        optionsButton.click();
+        return clickPopupWatchLaterButton$;
+      }),
     ),
-    concatAll()
+  ),
+  concatAll(),
 );
 
 export function initHomeObserver(): DisconnectFn {
-    // Avoid listening to the whole DOM by using the ytd-page-manager element.
-    const ytdPageManager = document.evaluate(
-        "/html/body/ytd-app/div[1]/ytd-page-manager",
-        document.body,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-    ).singleNodeValue as HTMLElement;
+  // Avoid listening to the whole DOM by using the ytd-page-manager element.
+  const ytdPageManager = document.evaluate(
+    '/html/body/ytd-app/div[1]/ytd-page-manager',
+    document.body,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue as HTMLElement;
 
-    const contentObserverConf = {attributes: false, childList: true, subtree: true};
-    contentMutationObserver.observe(ytdPageManager, contentObserverConf);
+  const contentObserverConf = { attributes: false, childList: true, subtree: true };
+  contentMutationObserver.observe(ytdPageManager, contentObserverConf);
 
-    const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-        .findFirst(new TagNavigationFilter("ytd-popup-container"))
-        .consume()!;
-    const popupObserverConf = {attributes: true, childList: false, subtree: true};
-    popupMutationObserver.observe(popupContainer, popupObserverConf);
+  const popupContainer = HtmlTreeNavigator.startFrom(document.body)
+    .findFirst(new TagNavigationFilter('ytd-popup-container'))
+    .consume()!;
+  const popupObserverConf = { attributes: true, childList: false, subtree: true };
+  popupMutationObserver.observe(popupContainer, popupObserverConf);
 
-    const createWatchLaterButtonSubscription = createWatchLaterButtons$.subscribe();
-    const queueWatchLaterClicksSubscription = processQueuedWatchLaterClick$.subscribe();
+  const createWatchLaterButtonSubscription = createWatchLaterButtons$.subscribe();
+  const queueWatchLaterClicksSubscription = processQueuedWatchLaterClick$.subscribe();
 
-    return () => {
-        contentMutationObserver.disconnect();
-        popupMutationObserver.disconnect();
-        createWatchLaterButtonSubscription.unsubscribe();
-        queueWatchLaterClicksSubscription.unsubscribe();
-    };
+  return () => {
+    contentMutationObserver.disconnect();
+    popupMutationObserver.disconnect();
+    createWatchLaterButtonSubscription.unsubscribe();
+    queueWatchLaterClicksSubscription.unsubscribe();
+  };
 }

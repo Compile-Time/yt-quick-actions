@@ -10,22 +10,31 @@ import {
   Subject,
   tap,
   throwError,
-} from "rxjs";
-import {DisconnectFn} from "@/utils/types/disconnectable";
-import {HtmlParentNavigator} from "@/utils/html-navigation/html-parent-navigator";
+} from 'rxjs';
+import { DisconnectFn } from '@/utils/types/disconnectable';
+import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
 import {
-    IdNavigationFilter,
-    SvgDrawPathNavigationFilter,
-    TagNavigationFilter
-} from "@/utils/html-navigation/filter/navigation-filter";
-import {QaHtmlElements} from "@/utils/html-element-processing/qa-html-elements";
-import {SvgDrawPath} from "@/utils/html-element-processing/element-data";
-import {HtmlTreeNavigator} from "@/utils/html-navigation/html-tree-navigator";
+  IdNavigationFilter,
+  SvgDrawPathNavigationFilter,
+  TagNavigationFilter,
+} from '@/utils/html-navigation/filter/navigation-filter';
+import { QaHtmlElements } from '@/utils/html-element-processing/qa-html-elements';
+import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
+import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
+import { createLogger } from '@/utils/logging/log-provider';
+import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
+
+const logger = createLogger('video');
+storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
+  if (logLevels) {
+    logger.setLevel(logLevels.watchVideo);
+  }
+});
 
 const contentMutationSubject = new Subject<MutationRecord>();
 const contentMutationObserver = new MutationObserver((mutations, observer) => {
   mutations.forEach((mutation) => {
-    if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== "BUTTON")) {
+    if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== 'BUTTON')) {
       contentMutationSubject.next(mutation);
     }
   });
@@ -36,7 +45,7 @@ const popupMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
     // ignore it.
-    if (mutation.attributeName !== "style") {
+    if (mutation.attributeName !== 'style') {
       popupMutationSubject.next(mutation);
     }
   });
@@ -47,18 +56,22 @@ const saveVideoInOptionsClickedSubject = new BehaviorSubject<boolean>(false);
 
 const topLevelComputedButtonsMutations$ = contentMutationSubject.pipe(
   filter(
-    (record) => record.target.nodeName === "DIV" && (record.target as HTMLElement).id === "top-level-buttons-computed"
+    (record) => record.target.nodeName === 'DIV' && (record.target as HTMLElement).id === 'top-level-buttons-computed',
   ),
   debounceTime(400),
-  map((record) => record.target as HTMLElement)
+  map((record) => record.target as HTMLElement),
+  tap((record) => logger.debug('Matching top level buttons computed mutation found: ', record)),
 );
 const moreOptionsMutations$ = contentMutationSubject.pipe(
   filter((record) => {
     const ytButton = record.target as HTMLElement;
-    return HtmlParentNavigator.startFrom(ytButton).find(new IdNavigationFilter("yt-button-shape", "button-shape")).exists();
+    return HtmlParentNavigator.startFrom(ytButton)
+      .find(new IdNavigationFilter('yt-button-shape', 'button-shape'))
+      .exists();
   }),
   debounceTime(400),
-  map((record) => record.target as HTMLElement)
+  map((record) => record.target as HTMLElement),
+  tap((record) => logger.debug('Matching More options button mutation found: ', record)),
 );
 
 const createWatchLaterButton$ = combineLatest({
@@ -74,8 +87,9 @@ const createWatchLaterButton$ = combineLatest({
       const saveToPlaylistButton = HtmlTreeNavigator.startFrom(topLevelButtonsComputed.parentElement!)
         .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
         .intoParentNavigator()
-        .find(new TagNavigationFilter("button"))
+        .find(new TagNavigationFilter('button'))
         .consume();
+      logger.debug('Search for save to playlist button yielded: ', saveToPlaylistButton);
       if (saveToPlaylistButton) {
         saveToPlaylistButton.click();
         saveVideoInOptionsClickedSubject.next(true);
@@ -90,93 +104,103 @@ const createWatchLaterButton$ = combineLatest({
     contentMutationObserver.disconnect();
   }),
   catchError((error) => {
+    logger.error('Error occurred while creating watch later buttons', error);
     contentMutationObserver.disconnect();
     return throwError(() => error);
-  })
+  }),
 );
 
 const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
   filter(() => watchLaterButtonClickedSubject.value === true && saveVideoInOptionsClickedSubject.value === false),
-  filter((record) => record.target.nodeName === "TP-YT-IRON-DROPDOWN"),
+  filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
     const popup = record.target as HTMLElement;
-    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: hidden;`);
   }),
   debounceTime(300),
   first(),
   tap(() => {
     // "Reload" the DOM element for its children.
     const tpYtIronDropdown = document.evaluate(
-      "/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown",
+      '/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown',
       document,
       null,
       XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null
+      null,
     ).singleNodeValue as HTMLElement;
 
     const button = HtmlTreeNavigator.startFrom(tpYtIronDropdown as HTMLElement)
       .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
       .intoParentNavigator()
-      .find(new TagNavigationFilter("tp-yt-paper-item"))
+      .find(new TagNavigationFilter('tp-yt-paper-item'))
       .consume()!;
+    logger.debug('Search for save to playlist entry in popup yielded: ', button);
 
-    button.click();
+    if (button) {
+      button.click();
+    }
     saveVideoInOptionsClickedSubject.next(true);
   }),
   catchError((error) => {
+    logger.error('Error occurred while trying to click the save to playlist entry in the popup', error);
     popupMutationObserver.disconnect();
 
     const popup = document.evaluate(
-      "/html/body/ytd-app/ytd-popup-container",
+      '/html/body/ytd-app/ytd-popup-container',
       document,
       null,
       XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null
+      null,
     ).singleNodeValue as HTMLElement;
-    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
 
     return throwError(() => error);
   }),
   tap(() => {
     clickPopupVideoSaveButton$.subscribe();
-  })
+  }),
 );
 
 const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
   filter(() => saveVideoInOptionsClickedSubject.value === true),
-  filter((record) => record.target.nodeName === "TP-YT-IRON-DROPDOWN"),
+  filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
     const popup = record.target as HTMLElement;
-    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: hidden;`);
   }),
   debounceTime(600),
   first(),
   tap(() => {
     // "Reload" the DOM element for its children.
     const popupContainer = document.evaluate(
-      "/html/body/ytd-app/ytd-popup-container",
+      '/html/body/ytd-app/ytd-popup-container',
       document,
       null,
       XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null
+      null,
     ).singleNodeValue as HTMLElement;
 
     const ytListItem = HtmlTreeNavigator.startFrom(popupContainer)
-      .findFirst(new TagNavigationFilter("yt-list-item-view-model"))
-      .consume()!;
-    ytListItem.click();
+      .findFirst(new TagNavigationFilter('yt-list-item-view-model'))
+      .consume();
+    logger.debug('Search for watch later playlist in popup yielded: ', ytListItem);
+
+    if (ytListItem) {
+      ytListItem.click();
+    }
   }),
-  catchError(() => {
+  catchError((err) => {
+    logger.error('Error occurred while trying to click the watch later playlist in the popup', err);
     popupMutationObserver.disconnect();
 
     const popup = document.evaluate(
-      "/html/body/ytd-app/ytd-popup-container",
+      '/html/body/ytd-app/ytd-popup-container',
       document,
       null,
       XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null
+      null,
     ).singleNodeValue as HTMLElement;
-    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
 
     return of(null);
   }),
@@ -189,9 +213,9 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
     }
 
     const popup = record.target as HTMLElement;
-    popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
     clickPopupWatchLaterPlaylist$.subscribe();
-  })
+  }),
 );
 
 export function initWatchVideo(): DisconnectFn {
@@ -201,14 +225,14 @@ export function initWatchVideo(): DisconnectFn {
     document.body,
     null,
     XPathResult.FIRST_ORDERED_NODE_TYPE,
-    null
+    null,
   ).singleNodeValue as HTMLElement;
 
   const contentObserverConf = { attributes: false, childList: true, subtree: true };
   contentMutationObserver.observe(ytdPageManager, contentObserverConf);
 
   const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-    .findFirst(new TagNavigationFilter("ytd-popup-container"))
+    .findFirst(new TagNavigationFilter('ytd-popup-container'))
     .consume()!;
   const popupObserverConf = { attributes: true, childList: false, subtree: true };
   popupMutationObserver.observe(popupContainer, popupObserverConf);

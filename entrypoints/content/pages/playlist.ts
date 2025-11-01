@@ -1,44 +1,53 @@
-import {BehaviorSubject, catchError, filter, first, map, of, Subject, tap, throwError} from "rxjs";
-import {DisconnectFn} from "@/utils/types/disconnectable";
-import {HtmlTreeNavigator} from "@/utils/html-navigation/html-tree-navigator";
+import { BehaviorSubject, catchError, filter, first, map, of, Subject, tap, throwError } from 'rxjs';
+import { DisconnectFn } from '@/utils/types/disconnectable';
+import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import {
-    IdNavigationFilter,
-    SvgDrawPathNavigationFilter,
-    TagNavigationFilter
-} from "@/utils/html-navigation/filter/navigation-filter";
-import {Ids, SvgDrawPath} from "@/utils/html-element-processing/element-data";
+  IdNavigationFilter,
+  SvgDrawPathNavigationFilter,
+  TagNavigationFilter,
+} from '@/utils/html-navigation/filter/navigation-filter';
+import { Ids, SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import {
-    QaHtmlElements,
-    qaMoveBottomButton,
-    qaMoveButtonsContainer,
-    qaMoveTopButton
-} from "@/utils/html-element-processing/qa-html-elements";
+  QaHtmlElements,
+  qaMoveBottomButton,
+  qaMoveButtonsContainer,
+  qaMoveTopButton,
+} from '@/utils/html-element-processing/qa-html-elements';
+import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
+import { createLogger } from '@/utils/logging/log-provider';
+
+const logger = createLogger('playlist');
+storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
+  if (logLevels) {
+    logger.setLevel(logLevels.playlist);
+  }
+});
 
 const videoListMutationSubject = new Subject<MutationRecord>();
 const videoListMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-        // A button is added to the DOM by the extension which can be caught by the observer causing an infinite loop.
-        if (
-            Array.from(mutation.addedNodes).every((node) => {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    const element = node as HTMLElement;
-                    return element.id !== Ids.QA_FLEX_CONTAINER_MOVE_BUTTONS && element.id !== Ids.QA_REMOVE_BUTTON;
-                }
-                return true;
-            })
-        ) {
-            videoListMutationSubject.next(mutation);
+  mutations.forEach((mutation) => {
+    // A button is added to the DOM by the extension which can be caught by the observer causing an infinite loop.
+    if (
+      Array.from(mutation.addedNodes).every((node) => {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+          const element = node as HTMLElement;
+          return element.id !== Ids.QA_FLEX_CONTAINER_MOVE_BUTTONS && element.id !== Ids.QA_REMOVE_BUTTON;
         }
-    });
+        return true;
+      })
+    ) {
+      videoListMutationSubject.next(mutation);
+    }
+  });
 });
 
 const popupOpenedSubject = new Subject<MutationRecord>();
 const popupMutationObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-        if (mutation.attributeName !== "style") {
-            popupOpenedSubject.next(mutation);
-        }
-    });
+  mutations.forEach((mutation) => {
+    if (mutation.attributeName !== 'style') {
+      popupOpenedSubject.next(mutation);
+    }
+  });
 });
 
 const removeButtonClicked$ = new BehaviorSubject(false);
@@ -46,51 +55,51 @@ const moveTopButtonClicked$ = new BehaviorSubject(false);
 const moveBottomButtonClicked$ = new BehaviorSubject(false);
 
 const addCustomButtonsToDom$ = videoListMutationSubject.pipe(
-    filter((record) => record.target.nodeName === "YTD-PLAYLIST-VIDEO-RENDERER"),
-    tap((record) => {
-        const menuElement = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
-            .findFirst(new IdNavigationFilter("div", "menu"))
-            .consume();
-        if (menuElement) {
-            const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
-                .findFirst(new IdNavigationFilter("button", "button"))
-                .consume()!;
+  filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
+  tap((record) => {
+    const menuElement = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
+      .findFirst(new IdNavigationFilter('div', 'menu'))
+      .consume();
+    if (menuElement) {
+      const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
+        .findFirst(new IdNavigationFilter('button', 'button'))
+        .consume()!;
 
-            const removeButton = QaHtmlElements.removeButton();
-            removeButton.onclick = () => {
-                optionsButton.click();
-                removeButtonClicked$.next(true);
-            };
+      const removeButton = QaHtmlElements.removeButton();
+      removeButton.onclick = () => {
+        optionsButton.click();
+        removeButtonClicked$.next(true);
+      };
 
-            menuElement.parentNode!.appendChild(removeButton);
-        }
+      menuElement.parentNode!.appendChild(removeButton);
+    }
 
-        const dragContainer = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
-            .findFirst(new IdNavigationFilter("div", "index-container"))
-            .consume();
-        if (dragContainer && menuElement) {
-            dragContainer.setAttribute("style", `${dragContainer.getAttribute("style")} position: relative;`);
-            const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
-                .findFirst(new IdNavigationFilter("button", "button"))
-                .consume()!;
+    const dragContainer = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
+      .findFirst(new IdNavigationFilter('div', 'index-container'))
+      .consume();
+    if (dragContainer && menuElement) {
+      dragContainer.setAttribute('style', `${dragContainer.getAttribute('style')} position: relative;`);
+      const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
+        .findFirst(new IdNavigationFilter('button', 'button'))
+        .consume()!;
 
-            const topButton = qaMoveTopButton(() => {
-                moveTopButtonClicked$.next(true);
-                optionsButton.click();
-            });
-            const bottomButton = qaMoveBottomButton(() => {
-                moveBottomButtonClicked$.next(true);
-                optionsButton.click();
-            });
-            const qaContainer = qaMoveButtonsContainer([topButton, bottomButton]);
+      const topButton = qaMoveTopButton(() => {
+        moveTopButtonClicked$.next(true);
+        optionsButton.click();
+      });
+      const bottomButton = qaMoveBottomButton(() => {
+        moveBottomButtonClicked$.next(true);
+        optionsButton.click();
+      });
+      const qaContainer = qaMoveButtonsContainer([topButton, bottomButton]);
 
-            dragContainer.append(qaContainer);
-        }
-    }),
-    catchError((error) => {
-        videoListMutationObserver.disconnect();
-        return throwError(() => error);
-    })
+      dragContainer.append(qaContainer);
+    }
+  }),
+  catchError((error) => {
+    videoListMutationObserver.disconnect();
+    return throwError(() => error);
+  }),
 );
 
 /**
@@ -109,212 +118,216 @@ const addCustomButtonsToDom$ = videoListMutationSubject.pipe(
  * - Finally, set the state of the behavior subject to false so that the dialog is usable for other actions again.
  */
 const clickRemoveItemInPopup$ = popupOpenedSubject.pipe(
-    filter(() => removeButtonClicked$.value === true),
-    filter((record) => record.target.nodeName === "SPAN"),
-    first(),
-    tap(() => {
-        // "Reload" the DOM element for its children.
-        const popup = document.evaluate(
-            "/html/body/ytd-app/ytd-popup-container",
-            document,
-            null,
-            XPathResult.ANY_UNORDERED_NODE_TYPE,
-            null
-        ).singleNodeValue as HTMLElement;
+  filter(() => removeButtonClicked$.value === true),
+  filter((record) => record.target.nodeName === 'SPAN'),
+  first(),
+  tap(() => {
+    // "Reload" the DOM element for its children.
+    const popup = document.evaluate(
+      '/html/body/ytd-app/ytd-popup-container',
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue as HTMLElement;
 
-        const button = HtmlTreeNavigator.startFrom(popup)
-            .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
-            .intoParentNavigator()
-            .find(new TagNavigationFilter("tp-yt-paper-item"))
-            .consume();
-        if (button) {
-            button.click();
-        }
-    }),
-    catchError((err) => {
-        popupMutationObserver.disconnect();
-        console.error("yt-err", err);
-        return of(undefined);
-    }),
-    tap(() => {
-        removeButtonClicked$.next(false);
-        clickRemoveItemInPopup$.subscribe();
-    })
+    const button = HtmlTreeNavigator.startFrom(popup)
+      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
+      .intoParentNavigator()
+      .find(new TagNavigationFilter('tp-yt-paper-item'))
+      .consume();
+    logger.debug('Search for remove entry in popup yielded: ', button);
+    if (button) {
+      button.click();
+    }
+  }),
+  catchError((err) => {
+    logger.error('Error while trying to click the remove entry in popup: ', err);
+    popupMutationObserver.disconnect();
+    return of(undefined);
+  }),
+  tap(() => {
+    removeButtonClicked$.next(false);
+    clickRemoveItemInPopup$.subscribe();
+  }),
 );
 
 const clickMoveTopButtonInPopup$ = popupOpenedSubject.pipe(
-    filter(() => moveTopButtonClicked$.value === true),
-    tap(() => {
-        const popup = document.evaluate(
-            "/html/body/ytd-app/ytd-popup-container",
-            document,
-            null,
-            XPathResult.ANY_UNORDERED_NODE_TYPE,
-            null
-        ).singleNodeValue as HTMLElement;
-        popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
-    }),
-    filter((record) => {
-        return (
-            (record.target.nodeName === "YTD-MENU-SERVICE-ITEM-RENDERER" &&
-                HtmlTreeNavigator.startFrom(record.target as HTMLElement)
-                    .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_TOP))
-                    .exists()) ||
-            (record.target.nodeName === "SPAN" &&
-                record.addedNodes.length > 0 &&
-                record.addedNodes.item(0)!.nodeName === "DIV" &&
-                HtmlTreeNavigator.startFrom(record.addedNodes.item(0) as HTMLElement)
-                    .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_TOP))
-                    .exists())
-        );
-    }),
-    first(),
-    map(() => {
-        // "Reload" the DOM element for its children.
-        const popup = document.evaluate(
-            "/html/body/ytd-app/ytd-popup-container",
-            document,
-            null,
-            XPathResult.ANY_UNORDERED_NODE_TYPE,
-            null
-        ).singleNodeValue as HTMLElement;
+  filter(() => moveTopButtonClicked$.value === true),
+  tap(() => {
+    const popup = document.evaluate(
+      '/html/body/ytd-app/ytd-popup-container',
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: hidden;`);
+  }),
+  filter((record) => {
+    return (
+      (record.target.nodeName === 'YTD-MENU-SERVICE-ITEM-RENDERER' &&
+        HtmlTreeNavigator.startFrom(record.target as HTMLElement)
+          .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_TOP))
+          .exists()) ||
+      (record.target.nodeName === 'SPAN' &&
+        record.addedNodes.length > 0 &&
+        record.addedNodes.item(0)!.nodeName === 'DIV' &&
+        HtmlTreeNavigator.startFrom(record.addedNodes.item(0) as HTMLElement)
+          .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_TOP))
+          .exists())
+    );
+  }),
+  first(),
+  map(() => {
+    // "Reload" the DOM element for its children.
+    const popup = document.evaluate(
+      '/html/body/ytd-app/ytd-popup-container',
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue as HTMLElement;
 
-        const button = HtmlTreeNavigator.startFrom(popup)
-            .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_TOP))
-            .intoParentNavigator()
-            .find(new TagNavigationFilter("tp-yt-paper-item"))
-            .consume();
-        if (button) {
-            button.click();
-        }
+    const button = HtmlTreeNavigator.startFrom(popup)
+      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_TOP))
+      .intoParentNavigator()
+      .find(new TagNavigationFilter('tp-yt-paper-item'))
+      .consume();
+    logger.debug('Search for move to top entry in popup yielded: ', button);
+    if (button) {
+      button.click();
+    }
 
-        return popup;
-    }),
-    catchError((err) => {
-        const popup = document.evaluate(
-            "/html/body/ytd-app/ytd-popup-container",
-            document,
-            null,
-            XPathResult.ANY_UNORDERED_NODE_TYPE,
-            null
-        ).singleNodeValue as HTMLElement;
-        popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+    return popup;
+  }),
+  catchError((err) => {
+    console.error('Error while trying to click the move to top entry in popup: ', err);
+    const popup = document.evaluate(
+      '/html/body/ytd-app/ytd-popup-container',
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
 
-        popupMutationObserver.disconnect();
-        return of(null);
-    }),
-    tap((popup) => {
-        moveTopButtonClicked$.next(false);
+    popupMutationObserver.disconnect();
+    return of(null);
+  }),
+  tap((popup) => {
+    moveTopButtonClicked$.next(false);
 
-        if (popup) {
-            popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
-            clickMoveTopButtonInPopup$.subscribe();
-        }
-    })
+    if (popup) {
+      popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+      clickMoveTopButtonInPopup$.subscribe();
+    }
+  }),
 );
 
 const clickMoveBottomButtonInPopup$ = popupOpenedSubject.pipe(
-    filter(() => moveBottomButtonClicked$.value === true),
-    tap((record) => {
-        const popup = document.evaluate(
-            "/html/body/ytd-app/ytd-popup-container",
-            document,
-            null,
-            XPathResult.ANY_UNORDERED_NODE_TYPE,
-            null
-        ).singleNodeValue as HTMLElement;
-        popup.setAttribute("style", `${popup.getAttribute("style")} visibility: hidden;`);
-    }),
-    filter((record) => {
-        return (
-            (record.target.nodeName === "YTD-MENU-SERVICE-ITEM-RENDERER" &&
-                HtmlTreeNavigator.startFrom(record.target as HTMLElement)
-                    .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_BOTTOM))
-                    .exists()) ||
-            (record.target.nodeName === "SPAN" &&
-                record.addedNodes.length > 0 &&
-                record.addedNodes.item(0)!.nodeName === "DIV" &&
-                HtmlTreeNavigator.startFrom(record.addedNodes.item(0) as HTMLElement)
-                    .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_BOTTOM))
-                    .exists())
-        );
-    }),
-    first(),
-    map(() => {
-        // "Reload" the DOM element for its children.
-        const popup = document.evaluate(
-            "/html/body/ytd-app/ytd-popup-container",
-            document,
-            null,
-            XPathResult.ANY_UNORDERED_NODE_TYPE,
-            null
-        ).singleNodeValue as HTMLElement;
+  filter(() => moveBottomButtonClicked$.value === true),
+  tap((record) => {
+    const popup = document.evaluate(
+      '/html/body/ytd-app/ytd-popup-container',
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: hidden;`);
+  }),
+  filter((record) => {
+    return (
+      (record.target.nodeName === 'YTD-MENU-SERVICE-ITEM-RENDERER' &&
+        HtmlTreeNavigator.startFrom(record.target as HTMLElement)
+          .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_BOTTOM))
+          .exists()) ||
+      (record.target.nodeName === 'SPAN' &&
+        record.addedNodes.length > 0 &&
+        record.addedNodes.item(0)!.nodeName === 'DIV' &&
+        HtmlTreeNavigator.startFrom(record.addedNodes.item(0) as HTMLElement)
+          .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_BOTTOM))
+          .exists())
+    );
+  }),
+  first(),
+  map(() => {
+    // "Reload" the DOM element for its children.
+    const popup = document.evaluate(
+      '/html/body/ytd-app/ytd-popup-container',
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue as HTMLElement;
 
-        const button = HtmlTreeNavigator.startFrom(popup)
-            .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_BOTTOM))
-            .intoParentNavigator()
-            .find(new TagNavigationFilter("tp-yt-paper-item"))
-            .consume();
-        if (button) {
-            button.click();
-        }
+    const button = HtmlTreeNavigator.startFrom(popup)
+      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.PLAYLIST_MOVE_TO_BOTTOM))
+      .intoParentNavigator()
+      .find(new TagNavigationFilter('tp-yt-paper-item'))
+      .consume();
+    logger.debug('Search for move to bottom entry in popup yielded: ', button);
+    if (button) {
+      button.click();
+    }
 
-        return popup;
-    }),
-    catchError((err) => {
-        const popup = document.evaluate(
-            "/html/body/ytd-app/ytd-popup-container",
-            document,
-            null,
-            XPathResult.ANY_UNORDERED_NODE_TYPE,
-            null
-        ).singleNodeValue as HTMLElement;
-        popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
+    return popup;
+  }),
+  catchError((err) => {
+    logger.error('Error while trying to click the move to bottom entry in popup: ', err);
+    const popup = document.evaluate(
+      '/html/body/ytd-app/ytd-popup-container',
+      document,
+      null,
+      XPathResult.ANY_UNORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue as HTMLElement;
+    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
 
-        popupMutationObserver.disconnect();
-        console.error("yt-err", err);
-        return of(null);
-    }),
-    tap((popup) => {
-        moveBottomButtonClicked$.next(false);
+    popupMutationObserver.disconnect();
+    return of(null);
+  }),
+  tap((popup) => {
+    moveBottomButtonClicked$.next(false);
 
-        if (popup) {
-            popup.setAttribute("style", `${popup.getAttribute("style")} visibility: visible;`);
-            clickMoveBottomButtonInPopup$.subscribe();
-        }
-    })
+    if (popup) {
+      popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+      clickMoveBottomButtonInPopup$.subscribe();
+    }
+  }),
 );
 
 export function initPlaylistObservers(): DisconnectFn {
-    // Avoid listening to the whole DOM by using the ytd-page-manager element.
-    const ytdPopupManager = document.evaluate(
-        "/html/body/ytd-app/div[1]/ytd-page-manager",
-        document.body,
-        null,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-    ).singleNodeValue as HTMLElement;
+  // Avoid listening to the whole DOM by using the ytd-page-manager element.
+  const ytdPopupManager = document.evaluate(
+    '/html/body/ytd-app/div[1]/ytd-page-manager',
+    document.body,
+    null,
+    XPathResult.FIRST_ORDERED_NODE_TYPE,
+    null,
+  ).singleNodeValue as HTMLElement;
 
-    const videoListObserverConfig: MutationObserverInit = {attributes: false, childList: true, subtree: true};
-    videoListMutationObserver.observe(ytdPopupManager, videoListObserverConfig);
+  const videoListObserverConfig: MutationObserverInit = { attributes: false, childList: true, subtree: true };
+  videoListMutationObserver.observe(ytdPopupManager, videoListObserverConfig);
 
-    const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-        .findFirst(new TagNavigationFilter("ytd-popup-container"))
-        .consume()!;
-    const popupObserverConfig: MutationObserverInit = {attributes: true, childList: true, subtree: true};
-    popupMutationObserver.observe(popupContainer, popupObserverConfig);
+  const popupContainer = HtmlTreeNavigator.startFrom(document.body)
+    .findFirst(new TagNavigationFilter('ytd-popup-container'))
+    .consume()!;
+  const popupObserverConfig: MutationObserverInit = { attributes: true, childList: true, subtree: true };
+  popupMutationObserver.observe(popupContainer, popupObserverConfig);
 
-    const addRemoveButtonToPlaylistSubscription = addCustomButtonsToDom$.subscribe();
-    const clickRemoveItemSubscription = clickRemoveItemInPopup$.subscribe();
-    const clickMoveTopButtonSubscription = clickMoveTopButtonInPopup$.subscribe();
-    const clickMoveBottomButtonSubscription = clickMoveBottomButtonInPopup$.subscribe();
+  const addRemoveButtonToPlaylistSubscription = addCustomButtonsToDom$.subscribe();
+  const clickRemoveItemSubscription = clickRemoveItemInPopup$.subscribe();
+  const clickMoveTopButtonSubscription = clickMoveTopButtonInPopup$.subscribe();
+  const clickMoveBottomButtonSubscription = clickMoveBottomButtonInPopup$.subscribe();
 
-    return () => {
-        videoListMutationObserver.disconnect();
-        popupMutationObserver.disconnect();
-        addRemoveButtonToPlaylistSubscription.unsubscribe();
-        clickRemoveItemSubscription.unsubscribe();
-        clickMoveTopButtonSubscription.unsubscribe();
-        clickMoveBottomButtonSubscription.unsubscribe();
-    };
+  return () => {
+    videoListMutationObserver.disconnect();
+    popupMutationObserver.disconnect();
+    addRemoveButtonToPlaylistSubscription.unsubscribe();
+    clickRemoveItemSubscription.unsubscribe();
+    clickMoveTopButtonSubscription.unsubscribe();
+    clickMoveBottomButtonSubscription.unsubscribe();
+  };
 }
