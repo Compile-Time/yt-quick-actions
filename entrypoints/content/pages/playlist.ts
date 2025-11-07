@@ -7,14 +7,11 @@ import {
   TagNavigationFilter,
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { Ids, SvgDrawPath } from '@/utils/html-element-processing/element-data';
-import {
-  QaHtmlElements,
-  qaMoveBottomButton,
-  qaMoveButtonsContainer,
-  qaMoveTopButton,
-} from '@/utils/html-element-processing/qa-html-elements';
 import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
 import { createLogger } from '@/utils/logging/log-provider';
+import { ContentScriptContext } from 'wxt/utils/content-script-context';
+import RemoveVideoPlaylistButton from '@/components/RemoveVideoPlaylistButton.vue';
+import MoveTopBottomContainer from '@/components/MoveTopBottomContainer.vue';
 
 const logger = createLogger('playlist');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
@@ -22,6 +19,8 @@ storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
     logger.setLevel(logLevels.playlist);
   }
 });
+
+const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | undefined>(undefined);
 
 const videoListMutationSubject = new Subject<MutationRecord>();
 const videoListMutationObserver = new MutationObserver((mutations) => {
@@ -31,7 +30,11 @@ const videoListMutationObserver = new MutationObserver((mutations) => {
       Array.from(mutation.addedNodes).every((node) => {
         if (node.nodeType === Node.ELEMENT_NODE) {
           const element = node as HTMLElement;
-          return element.id !== Ids.QA_FLEX_CONTAINER_MOVE_BUTTONS && element.id !== Ids.QA_REMOVE_BUTTON;
+          return (
+            element.id !== Ids.QA_FLEX_CONTAINER_MOVE_BUTTONS &&
+            element.id !== Ids.QA_REMOVE_BUTTON &&
+            element.getAttribute('data-v-app') === null
+          );
         }
         return true;
       })
@@ -65,35 +68,52 @@ const addCustomButtonsToDom$ = videoListMutationSubject.pipe(
         .findFirst(new IdNavigationFilter('button', 'button'))
         .consume()!;
 
-      const removeButton = QaHtmlElements.removeButton();
-      removeButton.onclick = () => {
-        optionsButton.click();
-        removeButtonClicked$.next(true);
-      };
+      const removeButton = createIntegratedUi(contentScriptContext$.value!, {
+        anchor: menuElement.parentElement,
+        position: 'inline',
+        onMount: (container) => {
+          const app = createApp(RemoveVideoPlaylistButton, {
+            optionsButton,
+            removeButtonClickedSubject: removeButtonClicked$,
+          });
+          app.mount(container);
+          return app;
+        },
+        onRemove: (app) => {
+          app?.unmount();
+        },
+      });
 
-      menuElement.parentNode!.appendChild(removeButton);
+      removeButton.mount();
     }
 
     const dragContainer = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
       .findFirst(new IdNavigationFilter('div', 'index-container'))
       .consume();
     if (dragContainer && menuElement) {
-      dragContainer.setAttribute('style', `${dragContainer.getAttribute('style')} position: relative;`);
+      dragContainer.style.position = 'relative';
       const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
         .findFirst(new IdNavigationFilter('button', 'button'))
         .consume()!;
 
-      const topButton = qaMoveTopButton(() => {
-        moveTopButtonClicked$.next(true);
-        optionsButton.click();
+      const moveToTopOrBottomContainer = createIntegratedUi(contentScriptContext$.value!, {
+        anchor: dragContainer,
+        position: 'inline',
+        onMount: (container) => {
+          container.style.position = 'absolute';
+          const app = createApp(MoveTopBottomContainer, {
+            optionsButton,
+            moveTopButtonClickedSubject: moveTopButtonClicked$,
+            moveBottomButtonClickedSubject: moveBottomButtonClicked$,
+          });
+          app.mount(container);
+          return app;
+        },
+        onRemove: (app) => {
+          app?.unmount();
+        },
       });
-      const bottomButton = qaMoveBottomButton(() => {
-        moveBottomButtonClicked$.next(true);
-        optionsButton.click();
-      });
-      const qaContainer = qaMoveButtonsContainer([topButton, bottomButton]);
-
-      dragContainer.append(qaContainer);
+      moveToTopOrBottomContainer.mount();
     }
   }),
   catchError((error) => {
@@ -298,7 +318,9 @@ const clickMoveBottomButtonInPopup$ = popupOpenedSubject.pipe(
   }),
 );
 
-export function initPlaylistObservers(): DisconnectFn {
+export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
+  contentScriptContext$.next(ctx);
+
   // Avoid listening to the whole DOM by using the ytd-page-manager element.
   const ytdPopupManager = document.evaluate(
     '/html/body/ytd-app/div[1]/ytd-page-manager',
