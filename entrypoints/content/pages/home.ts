@@ -17,10 +17,11 @@ import { DisconnectFn } from '@/utils/types/disconnectable';
 import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
 import { SvgDrawPathNavigationFilter, TagNavigationFilter } from '@/utils/html-navigation/filter/navigation-filter';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
-import { QaHtmlElements } from '@/utils/html-element-processing/qa-html-elements';
 import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { createLogger } from '@/utils/logging/log-provider';
 import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
+import { ContentScriptContext } from 'wxt/utils/content-script-context';
+import WatchLaterHomeButton from '@/components/WatchLaterHomeButton.vue';
 
 const logger = createLogger('home');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
@@ -29,35 +30,41 @@ storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
   }
 });
 
-const queueWatchLaterClickSubject = new Subject<HTMLElement>();
+const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 
-const contentMutationSubject = new Subject<MutationRecord>();
+const queueWatchLaterClick$ = new Subject<HTMLElement>();
+
+const contentMutation$ = new Subject<MutationRecord>();
 const contentMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     if (
-      !Array.from(mutation.addedNodes).some(
-        (node) => node.nodeName === 'DIV' && (node as HTMLElement).classList.contains('qa-home-watch-later'),
-      )
+      !Array.from(mutation.addedNodes).some((node) => {
+        const element = node as HTMLElement;
+        return (
+          node.nodeName === 'DIV' &&
+          (element.id === 'qa-watch-later-home-button-container' || element.getAttribute('data-v-app') !== null)
+        );
+      })
     ) {
-      contentMutationSubject.next(mutation);
+      contentMutation$.next(mutation);
     }
   });
 });
 
-const popupMutationSubject = new Subject<MutationRecord>();
+const popupMutation$ = new Subject<MutationRecord>();
 const popupMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
     // ignore it.
     if (mutation.attributeName !== 'style') {
-      popupMutationSubject.next(mutation);
+      popupMutation$.next(mutation);
     }
   });
 });
 
-const watchLaterButtonClickedSubject = new BehaviorSubject<boolean>(false);
+const watchLaterButtonClicked$ = new BehaviorSubject<boolean>(false);
 
-const createWatchLaterButtons$ = contentMutationSubject.pipe(
+const createWatchLaterButtons$ = contentMutation$.pipe(
   filter((mutationRecord) => {
     return mutationRecord.target.nodeName === 'DIV' && (mutationRecord.target as HTMLElement).id === 'content';
   }),
@@ -79,10 +86,24 @@ const createWatchLaterButtons$ = contentMutationSubject.pipe(
       .consume()!;
     logger.debug('Search for more options button yielded: ', optionsButton);
 
-    const qaButton = QaHtmlElements.watchLaterHomeVideoButton(() => {
-      queueWatchLaterClickSubject.next(optionsButton);
+    divContent.setAttribute('style', 'position: relative;');
+    const watchLaterButton = createIntegratedUi(contentScriptContext$.value!, {
+      anchor: divContent,
+      position: 'overlay',
+      onMount: (container) => {
+        container.style.height = '100%';
+        const app = createApp(WatchLaterHomeButton, {
+          optionsButton,
+          watchLaterClickSubject: queueWatchLaterClick$,
+        });
+        app.mount(container);
+        return app;
+      },
+      onRemove: (app) => {
+        app?.unmount();
+      },
     });
-    divContent.appendChild(qaButton.completeHtmlElement);
+    watchLaterButton.mount();
   }),
   catchError((error) => {
     logger.error('Error occurred while creating watch later buttons', error);
@@ -106,8 +127,8 @@ const createWatchLaterButtons$ = contentMutationSubject.pipe(
  *   operator. This means we need to manually re-subscribe onto the subject afterward. There may be better appraoches
  *   but this keeps the code simple.
  */
-const clickPopupWatchLaterButton$ = popupMutationSubject.pipe(
-  filter(() => watchLaterButtonClickedSubject.value === true),
+const clickPopupWatchLaterButton$ = popupMutation$.pipe(
+  filter(() => watchLaterButtonClicked$.value === true),
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
     const popup = record.target as HTMLElement;
@@ -151,7 +172,7 @@ const clickPopupWatchLaterButton$ = popupMutationSubject.pipe(
     return of(null);
   }),
   tap((record) => {
-    watchLaterButtonClickedSubject.next(false);
+    watchLaterButtonClicked$.next(false);
 
     if (!record) {
       return;
@@ -167,14 +188,15 @@ const clickPopupWatchLaterButton$ = popupMutationSubject.pipe(
  *
  * `windowCount` creates a window of observables until the specific count is reached. We use this to put each
  * button click into a new observable and concat them with `concatAll`. `concatAll` subscribes to each observable
- * sequentially, so the next watch later action will only be performed after the previous one is finished.
+ * sequentially, so the next watch later action will only be performed after the previous one is finished. This
+ * ensures that the popup content is properly synced with the video the button was clicked on.
  */
-const processQueuedWatchLaterClick$ = queueWatchLaterClickSubject.pipe(
+const processQueuedWatchLaterClick$ = queueWatchLaterClick$.pipe(
   windowCount(1),
   map((window) =>
     window.pipe(
       switchMap((optionsButton) => {
-        watchLaterButtonClickedSubject.next(true);
+        watchLaterButtonClicked$.next(true);
         optionsButton.click();
         return clickPopupWatchLaterButton$;
       }),
@@ -183,7 +205,9 @@ const processQueuedWatchLaterClick$ = queueWatchLaterClickSubject.pipe(
   concatAll(),
 );
 
-export function initHomeObserver(): DisconnectFn {
+export function initHomeObserver(ctx: ContentScriptContext): DisconnectFn {
+  contentScriptContext$.next(ctx);
+
   // Avoid listening to the whole DOM by using the ytd-page-manager element.
   const ytdPageManager = document.evaluate(
     '/html/body/ytd-app/div[1]/ytd-page-manager',
