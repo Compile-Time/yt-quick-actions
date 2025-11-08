@@ -29,10 +29,15 @@ function handleLogLevelChange(event: Event, loggerName: keyof SettingLogLevels) 
 
 <template>
   <div class="bg-base-200 border-base-300 grid grid-cols-2 gap-4 items-center">
-    <template v-for="(value, key) in logLevels">
+    <template v-for="(value, key) in logLevels" :key="key">
       <label :for="key" class="label">{{ templateLoggerNames[key] }}</label>
-      <select class="select" @change="(event) => handleLogLevelChange(event, key)" :id="key">
-        <option v-for="option in logLevelOptions" :value="option.value" :selected="option.value === value">
+      <select :id="key" class="select" @change="(event) => handleLogLevelChange(event, key)">
+        <option
+          v-for="option in logLevelOptions"
+          :key="option.value"
+          :value="option.value"
+          :selected="option.value === value"
+        >
           {{ option.label }}
         </option>
       </select>

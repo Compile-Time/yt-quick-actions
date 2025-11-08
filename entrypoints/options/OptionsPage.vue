@@ -72,11 +72,11 @@ function handleSaveSettings() {
 
     <input type="radio" name="setting_tabs" class="tab" aria-label="Logging" />
     <div class="tab-content border-base-300 bg-base-200 p-10">
-      <LogLevels :log-levels="loggers" @logLevelChanged="handleLogLevelChange" />
+      <LogLevels :log-levels="loggers" @log-level-changed="handleLogLevelChange" />
     </div>
   </div>
 
-  <div class="toast toast-center" v-if="settingsSavedToast">
+  <div v-if="settingsSavedToast" class="toast toast-center">
     <div class="alert alert-success">
       <span>Settings saved.</span>
     </div>

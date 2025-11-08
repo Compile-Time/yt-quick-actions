@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
 import './style.css';
-import Options from './Options.vue';
+import OptionsPage from './OptionsPage.vue';
 
-createApp(Options).mount('#app');
+createApp(OptionsPage).mount('#app');
