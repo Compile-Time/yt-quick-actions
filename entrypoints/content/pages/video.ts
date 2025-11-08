@@ -27,7 +27,7 @@ import WatchLaterVideoButton from '@/components/WatchLaterVideoButton.vue';
 
 const logger = createLogger('video');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
-  if (logLevels) {
+  if (logLevels?.watchVideo) {
     logger.setLevel(logLevels.watchVideo);
   }
 });

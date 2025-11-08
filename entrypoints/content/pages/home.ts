@@ -15,18 +15,51 @@ import {
 } from 'rxjs';
 import { DisconnectFn } from '@/utils/types/disconnectable';
 import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
-import { SvgDrawPathNavigationFilter, TagNavigationFilter } from '@/utils/html-navigation/filter/navigation-filter';
+import {
+  SvgDrawPathNavigationFilter,
+  TagNavigationFilter,
+  TextNavigationFilter,
+} from '@/utils/html-navigation/filter/navigation-filter';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { createLogger } from '@/utils/logging/log-provider';
-import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
+import {
+  SETTING_LOG_LEVELS,
+  SETTING_SEARCH_STRINGS,
+  SettingLogLevels,
+  SettingSearchStrings,
+} from '@/utils/storage/settings-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterHomeButton from '@/components/WatchLaterHomeButton.vue';
 
 const logger = createLogger('home');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
-  if (logLevels) {
+  if (logLevels?.homePage) {
     logger.setLevel(logLevels.homePage);
+  }
+});
+
+let settingSearchStrings: SettingSearchStrings = {
+  homePage: {
+    watchLaterEntry: undefined,
+  },
+  watchPlaylist: {
+    watchLaterEntry: undefined,
+    removeEntry: undefined,
+  },
+  playlist: {
+    removeEntry: undefined,
+    moveToBottomEntry: undefined,
+    moveToTopEntry: undefined,
+  },
+  watchVideo: {
+    videoSaveButton: undefined,
+    watchLaterEntry: undefined,
+  },
+};
+storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (searchStrings) => {
+  if (searchStrings) {
+    settingSearchStrings = searchStrings;
   }
 });
 
@@ -124,15 +157,15 @@ const createWatchLaterButtons$ = contentMutation$.pipe(
  * - Because the popup is being hidden, and we are listening to attribute changes with a mutation observer, we need
  *   to exclude changes caused by the style attribute, or we are stuck in a loop.
  * - We are only interested in the first change that manages to go through the filters, so we use the first()
- *   operator. This means we need to manually re-subscribe onto the subject afterward. There may be better appraoches
+ *   operator. This means we need to manually re-subscribe onto the subject afterward. There may be better approaches,
  *   but this keeps the code simple.
  */
 const clickPopupWatchLaterButton$ = popupMutation$.pipe(
-  filter(() => watchLaterButtonClicked$.value === true),
+  filter(() => watchLaterButtonClicked$.value),
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
     const popup = record.target as HTMLElement;
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: hidden;`);
+    popup.style.visibility = 'hidden';
   }),
   debounceTime(300),
   first(),
@@ -146,15 +179,29 @@ const clickPopupWatchLaterButton$ = popupMutation$.pipe(
       null,
     ).singleNodeValue as HTMLElement;
 
-    const button = HtmlTreeNavigator.startFrom(popupContainer)
-      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.WATCH_LATER_HOME_PAGE))
-      .intoParentNavigator()
-      .find(new TagNavigationFilter('yt-list-item-view-model'))
-      .consume();
-    logger.debug('Search for watch later entry in popup yielded: ', button);
+    let clickable: HTMLElement | null;
+    if (settingSearchStrings.homePage.watchLaterEntry) {
+      logger.debug(
+        `Using custom search string "${settingSearchStrings.homePage.watchLaterEntry}" for watch later action`,
+      );
+      clickable = HtmlTreeNavigator.startFrom(popupContainer)
+        .findFirst(new TextNavigationFilter(settingSearchStrings.homePage.watchLaterEntry))
+        .intoParentNavigator()
+        .find(new TagNavigationFilter('yt-list-item-view-model'))
+        .consume();
+    } else {
+      logger.debug('Using default icon search for watch later action');
+      clickable = HtmlTreeNavigator.startFrom(popupContainer)
+        .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.WATCH_LATER_HOME_PAGE))
+        .intoParentNavigator()
+        .find(new TagNavigationFilter('yt-list-item-view-model'))
+        .consume();
+    }
 
-    if (button) {
-      button.click();
+    logger.debug('Search for watch later entry in popup yielded: ', clickable);
+
+    if (clickable) {
+      clickable.click();
     }
   }),
   catchError((error) => {
@@ -167,7 +214,7 @@ const clickPopupWatchLaterButton$ = popupMutation$.pipe(
       XPathResult.ANY_UNORDERED_NODE_TYPE,
       null,
     ).singleNodeValue as HTMLElement;
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+    popup.style.visibility = 'visible';
 
     return of(null);
   }),
@@ -179,7 +226,7 @@ const clickPopupWatchLaterButton$ = popupMutation$.pipe(
     }
 
     const popup = record.target as HTMLElement;
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+    popup.style.visibility = 'visible';
   }),
 );
 
@@ -223,7 +270,7 @@ export function initHomeObserver(ctx: ContentScriptContext): DisconnectFn {
   const popupContainer = HtmlTreeNavigator.startFrom(document.body)
     .findFirst(new TagNavigationFilter('ytd-popup-container'))
     .consume()!;
-  const popupObserverConf = { attributes: true, childList: false, subtree: true };
+  const popupObserverConf = { attributes: true, childList: true, subtree: true };
   popupMutationObserver.observe(popupContainer, popupObserverConf);
 
   const createWatchLaterButtonSubscription = createWatchLaterButtons$.subscribe();

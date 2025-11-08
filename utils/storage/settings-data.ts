@@ -10,12 +10,28 @@ export interface SettingLogLevels {
   playlist: LogLevel;
 }
 
-export interface SettingSearchStrings {
-  playlistRemoveEntry: string | undefined;
-  playlistMoveTopEntry: string | undefined;
-  playlistMoveBottomEntry: string | undefined;
-  homePageWatchLaterEntry: string | undefined;
-  videoWatchLaterEntry: string | undefined;
-  watchingPlaylistRemoveEntry: string | undefined;
-  watchingPlaylistWatchLaterEntry: string | undefined;
+interface SettingSearchStringsBase<T> {
+  homePage: {
+    watchLaterEntry: T;
+  };
+  watchVideo: {
+    watchLaterEntry: T;
+    videoSaveButton: T;
+  };
+  watchPlaylist: {
+    removeEntry: T;
+    watchLaterEntry: T;
+  };
+  playlist: {
+    removeEntry: T;
+    moveToTopEntry: T;
+    moveToBottomEntry: T;
+  };
 }
+
+export type SettingSearchStrings = SettingSearchStringsBase<string | undefined>;
+export type TemplateSearchStrings = SettingSearchStringsBase<string>;
+export type SettingSearchStringValues = SettingSearchStrings['homePage'] &
+  SettingSearchStrings['watchVideo'] &
+  SettingSearchStrings['watchPlaylist'] &
+  SettingSearchStrings['playlist'];

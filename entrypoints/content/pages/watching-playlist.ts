@@ -16,7 +16,7 @@ import { NodeTypes } from '@vue/compiler-core';
 
 const logger = createLogger('watching-playlist');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
-  if (logLevels) {
+  if (logLevels?.watchPlaylist) {
     logger.setLevel(logLevels.watchPlaylist);
   }
 });

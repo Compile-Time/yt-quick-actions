@@ -27,13 +27,22 @@ storage.getItem<SettingLogLevels>(SETTING_LOG_LEVELS).then((levels) => {
 });
 
 const settingSearchStrings = ref<SettingSearchStrings>({
-  homePageWatchLaterEntry: undefined,
-  playlistMoveBottomEntry: undefined,
-  playlistMoveTopEntry: undefined,
-  playlistRemoveEntry: undefined,
-  videoWatchLaterEntry: undefined,
-  watchingPlaylistRemoveEntry: undefined,
-  watchingPlaylistWatchLaterEntry: undefined,
+  homePage: {
+    watchLaterEntry: undefined,
+  },
+  watchVideo: {
+    watchLaterEntry: undefined,
+    videoSaveButton: undefined,
+  },
+  playlist: {
+    moveToTopEntry: undefined,
+    moveToBottomEntry: undefined,
+    removeEntry: undefined,
+  },
+  watchPlaylist: {
+    removeEntry: undefined,
+    watchLaterEntry: undefined,
+  },
 });
 storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((strings) => {
   if (strings) {
@@ -49,15 +58,15 @@ function handleLogLevelChange({ loggerName, level }: { loggerName: keyof Setting
     ...loggers.value,
     [loggerName]: level,
   });
-  handleSaveSettings();
+  showSavedToast();
 }
 
 function handleSearchSettingsChange(data: SettingSearchStrings) {
   storage.setItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS, data);
-  handleSaveSettings();
+  showSavedToast();
 }
 
-function handleSaveSettings() {
+function showSavedToast() {
   settingsSavedToast.value = true;
   setTimeout(() => {
     settingsSavedToast.value = false;

@@ -15,7 +15,7 @@ import MoveTopBottomContainer from '@/components/MoveTopBottomContainer.vue';
 
 const logger = createLogger('playlist');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
-  if (logLevels) {
+  if (logLevels?.playlist) {
     logger.setLevel(logLevels.playlist);
   }
 });
