@@ -10,11 +10,15 @@ import {
 import LogLevels from '@/components/LogLevels.vue';
 import SearchStrings from '@/components/SearchStrings.vue';
 
+function defaultLogLevel() {
+  return import.meta.env.DEV ? LogLevel.DEBUG : LogLevel.WARN;
+}
+
 const loggers = ref<SettingLogLevels>({
-  homePage: LogLevel.WARN,
-  watchVideo: LogLevel.WARN,
-  watchPlaylist: LogLevel.WARN,
-  playlist: LogLevel.WARN,
+  homePage: defaultLogLevel(),
+  watchVideo: defaultLogLevel(),
+  watchPlaylist: defaultLogLevel(),
+  playlist: defaultLogLevel(),
 });
 storage.getItem<SettingLogLevels>(SETTING_LOG_LEVELS).then((levels) => {
   if (levels) {
