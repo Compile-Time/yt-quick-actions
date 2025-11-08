@@ -5,5 +5,5 @@ coverage/
 assets
 node_modules
 public
-.eslintrc.cjs
+eslint.config.js
 *.md
