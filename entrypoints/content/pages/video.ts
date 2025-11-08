@@ -18,11 +18,12 @@ import {
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
 } from '@/utils/html-navigation/filter/navigation-filter';
-import { QaHtmlElements } from '@/utils/html-element-processing/qa-html-elements';
 import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import { createLogger } from '@/utils/logging/log-provider';
 import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
+import { ContentScriptContext } from 'wxt/utils/content-script-context';
+import WatchLaterVideoButton from '@/components/WatchLaterVideoButton.vue';
 
 const logger = createLogger('video');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
@@ -31,8 +32,10 @@ storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
   }
 });
 
+const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
+
 const contentMutationSubject = new Subject<MutationRecord>();
-const contentMutationObserver = new MutationObserver((mutations, observer) => {
+const contentMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== 'BUTTON')) {
       contentMutationSubject.next(mutation);
@@ -83,22 +86,41 @@ const createWatchLaterButton$ = combineLatest({
   // After the button is set up in the DOM, we don't need the subscription anymore.
   first(),
   tap(({ topLevelButtonsComputed, moreOptionsButton }) => {
-    const watchLaterButton = QaHtmlElements.watchLaterUnderVideoButton(() => {
-      const saveToPlaylistButton = HtmlTreeNavigator.startFrom(topLevelButtonsComputed.parentElement!)
-        .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
-        .intoParentNavigator()
-        .find(new TagNavigationFilter('button'))
-        .consume();
-      logger.debug('Search for save to playlist button yielded: ', saveToPlaylistButton);
-      if (saveToPlaylistButton) {
-        saveToPlaylistButton.click();
-        saveVideoInOptionsClickedSubject.next(true);
-      } else {
-        (moreOptionsButton.children[0] as HTMLElement).click();
-        watchLaterButtonClickedSubject.next(true);
-      }
+    const saveToPlaylistButton = HtmlTreeNavigator.startFrom(topLevelButtonsComputed.parentElement!)
+      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
+      .intoParentNavigator()
+      .find(new TagNavigationFilter('button'))
+      .consume();
+    logger.debug('Search for save to playlist button yielded: ', saveToPlaylistButton);
+
+    let popupTrigger;
+    let subjectTrigger;
+
+    if (saveToPlaylistButton) {
+      popupTrigger = saveToPlaylistButton;
+      subjectTrigger = saveVideoInOptionsClickedSubject;
+    } else {
+      popupTrigger = moreOptionsButton.children[0] as HTMLElement;
+      subjectTrigger = watchLaterButtonClickedSubject;
+    }
+
+    const watchLaterButton = createIntegratedUi(contentScriptContext$.value!, {
+      anchor: topLevelButtonsComputed,
+      position: 'inline',
+      onMount: (container) => {
+        const app = createApp(WatchLaterVideoButton, {
+          popupTrigger,
+          subjectTrigger,
+        });
+        app.mount(container);
+        return app;
+      },
+      onRemove: (app) => {
+        app?.unmount();
+      },
     });
-    topLevelButtonsComputed.appendChild(watchLaterButton);
+
+    watchLaterButton.mount();
   }),
   tap(() => {
     contentMutationObserver.disconnect();
@@ -111,7 +133,7 @@ const createWatchLaterButton$ = combineLatest({
 );
 
 const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
-  filter(() => watchLaterButtonClickedSubject.value === true && saveVideoInOptionsClickedSubject.value === false),
+  filter(() => watchLaterButtonClickedSubject.value && !saveVideoInOptionsClickedSubject.value),
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
     const popup = record.target as HTMLElement;
@@ -162,7 +184,7 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
 );
 
 const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
-  filter(() => saveVideoInOptionsClickedSubject.value === true),
+  filter(() => saveVideoInOptionsClickedSubject.value),
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
     const popup = record.target as HTMLElement;
@@ -218,7 +240,9 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
   }),
 );
 
-export function initWatchVideo(): DisconnectFn {
+export function initWatchVideo(ctx: ContentScriptContext): DisconnectFn {
+  contentScriptContext$.next(ctx);
+
   // Avoid listening to the whole DOM by using the ytd-page-manager element.
   const ytdPageManager = document.evaluate(
     '//*[@id="page-manager"]',
