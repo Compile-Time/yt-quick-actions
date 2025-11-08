@@ -7,10 +7,12 @@ import {
   TagNavigationFilter,
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
-import { QaHtmlElements } from '@/utils/html-element-processing/qa-html-elements';
-import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
+import { Ids, SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { createLogger } from '@/utils/logging/log-provider';
 import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
+import { ContentScriptContext } from 'wxt/utils/content-script-context';
+import RemoveVideoPlaylistButton from '@/components/RemoveVideoPlaylistButton.vue';
+import { NodeTypes } from '@vue/compiler-core';
 
 const logger = createLogger('watching-playlist');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
@@ -18,6 +20,8 @@ storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
     logger.setLevel(logLevels.watchPlaylist);
   }
 });
+
+const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 
 const contentMutationSubject = new Subject<MutationRecord>();
 const contentMutationObserver = new MutationObserver((mutations) => {
@@ -31,15 +35,22 @@ const contentMutationObserver = new MutationObserver((mutations) => {
 const popupMutationSubject = new Subject<MutationRecord>();
 const popupMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
-    // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
-    // ignore it.
-    if (mutation.attributeName !== 'style') {
+    const pushMutation =
+      mutation.attributeName !== 'style' &&
+      Array.from(mutation.addedNodes).every((node) => {
+        if (node.nodeType === NodeTypes.ELEMENT) {
+          const element = node as HTMLElement;
+          return element.id !== Ids.QA_REMOVE_BUTTON && element.getAttribute('data-v-app') === null;
+        }
+        return true;
+      });
+    if (pushMutation) {
       popupMutationSubject.next(mutation);
     }
   });
 });
 
-const removeButtonClickedSubject = new BehaviorSubject<boolean>(false);
+const removeButtonClicked$ = new BehaviorSubject<boolean>(false);
 
 const createRemoveButtons$ = contentMutationSubject.pipe(
   filter((record) => record.target.nodeName === 'DIV' && (record.target as HTMLElement).id === 'menu'),
@@ -55,18 +66,29 @@ const createRemoveButtons$ = contentMutationSubject.pipe(
       .consume()!;
     logger.debug('Search for more options button yielded: ', optionsButton);
 
-    const removeButton = QaHtmlElements.removeButton();
-    removeButton.onclick = () => {
-      optionsButton.click();
-      removeButtonClickedSubject.next(true);
-    };
+    const removeButton = createIntegratedUi(contentScriptContext$.value!, {
+      anchor: menuElement.parentElement!,
+      position: 'inline',
+      onMount: (container) => {
+        container.setAttribute('style', 'display: flex; align-items: center');
+        const app = createApp(RemoveVideoPlaylistButton, {
+          optionsButton,
+          removeButtonClickedSubject: removeButtonClicked$,
+        });
+        app.mount(container);
+        return app;
+      },
+      onRemove: (app) => {
+        app?.unmount();
+      },
+    });
 
-    menuElement.parentNode!.appendChild(removeButton);
+    removeButton.mount();
   }),
 );
 
 const clickPopupRemoveButton$ = popupMutationSubject.pipe(
-  filter(() => removeButtonClickedSubject.value === true),
+  filter(() => removeButtonClicked$.value),
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap(() => {
     const popup = document.evaluate(
@@ -125,12 +147,14 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
     }
 
     clickPopupRemoveButton$.subscribe();
-    removeButtonClickedSubject.next(false);
+    removeButtonClicked$.next(false);
     popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
   }),
 );
 
-export function initWatchingPlaylist(): DisconnectFn {
+export function initWatchingPlaylist(ctx: ContentScriptContext): DisconnectFn {
+  contentScriptContext$.next(ctx);
+
   // Avoid listening to the whole DOM by using the ytd-page-manager element.
   const ytdPageManager = document.evaluate(
     '//*[@id="page-manager"]',

@@ -35,16 +35,16 @@ export default defineContentScript({
 
       const pathAndQueryParams = `${location.pathname}${location.search}`;
       if (pathAndQueryParams.includes('watch') && pathAndQueryParams.includes('list=WL')) {
-        disconnectFns.push(initWatchingPlaylist());
-        disconnectFns.push(initWatchVideo());
+        disconnectFns.push(initWatchingPlaylist(ctx));
+        disconnectFns.push(initWatchVideo(ctx));
       } else if (pathAndQueryParams.includes('list=WL')) {
-        disconnectFns.push(initPlaylistObservers());
+        disconnectFns.push(initPlaylistObservers(ctx));
       } else if (pathAndQueryParams.includes('watch')) {
-        disconnectFns.push(initWatchVideo());
+        disconnectFns.push(initWatchVideo(ctx));
       } else if (pathAndQueryParams.includes('subscriptions')) {
-        disconnectFns.push(initHomeObserver());
+        disconnectFns.push(initHomeObserver(ctx));
       } else if (pathAndQueryParams === '/') {
-        disconnectFns.push(initHomeObserver());
+        disconnectFns.push(initHomeObserver(ctx));
       }
     }
 

@@ -20,7 +20,7 @@ storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
   }
 });
 
-const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | undefined>(undefined);
+const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 
 const videoListMutationSubject = new Subject<MutationRecord>();
 const videoListMutationObserver = new MutationObserver((mutations) => {
