@@ -52,7 +52,6 @@ function handleInputChange() {
 function updateSearchString(page: keyof SettingSearchStrings, element: keyof SettingSearchStringValues, value: string) {
   // @ts-expect-error The effort to properly type this is not worth the convenience this offers.
   searchStrings[page][element] = value;
-  console.log(page, element, value);
 }
 </script>
 

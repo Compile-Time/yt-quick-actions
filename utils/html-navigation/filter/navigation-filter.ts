@@ -104,7 +104,7 @@ export class TextNavigationFilter extends NavigationFilter {
   }
 
   protected applyCondition(element: HTMLElement): boolean {
-    return element.innerText.toLowerCase().includes(this.text.toLowerCase());
+    return element.tagName === 'SPAN' && element.innerText?.toLowerCase().includes(this.text.toLowerCase());
   }
 
   equals(other: TextNavigationFilter): boolean {

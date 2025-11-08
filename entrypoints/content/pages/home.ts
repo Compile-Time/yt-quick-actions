@@ -33,6 +33,11 @@ import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterHomeButton from '@/components/WatchLaterHomeButton.vue';
 
 const logger = createLogger('home');
+storage.getItem<SettingLogLevels>(SETTING_LOG_LEVELS).then((logLevels) => {
+  if (logLevels?.homePage) {
+    logger.setLevel(logLevels.homePage);
+  }
+});
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
   if (logLevels?.homePage) {
     logger.setLevel(logLevels.homePage);
@@ -57,6 +62,11 @@ let settingSearchStrings: SettingSearchStrings = {
     watchLaterEntry: undefined,
   },
 };
+storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((searchStrings) => {
+  if (searchStrings) {
+    settingSearchStrings = searchStrings;
+  }
+});
 storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (searchStrings) => {
   if (searchStrings) {
     settingSearchStrings = searchStrings;
