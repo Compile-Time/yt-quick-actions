@@ -1,5 +1,5 @@
-import { HtmlParentNavigator } from "./html-parent-navigator";
-import { HtmlTreeNavigator } from "./html-tree-navigator";
+import { HtmlParentNavigator } from './html-parent-navigator';
+import { HtmlTreeNavigator } from './html-tree-navigator';
 
 export class HtmlFindResult {
   constructor(private element: HTMLElement | null) {}

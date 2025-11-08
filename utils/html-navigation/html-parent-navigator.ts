@@ -1,10 +1,10 @@
-import { NavigationFilter } from "./filter/navigation-filter";
-import { HtmlFindResult } from "./html-find-result";
+import { NavigationFilter } from './filter/navigation-filter';
+import { HtmlFindResult } from './html-find-result';
 
 export class HtmlParentNavigator {
-  private constructor(private element: HTMLElement) {}
+  private constructor(private element: HTMLElement | null) {}
 
-  static startFrom(element: HTMLElement): HtmlParentNavigator {
+  static startFrom(element: HTMLElement | null): HtmlParentNavigator {
     return new HtmlParentNavigator(element);
   }
 
@@ -16,13 +16,13 @@ export class HtmlParentNavigator {
     return new HtmlFindResult(this.navigateToParent(this.element, filter));
   }
 
-  private navigateToParent(element: HTMLElement, filter: NavigationFilter): HTMLElement | null {
+  private navigateToParent(element: HTMLElement | null, filter: NavigationFilter): HTMLElement | null {
     const foundElement = filter.applySingle(element);
 
     if (foundElement) {
       return foundElement;
     } else {
-      return !element.parentElement ? null : this.navigateToParent(element.parentElement, filter);
+      return !element?.parentElement ? null : this.navigateToParent(element.parentElement, filter);
     }
   }
 }

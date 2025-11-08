@@ -1,10 +1,14 @@
-import { AttributeNames, Tags } from "../../html-element-processing/element-data";
+import { AttributeNames, Tags } from '../../html-element-processing/element-data';
 
 export abstract class NavigationFilter {
   apply(htmlCollection: HTMLCollection): HTMLElement[] {
     const filteredElements: HTMLElement[] = [];
     for (let i = 0; i < htmlCollection.length; i++) {
-      const element: HTMLElement = htmlCollection.item(i) as HTMLElement;
+      const childNode = htmlCollection.item(i);
+      if (!childNode) {
+        continue;
+      }
+      const element: HTMLElement = childNode as unknown as HTMLElement;
 
       if (this.applyCondition(element)) {
         filteredElements.push(element);
@@ -14,8 +18,8 @@ export abstract class NavigationFilter {
     return filteredElements;
   }
 
-  applySingle(element: HTMLElement): HTMLElement | undefined {
-    return this.applyCondition(element) ? element : undefined;
+  applySingle(element: HTMLElement | null): HTMLElement | null {
+    return this.applyCondition(element) ? element : null;
   }
 
   toString(): string {
@@ -32,11 +36,14 @@ export abstract class NavigationFilter {
     return normalString.toLowerCase().includes(lowercaseString);
   }
 
-  protected abstract applyCondition(element: HTMLElement): boolean;
+  protected abstract applyCondition(element: HTMLElement | null): boolean;
 }
 
 export class IdNavigationFilter extends NavigationFilter {
-  constructor(private readonly tagName: string, private readonly id: string) {
+  constructor(
+    private readonly tagName: string,
+    private readonly id: string,
+  ) {
     super();
   }
 
@@ -88,5 +95,19 @@ export class AnyFilter<T extends NavigationFilter> extends NavigationFilter {
 
   protected applyCondition(element: HTMLElement): boolean {
     return this.filterList.some((filter) => !!filter.applySingle(element));
+  }
+}
+
+export class TextNavigationFilter extends NavigationFilter {
+  constructor(private readonly text: string) {
+    super();
+  }
+
+  protected applyCondition(element: HTMLElement): boolean {
+    return element.innerText.toLowerCase().includes(this.text.toLowerCase());
+  }
+
+  equals(other: TextNavigationFilter): boolean {
+    return other.text === this.text;
   }
 }

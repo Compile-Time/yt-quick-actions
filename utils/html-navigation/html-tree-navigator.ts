@@ -1,6 +1,6 @@
-import { NavigationFilter } from "./filter/navigation-filter";
-import { NavigationFiltersToProcessQueue } from "./filter/navigation-filters-to-process-queue";
-import { HtmlFindResult } from "./html-find-result";
+import { NavigationFilter } from './filter/navigation-filter';
+import { NavigationFiltersToProcessQueue } from './filter/navigation-filters-to-process-queue';
+import { HtmlFindResult } from './html-find-result';
 
 /**
  * Builder-like class for HTML tree navigation.
@@ -8,16 +8,16 @@ import { HtmlFindResult } from "./html-find-result";
 export class HtmlTreeNavigator {
   private initialFilterQueue: NavigationFiltersToProcessQueue = new NavigationFiltersToProcessQueue();
 
-  constructor(private element: HTMLElement) {}
+  constructor(private element: HTMLElement | null) {}
 
-  static startFrom(element: HTMLElement): HtmlTreeNavigator {
+  static startFrom(element: HTMLElement | null): HtmlTreeNavigator {
     return new HtmlTreeNavigator(element);
   }
 
   /**
    * Add a {@link NavigationFilter} to restrict the tree navigation with.
    *
-   * When looking for a specific element in the HTMl tree it might be possible that such an element
+   * When looking for a specific element in the HTML tree, it might be possible that such an element
    * might exist in many places in the tree while only a specific subtree is relevant. This method
    * allows restricting the search to a specific subtree.
    *
@@ -45,8 +45,8 @@ export class HtmlTreeNavigator {
     }
 
     this.filter(targetElementFilter);
-    return this.navigateTree(this.initialFilterQueue, this.element.children).map(
-      (element) => new HtmlFindResult(element)
+    return this.navigateTree(this.initialFilterQueue, this.element.children as unknown as HTMLCollection).map(
+      (element) => new HtmlFindResult(element),
     );
   }
 
@@ -85,7 +85,7 @@ export class HtmlTreeNavigator {
     }
     const filter = filterToProcess.getFilter();
 
-    const foundElements: HTMLElement[] = filter.apply(htmlCollection);
+    const foundElements = filter.apply(htmlCollection);
     if (foundElements.length > 0) {
       filterToProcess.markProcessed();
       if (filterQueue.areAllFiltersProcessed()) {

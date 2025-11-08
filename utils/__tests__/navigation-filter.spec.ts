@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   AnyFilter,
   IdNavigationFilter,
@@ -108,7 +108,7 @@ describe('NavigationFilter', () => {
       const filter = new TagNavigationFilter('p');
       const htmlCollection = fakeDocument.getHtmlCollection();
 
-      const result: Element[] = filter.apply(htmlCollection);
+      const result: HTMLElement[] = filter.apply(htmlCollection);
       expect(result.length).toEqual(1);
       expect(result[0]).toEqual(fakeDocument.getElementById('paragraph'));
     });
@@ -127,7 +127,7 @@ describe('NavigationFilter', () => {
       const filter = new IdNavigationFilter('i', 'image');
       const htmlCollection = fakeDocument.getHtmlCollection();
 
-      const result: Element[] = filter.apply(htmlCollection);
+      const result: HTMLElement[] = filter.apply(htmlCollection);
       expect(result.length).toEqual(1);
       expect(result[0]).toEqual(fakeDocument.getElementById('image'));
     });
@@ -147,7 +147,7 @@ describe('NavigationFilter', () => {
       const filter = new SvgDrawPathNavigationFilter('M 10 10');
       const htmlCollection = fakeDocument.getSvg();
 
-      const result: Element[] = filter.apply(htmlCollection);
+      const result: HTMLElement[] = filter.apply(htmlCollection);
       expect(result.length).toEqual(1);
       expect(result[0]).toEqual(fakeDocument.getElementById('path'));
     });
@@ -173,7 +173,7 @@ describe('NavigationFilter', () => {
       ]);
       const htmlCollection = fakeDocument.getSvg('M 40 40');
 
-      const result: Element[] = anyFilter.apply(htmlCollection);
+      const result: HTMLElement[] = anyFilter.apply(htmlCollection);
       expect(result.length).toEqual(0);
       expect(result[0]).toBeUndefined();
     });
@@ -195,7 +195,7 @@ describe('NavigationFilter', () => {
 
       const fakeHtmlCollection = new FakeHtmlCollection<Element>(res);
 
-      const result: Element[] = anyFilter.apply(fakeHtmlCollection);
+      const result: HTMLElement[] = anyFilter.apply(fakeHtmlCollection);
       expect(result.length).toEqual(2);
       expect(result[0]).toEqual(svg1.children.item(0));
       expect(result[1]).toEqual(svg2.children.item(0));
