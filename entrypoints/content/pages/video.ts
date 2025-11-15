@@ -170,7 +170,7 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
     const popup = record.target as HTMLElement;
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: hidden;`);
+    hideYtPopup(popup);
   }),
   debounceTime(300),
   first(),
@@ -208,15 +208,7 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
   catchError((error) => {
     logger.error('Error occurred while trying to click the save to playlist entry in the popup', error);
     popupMutationObserver.disconnect();
-
-    const popup = document.evaluate(
-      '/html/body/ytd-app/ytd-popup-container',
-      document,
-      null,
-      XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue as HTMLElement;
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+    allowYtPopupVisibility();
 
     return throwError(() => error);
   }),
@@ -230,7 +222,7 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
     const popup = record.target as HTMLElement;
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: hidden;`);
+    hideYtPopup(popup);
   }),
   debounceTime(600),
   first(),
@@ -265,15 +257,7 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
   catchError((err) => {
     logger.error('Error occurred while trying to click the watch later playlist in the popup', err);
     popupMutationObserver.disconnect();
-
-    const popup = document.evaluate(
-      '/html/body/ytd-app/ytd-popup-container',
-      document,
-      null,
-      XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue as HTMLElement;
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+    allowYtPopupVisibility();
 
     return of(null);
   }),
@@ -286,7 +270,7 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
     }
 
     const popup = record.target as HTMLElement;
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+    allowYtPopupVisibility(popup);
     clickPopupWatchLaterPlaylist$.subscribe();
   }),
 );
