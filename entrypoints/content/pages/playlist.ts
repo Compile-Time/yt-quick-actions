@@ -95,13 +95,14 @@ const addScrollToEndButton$ = videoListMutationSubject.pipe(
   filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
   first(),
   tap(() => {
-    const playlistOptionsButton = document.evaluate(
-      '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-playlist-header-renderer/div/div[2]/div[1]/div/div[1]/div[2]',
+    const playlistSideBarHeader = document.evaluate(
+      '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-playlist-header-renderer/div/div[2]',
       document,
       null,
       XPathResult.FIRST_ORDERED_NODE_TYPE,
       null,
     ).singleNodeValue! as HTMLElement;
+    playlistSideBarHeader.style.position = 'relative';
 
     const scrollContainer = document.evaluate(
       '//div[@id="primary"]',
@@ -112,10 +113,13 @@ const addScrollToEndButton$ = videoListMutationSubject.pipe(
     ).singleNodeValue as HTMLElement;
 
     const scrollToBottomButton = createIntegratedUi(contentScriptContext$.value!, {
-      anchor: playlistOptionsButton,
+      anchor: playlistSideBarHeader,
       position: 'inline',
       append: 'last',
       onMount: (container) => {
+        container.style.position = 'absolute';
+        container.style.bottom = '0';
+        container.style.right = '0';
         const app = createApp(ScrollToContainerEndButton, {
           scrollContainer,
         });
@@ -385,6 +389,7 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
   const clickMoveTopButtonSubscription = clickMoveTopButtonInPopup$.subscribe();
   const clickMoveBottomButtonSubscription = clickMoveBottomButtonInPopup$.subscribe();
   const addScrollToEndButtonSubscription = addScrollToEndButton$.subscribe();
+  const hideYtPopupSubscription = hideYtPopup$.subscribe();
 
   return () => {
     videoListMutationObserver.disconnect();
@@ -394,5 +399,6 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
     clickMoveTopButtonSubscription.unsubscribe();
     clickMoveBottomButtonSubscription.unsubscribe();
     addScrollToEndButtonSubscription.unsubscribe();
+    hideYtPopupSubscription.unsubscribe();
   };
 }
