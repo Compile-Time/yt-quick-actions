@@ -20,6 +20,7 @@ import RemoveVideoPlaylistButton from '@/components/RemoveVideoPlaylistButton.vu
 import MoveTopBottomContainer from '@/components/MoveTopBottomContainer.vue';
 import { allowYtPopupVisibility } from '@/utils/yt-popup-visibility';
 import { getYtPopupFromDom } from '@/utils/yt-popup';
+import ScrollToContainerEndButton from '@/components/ScrollToContainerEndButton.vue';
 
 const logger = createLogger('playlist');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
@@ -89,6 +90,45 @@ const popupReadyAndHidden$ = popupMutation$.pipe(
 const removeButtonClicked$ = new BehaviorSubject(false);
 const moveTopButtonClicked$ = new BehaviorSubject(false);
 const moveBottomButtonClicked$ = new BehaviorSubject(false);
+
+const addScrollToEndButton$ = videoListMutationSubject.pipe(
+  filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
+  first(),
+  tap(() => {
+    const playlistOptionsButton = document.evaluate(
+      '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-playlist-header-renderer/div/div[2]/div[1]/div/div[1]/div[2]',
+      document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue! as HTMLElement;
+
+    const scrollContainer = document.evaluate(
+      '//div[@id="primary"]',
+      document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null,
+    ).singleNodeValue as HTMLElement;
+
+    const scrollToBottomButton = createIntegratedUi(contentScriptContext$.value!, {
+      anchor: playlistOptionsButton,
+      position: 'inline',
+      append: 'last',
+      onMount: (container) => {
+        const app = createApp(ScrollToContainerEndButton, {
+          scrollContainer,
+        });
+        app.mount(container);
+        return app;
+      },
+      onRemove: (app) => {
+        app?.unmount();
+      },
+    });
+    scrollToBottomButton.mount();
+  }),
+);
 
 const addCustomButtonsToDom$ = videoListMutationSubject.pipe(
   filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
@@ -344,6 +384,7 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
   const clickRemoveItemSubscription = clickRemoveItemInPopup$.subscribe();
   const clickMoveTopButtonSubscription = clickMoveTopButtonInPopup$.subscribe();
   const clickMoveBottomButtonSubscription = clickMoveBottomButtonInPopup$.subscribe();
+  const addScrollToEndButtonSubscription = addScrollToEndButton$.subscribe();
 
   return () => {
     videoListMutationObserver.disconnect();
@@ -352,5 +393,6 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
     clickRemoveItemSubscription.unsubscribe();
     clickMoveTopButtonSubscription.unsubscribe();
     clickMoveBottomButtonSubscription.unsubscribe();
+    addScrollToEndButtonSubscription.unsubscribe();
   };
 }
