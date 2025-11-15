@@ -7,6 +7,7 @@ import {
   first,
   map,
   of,
+  shareReplay,
   Subject,
   tap,
   throwError,
@@ -21,7 +22,12 @@ import {
 import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import { createLogger } from '@/utils/logging/log-provider';
-import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
+import {
+  SETTING_LOG_LEVELS,
+  SETTING_SEARCH_STRINGS,
+  SettingLogLevels,
+  SettingSearchStrings,
+} from '@/utils/storage/settings-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterVideoButton from '@/components/WatchLaterVideoButton.vue';
 
@@ -32,13 +38,30 @@ storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
   }
 });
 
+let searchStrings: SettingSearchStrings['watchVideo'] = {
+  watchLaterEntry: undefined,
+  videoSaveButton: undefined,
+};
+storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
+  logger.debug('Setting search strings changed: ', settingSearchStrings);
+  if (settingSearchStrings?.watchVideo) {
+    searchStrings = settingSearchStrings.watchVideo;
+  }
+});
+storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearchStrings) => {
+  logger.debug('Loaded setting search strings: ', settingSearchStrings);
+  if (settingSearchStrings?.watchVideo) {
+    searchStrings = settingSearchStrings.watchVideo;
+  }
+});
+
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 
-const contentMutationSubject = new Subject<MutationRecord>();
+const contentMutation$ = new Subject<MutationRecord>();
 const contentMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     if (Array.from(mutation.addedNodes).every((node) => node.nodeName !== 'BUTTON')) {
-      contentMutationSubject.next(mutation);
+      contentMutation$.next(mutation);
     }
   });
 });
@@ -57,7 +80,7 @@ const popupMutationObserver = new MutationObserver((mutations) => {
 const watchLaterButtonClickedSubject = new BehaviorSubject<boolean>(false);
 const saveVideoInOptionsClickedSubject = new BehaviorSubject<boolean>(false);
 
-const topLevelComputedButtonsMutations$ = contentMutationSubject.pipe(
+const topLevelComputedButtonsMutations$ = contentMutation$.pipe(
   filter(
     (record) => record.target.nodeName === 'DIV' && (record.target as HTMLElement).id === 'top-level-buttons-computed',
   ),
@@ -65,7 +88,7 @@ const topLevelComputedButtonsMutations$ = contentMutationSubject.pipe(
   map((record) => record.target as HTMLElement),
   tap((record) => logger.debug('Matching top level buttons computed mutation found: ', record)),
 );
-const moreOptionsMutations$ = contentMutationSubject.pipe(
+const moreOptionsMutations$ = contentMutation$.pipe(
   filter((record) => {
     const ytButton = record.target as HTMLElement;
     return HtmlParentNavigator.startFrom(ytButton)
@@ -240,27 +263,31 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
   }),
 );
 
+const ytAppReady$ = contentMutation$.pipe(
+  filter((record) => record.target.nodeName === 'YTD-APP'),
+  shareReplay({
+    bufferSize: 1,
+    refCount: true,
+  }),
+);
+
+const setupPopupMutationObserver$ = ytAppReady$.pipe(
+  tap(() => {
+    const popupContainer = HtmlTreeNavigator.startFrom(document.body)
+      .findFirst(new TagNavigationFilter('ytd-popup-container'))
+      .consume()!;
+    const popupObserverConf = { attributes: true, childList: false, subtree: true };
+    popupMutationObserver.observe(popupContainer, popupObserverConf);
+  }),
+);
+
 export function initWatchVideo(ctx: ContentScriptContext): DisconnectFn {
   contentScriptContext$.next(ctx);
 
-  // Avoid listening to the whole DOM by using the ytd-page-manager element.
-  const ytdPageManager = document.evaluate(
-    '//*[@id="page-manager"]',
-    document.body,
-    null,
-    XPathResult.FIRST_ORDERED_NODE_TYPE,
-    null,
-  ).singleNodeValue as HTMLElement;
-
   const contentObserverConf = { attributes: false, childList: true, subtree: true };
-  contentMutationObserver.observe(ytdPageManager, contentObserverConf);
+  contentMutationObserver.observe(document.body, contentObserverConf);
 
-  const popupContainer = HtmlTreeNavigator.startFrom(document.body)
-    .findFirst(new TagNavigationFilter('ytd-popup-container'))
-    .consume()!;
-  const popupObserverConf = { attributes: true, childList: false, subtree: true };
-  popupMutationObserver.observe(popupContainer, popupObserverConf);
-
+  const setupPopupMutationObserver = setupPopupMutationObserver$.subscribe();
   const createWatchLaterButtonSubscription = createWatchLaterButton$.subscribe();
   const clickPopupVideoSaveSubscription = clickPopupVideoSaveButton$.subscribe();
   const clickPopupWatchLaterPlaylistSubscription = clickPopupWatchLaterPlaylist$.subscribe();
@@ -268,6 +295,7 @@ export function initWatchVideo(ctx: ContentScriptContext): DisconnectFn {
   return () => {
     contentMutationObserver.disconnect();
     popupMutationObserver.disconnect();
+    setupPopupMutationObserver.unsubscribe();
     createWatchLaterButtonSubscription.unsubscribe();
     clickPopupVideoSaveSubscription.unsubscribe();
     clickPopupWatchLaterPlaylistSubscription.unsubscribe();
