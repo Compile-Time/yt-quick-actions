@@ -99,12 +99,18 @@ export class AnyFilter<T extends NavigationFilter> extends NavigationFilter {
 }
 
 export class TextNavigationFilter extends NavigationFilter {
-  constructor(private readonly text: string) {
+  constructor(
+    private readonly tag: string,
+    private readonly text: string,
+  ) {
     super();
   }
 
   protected applyCondition(element: HTMLElement): boolean {
-    return element.tagName === 'SPAN' && element.innerText?.toLowerCase().includes(this.text.toLowerCase());
+    console.log('condition', element.tagName, element.innerText);
+    return (
+      element.tagName === this.tag.toUpperCase() && element.innerText?.toLowerCase().includes(this.text.toLowerCase())
+    );
   }
 
   equals(other: TextNavigationFilter): boolean {

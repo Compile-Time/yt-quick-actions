@@ -44,32 +44,19 @@ storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
   }
 });
 
-let settingSearchStrings: SettingSearchStrings = {
-  homePage: {
-    watchLaterEntry: undefined,
-  },
-  watchPlaylist: {
-    watchLaterEntry: undefined,
-    removeEntry: undefined,
-  },
-  playlist: {
-    removeEntry: undefined,
-    moveToBottomEntry: undefined,
-    moveToTopEntry: undefined,
-  },
-  watchVideo: {
-    videoSaveButton: undefined,
-    watchLaterEntry: undefined,
-  },
+let searchStrings: SettingSearchStrings['homePage'] = {
+  watchLaterEntry: undefined,
 };
-storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((searchStrings) => {
-  if (searchStrings) {
-    settingSearchStrings = searchStrings;
+storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearchStrings) => {
+  logger.debug('Setting search strings changed: ', settingSearchStrings);
+  if (settingSearchStrings?.homePage) {
+    searchStrings = settingSearchStrings.homePage;
   }
 });
-storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (searchStrings) => {
-  if (searchStrings) {
-    settingSearchStrings = searchStrings;
+storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
+  logger.debug('Loaded setting search strings: ', settingSearchStrings);
+  if (settingSearchStrings?.homePage) {
+    searchStrings = settingSearchStrings.homePage;
   }
 });
 
@@ -190,12 +177,10 @@ const clickPopupWatchLaterButton$ = popupMutation$.pipe(
     ).singleNodeValue as HTMLElement;
 
     let clickable: HTMLElement | null;
-    if (settingSearchStrings.homePage.watchLaterEntry) {
-      logger.debug(
-        `Using custom search string "${settingSearchStrings.homePage.watchLaterEntry}" for watch later action`,
-      );
+    if (searchStrings.watchLaterEntry) {
+      logger.debug(`Using custom search string "${searchStrings.watchLaterEntry}" for watch later action`);
       clickable = HtmlTreeNavigator.startFrom(popupContainer)
-        .findFirst(new TextNavigationFilter(settingSearchStrings.homePage.watchLaterEntry))
+        .findFirst(new TextNavigationFilter('span', searchStrings.watchLaterEntry))
         .intoParentNavigator()
         .find(new TagNavigationFilter('yt-list-item-view-model'))
         .consume();

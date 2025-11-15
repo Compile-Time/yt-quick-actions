@@ -24,6 +24,8 @@ export default typescriptEslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': 'off',
+      // Turned off because content scripts might set up multiple components.
+      'vue/one-component-per-file': 'off',
     },
   },
   eslintConfigPrettier,
