@@ -82,7 +82,7 @@ const popupMutationObserver = new MutationObserver((mutations) => {
 });
 const popupReadyAndHidden$ = popupMutation$.pipe(
   tap(() => {
-    // hideYtPopup();
+    hideYtPopup();
   }),
   debounceTime(750),
 );
