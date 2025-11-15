@@ -75,7 +75,6 @@ const popupMutation$ = new Subject<MutationRecord>();
 const popupMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     if (mutation.attributeName !== 'style') {
-      logger.debug('Popup mutation: ', mutation);
       popupMutation$.next(mutation);
     }
   });
@@ -389,7 +388,6 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
   const clickMoveTopButtonSubscription = clickMoveTopButtonInPopup$.subscribe();
   const clickMoveBottomButtonSubscription = clickMoveBottomButtonInPopup$.subscribe();
   const addScrollToEndButtonSubscription = addScrollToEndButton$.subscribe();
-  const hideYtPopupSubscription = hideYtPopup$.subscribe();
 
   return () => {
     videoListMutationObserver.disconnect();
@@ -399,6 +397,5 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
     clickMoveTopButtonSubscription.unsubscribe();
     clickMoveBottomButtonSubscription.unsubscribe();
     addScrollToEndButtonSubscription.unsubscribe();
-    hideYtPopupSubscription.unsubscribe();
   };
 }
