@@ -18,6 +18,7 @@ import {
   IdNavigationFilter,
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
+  TextNavigationFilter,
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
@@ -77,8 +78,8 @@ const popupMutationObserver = new MutationObserver((mutations) => {
   });
 });
 
-const watchLaterButtonClickedSubject = new BehaviorSubject<boolean>(false);
-const saveVideoInOptionsClickedSubject = new BehaviorSubject<boolean>(false);
+const watchLaterButtonClicked$ = new BehaviorSubject<boolean>(false);
+const saveVideoInOptionsClicked$ = new BehaviorSubject<boolean>(false);
 
 const topLevelComputedButtonsMutations$ = contentMutation$.pipe(
   filter(
@@ -109,11 +110,20 @@ const createWatchLaterButton$ = combineLatest({
   // After the button is set up in the DOM, we don't need the subscription anymore.
   first(),
   tap(({ topLevelButtonsComputed, moreOptionsButton }) => {
-    const saveToPlaylistButton = HtmlTreeNavigator.startFrom(topLevelButtonsComputed.parentElement!)
-      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
-      .intoParentNavigator()
-      .find(new TagNavigationFilter('button'))
-      .consume();
+    let saveToPlaylistButton: HTMLElement | null;
+    if (searchStrings.videoSaveButton) {
+      logger.debug(`Using custom search string "${searchStrings.videoSaveButton}" for save to playlist button`);
+      saveToPlaylistButton = HtmlTreeNavigator.startFrom(topLevelButtonsComputed.parentElement!)
+        .findFirst(new TextNavigationFilter('button', searchStrings.videoSaveButton))
+        .consume();
+    } else {
+      logger.debug('Using default icon search for save to playlist button');
+      saveToPlaylistButton = HtmlTreeNavigator.startFrom(topLevelButtonsComputed.parentElement!)
+        .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
+        .intoParentNavigator()
+        .find(new TagNavigationFilter('button'))
+        .consume();
+    }
     logger.debug('Search for save to playlist button yielded: ', saveToPlaylistButton);
 
     let popupTrigger;
@@ -121,10 +131,10 @@ const createWatchLaterButton$ = combineLatest({
 
     if (saveToPlaylistButton) {
       popupTrigger = saveToPlaylistButton;
-      subjectTrigger = saveVideoInOptionsClickedSubject;
+      subjectTrigger = saveVideoInOptionsClicked$;
     } else {
       popupTrigger = moreOptionsButton.children[0] as HTMLElement;
-      subjectTrigger = watchLaterButtonClickedSubject;
+      subjectTrigger = watchLaterButtonClicked$;
     }
 
     const watchLaterButton = createIntegratedUi(contentScriptContext$.value!, {
@@ -156,7 +166,7 @@ const createWatchLaterButton$ = combineLatest({
 );
 
 const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
-  filter(() => watchLaterButtonClickedSubject.value && !saveVideoInOptionsClickedSubject.value),
+  filter(() => watchLaterButtonClicked$.value && !saveVideoInOptionsClicked$.value),
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
     const popup = record.target as HTMLElement;
@@ -174,17 +184,26 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
       null,
     ).singleNodeValue as HTMLElement;
 
-    const button = HtmlTreeNavigator.startFrom(tpYtIronDropdown as HTMLElement)
-      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
-      .intoParentNavigator()
-      .find(new TagNavigationFilter('tp-yt-paper-item'))
-      .consume()!;
-    logger.debug('Search for save to playlist entry in popup yielded: ', button);
-
-    if (button) {
-      button.click();
+    let clickable: HTMLElement | null;
+    if (searchStrings.videoSaveButton) {
+      logger.debug(`Using custom search string "${searchStrings.videoSaveButton}" for watch later playlist`);
+      clickable = HtmlTreeNavigator.startFrom(tpYtIronDropdown)
+        .findFirst(new TextNavigationFilter('tp-yt-paper-item', searchStrings.videoSaveButton))
+        .consume();
+    } else {
+      logger.debug('Using default text search for watch later playlist');
+      clickable = HtmlTreeNavigator.startFrom(tpYtIronDropdown as HTMLElement)
+        .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
+        .intoParentNavigator()
+        .find(new TagNavigationFilter('tp-yt-paper-item'))
+        .consume();
     }
-    saveVideoInOptionsClickedSubject.next(true);
+    logger.debug('Search for save to playlist entry in popup yielded: ', clickable);
+
+    if (clickable) {
+      clickable.click();
+    }
+    saveVideoInOptionsClicked$.next(true);
   }),
   catchError((error) => {
     logger.error('Error occurred while trying to click the save to playlist entry in the popup', error);
@@ -207,7 +226,7 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
 );
 
 const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
-  filter(() => saveVideoInOptionsClickedSubject.value),
+  filter(() => saveVideoInOptionsClicked$.value),
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
     const popup = record.target as HTMLElement;
@@ -225,13 +244,22 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
       null,
     ).singleNodeValue as HTMLElement;
 
-    const ytListItem = HtmlTreeNavigator.startFrom(popupContainer)
-      .findFirst(new TagNavigationFilter('yt-list-item-view-model'))
-      .consume();
-    logger.debug('Search for watch later playlist in popup yielded: ', ytListItem);
+    let clickable: HTMLElement | null;
+    if (searchStrings.watchLaterEntry) {
+      logger.debug(`Using custom search string "${searchStrings.watchLaterEntry}" for watch later playlist`);
+      clickable = HtmlTreeNavigator.startFrom(popupContainer)
+        .findFirst(new TextNavigationFilter('span', searchStrings.watchLaterEntry))
+        .consume();
+    } else {
+      logger.debug('Using default text search for watch later playlist');
+      clickable = HtmlTreeNavigator.startFrom(popupContainer)
+        .findFirst(new TagNavigationFilter('yt-list-item-view-model'))
+        .consume();
+    }
+    logger.debug('Search for watch later playlist in popup yielded: ', clickable);
 
-    if (ytListItem) {
-      ytListItem.click();
+    if (clickable) {
+      clickable.click();
     }
   }),
   catchError((err) => {
@@ -250,8 +278,8 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
     return of(null);
   }),
   tap((record) => {
-    watchLaterButtonClickedSubject.next(false);
-    saveVideoInOptionsClickedSubject.next(false);
+    watchLaterButtonClicked$.next(false);
+    saveVideoInOptionsClicked$.next(false);
 
     if (!record) {
       return;

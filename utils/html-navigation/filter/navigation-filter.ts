@@ -107,6 +107,7 @@ export class TextNavigationFilter extends NavigationFilter {
   }
 
   protected applyCondition(element: HTMLElement): boolean {
+    console.log('Applying text navigation filter to element: ', element.tagName, element.textContent);
     return (
       element.tagName === this.tag.toUpperCase() && element.textContent?.toLowerCase().includes(this.text.toLowerCase())
     );
