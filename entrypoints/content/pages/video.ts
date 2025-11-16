@@ -31,6 +31,7 @@ import {
 } from '@/utils/storage/settings-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterVideoButton from '@/components/WatchLaterVideoButton.vue';
+import { getYtPopupFromDom } from '#imports';
 
 const logger = createLogger('video');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
@@ -228,13 +229,7 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
   first(),
   tap(() => {
     // "Reload" the DOM element for its children.
-    const popupContainer = document.evaluate(
-      '/html/body/ytd-app/ytd-popup-container',
-      document,
-      null,
-      XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue as HTMLElement;
+    const popupContainer = getYtPopupFromDom();
 
     let clickable: HTMLElement | null;
     if (searchStrings.watchLaterEntry) {

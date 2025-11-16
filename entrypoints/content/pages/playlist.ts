@@ -21,6 +21,7 @@ import MoveTopBottomContainer from '@/components/MoveTopBottomContainer.vue';
 import { allowYtPopupVisibility } from '@/utils/yt-popup-visibility';
 import { getYtPopupFromDom } from '@/utils/yt-popup';
 import ScrollToContainerEndButton from '@/components/ScrollToContainerEndButton.vue';
+import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
 
 const logger = createLogger('playlist');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
@@ -93,7 +94,7 @@ const moveBottomButtonClicked$ = new BehaviorSubject(false);
 const addScrollToEndButton$ = videoListMutationSubject.pipe(
   filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
   first(),
-  tap(() => {
+  tap((record: MutationRecord) => {
     const playlistSideBarHeader = document.evaluate(
       '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-playlist-header-renderer/div/div[2]',
       document,
@@ -103,13 +104,10 @@ const addScrollToEndButton$ = videoListMutationSubject.pipe(
     ).singleNodeValue! as HTMLElement;
     playlistSideBarHeader.style.position = 'relative';
 
-    const scrollContainer = document.evaluate(
-      '//div[@id="primary"]',
-      document,
-      null,
-      XPathResult.FIRST_ORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue as HTMLElement;
+    const scrollContainer = HtmlParentNavigator.startFrom(record.target as HTMLElement)
+      .find(new IdNavigationFilter('div', 'primary'))
+      .consume();
+    logger.debug('Search for scroll container yielded: ', scrollContainer);
 
     const scrollToBottomButton = createIntegratedUi(contentScriptContext$.value!, {
       anchor: playlistSideBarHeader,

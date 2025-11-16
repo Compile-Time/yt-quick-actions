@@ -31,6 +31,7 @@ import {
 } from '@/utils/storage/settings-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterHomeButton from '@/components/WatchLaterHomeButton.vue';
+import { getTpYtIronDropDownFromDom } from '@/utils/yt-popup';
 
 const logger = createLogger('home');
 storage.getItem<SettingLogLevels>(SETTING_LOG_LEVELS).then((logLevels) => {
@@ -168,13 +169,7 @@ const clickPopupWatchLaterButton$ = popupMutation$.pipe(
   first(),
   tap(() => {
     // "Reload" the DOM element for its children.
-    const popupContainer = document.evaluate(
-      '/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown',
-      document,
-      null,
-      XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue as HTMLElement;
+    const popupContainer = getTpYtIronDropDownFromDom();
 
     let clickable: HTMLElement | null;
     if (searchStrings.watchLaterEntry) {
@@ -202,13 +197,7 @@ const clickPopupWatchLaterButton$ = popupMutation$.pipe(
   catchError((error) => {
     logger.error('Error occurred while trying to click the watch later button in the popup', error);
     popupMutationObserver.disconnect();
-    const popup = document.evaluate(
-      '/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown',
-      document,
-      null,
-      XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue as HTMLElement;
+    const popup = getTpYtIronDropDownFromDom();
     popup.style.visibility = 'visible';
 
     return of(null);

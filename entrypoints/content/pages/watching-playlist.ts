@@ -5,19 +5,43 @@ import {
   IdNavigationFilter,
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
+  TextNavigationFilter,
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import { Ids, SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { createLogger } from '@/utils/logging/log-provider';
-import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
+import {
+  SETTING_LOG_LEVELS,
+  SETTING_SEARCH_STRINGS,
+  SettingLogLevels,
+  SettingSearchStrings,
+} from '@/utils/storage/settings-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import RemoveVideoPlaylistButton from '@/components/RemoveVideoPlaylistButton.vue';
 import { NodeTypes } from '@vue/compiler-core';
+import { getYtPopupFromDom, hideYtPopup } from '#imports';
 
 const logger = createLogger('watching-playlist');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
   if (logLevels?.watchPlaylist) {
     logger.setLevel(logLevels.watchPlaylist);
+  }
+});
+
+let searchStrings: SettingSearchStrings['watchPlaylist'] = {
+  removeEntry: undefined,
+  watchLaterEntry: undefined,
+};
+storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
+  logger.debug('Setting search strings changed: ', settingSearchStrings);
+  if (settingSearchStrings?.watchPlaylist) {
+    searchStrings = settingSearchStrings.watchPlaylist;
+  }
+});
+storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearchStrings) => {
+  logger.debug('Loaded setting search strings: ', settingSearchStrings);
+  if (settingSearchStrings?.watchPlaylist) {
+    searchStrings = settingSearchStrings.watchPlaylist;
   }
 });
 
@@ -91,37 +115,31 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
   filter(() => removeButtonClicked$.value),
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap(() => {
-    const popup = document.evaluate(
-      '/html/body/ytd-app/ytd-popup-container',
-      document,
-      null,
-      XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue as HTMLElement;
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: hidden;`);
-    return popup;
+    hideYtPopup();
   }),
   debounceTime(300),
   first(),
   map(() => {
-    // "Reload" the DOM element for its children.
-    const popup = document.evaluate(
-      '/html/body/ytd-app/ytd-popup-container',
-      document,
-      null,
-      XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue as HTMLElement;
+    const popup = getYtPopupFromDom();
 
-    const button = HtmlTreeNavigator.startFrom(popup)
-      .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
-      .intoParentNavigator()
-      .find(new TagNavigationFilter('tp-yt-paper-item'))
-      .consume();
-    logger.debug('Search for remove entry in popup yielded: ', button);
+    let clickable: HTMLElement | null;
+    if (searchStrings.removeEntry) {
+      logger.debug(`Using search string "${searchStrings.removeEntry}" for remove entry`);
+      clickable = HtmlTreeNavigator.startFrom(popup)
+        .findFirst(new TextNavigationFilter('ytd-menu-service-item-renderer', searchStrings.removeEntry))
+        .consume();
+    } else {
+      logger.debug('Using default icon search for remove entry');
+      clickable = HtmlTreeNavigator.startFrom(popup)
+        .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.TRASH_ICON))
+        .intoParentNavigator()
+        .find(new TagNavigationFilter('tp-yt-paper-item'))
+        .consume();
+    }
+    logger.debug('Search for remove entry in popup yielded: ', clickable);
 
-    if (button) {
-      button.click();
+    if (clickable) {
+      clickable.click();
     }
 
     return popup;
@@ -130,25 +148,19 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
     logger.error('Error occurred while trying to click the remove entry in the popup', err);
     popupMutationObserver.disconnect();
 
-    const popup = document.evaluate(
-      '/html/body/ytd-app/ytd-popup-container',
-      document,
-      null,
-      XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue as HTMLElement;
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+    allowYtPopupVisibility();
 
     return of(null);
   }),
   tap((popup) => {
+    removeButtonClicked$.next(false);
+
     if (!popup) {
       return;
     }
 
     clickPopupRemoveButton$.subscribe();
-    removeButtonClicked$.next(false);
-    popup.setAttribute('style', `${popup.getAttribute('style')} visibility: visible;`);
+    hideYtPopup(popup);
   }),
 );
 

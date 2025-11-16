@@ -12,7 +12,7 @@ function click() {
 </script>
 
 <template>
-  <div class="flex justify-end sticky">
+  <div class="flex justify-end">
     <button class="qa-btn qa-btn-pill" @click="click">
       <i class="fa-solid fa-arrows-down-to-line fa-lg"></i>
     </button>
