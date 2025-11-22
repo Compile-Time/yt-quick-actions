@@ -34,7 +34,6 @@ import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterVideoButton from '@/components/WatchLaterVideoButton.vue';
 import { getTpYtIronDropDownFromDom, getYtPopupFromDom } from '#imports';
 import { CurrentPage } from '@/entrypoints/content';
-import { HTMLElement } from 'linkedom';
 
 const logger = createLogger('video');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
