@@ -317,6 +317,7 @@ const ytPopupReady$ = merge([
 );
 
 const setupPopupMutationObserver$ = ytPopupReady$.pipe(
+  first(),
   tap(() => {
     const popupContainer = HtmlTreeNavigator.startFrom(document.body)
       .findFirst(new TagNavigationFilter('ytd-popup-container'))

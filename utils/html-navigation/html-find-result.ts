@@ -20,7 +20,10 @@ export class HtmlFindResult {
     return !this.exists();
   }
 
-  intoParentNavigator(): HtmlParentNavigator {
+  intoParentNavigator(jumpUp: boolean = false): HtmlParentNavigator {
+    if (jumpUp) {
+      return HtmlParentNavigator.startFrom(this.element!.parentElement);
+    }
     return HtmlParentNavigator.startFrom(this.element);
   }
 

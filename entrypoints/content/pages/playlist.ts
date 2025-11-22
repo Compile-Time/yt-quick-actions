@@ -50,8 +50,8 @@ storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearc
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 
-const videoListMutationSubject = new Subject<MutationRecord>();
-const videoListMutationObserver = new MutationObserver((mutations) => {
+const contentMutation$ = new Subject<MutationRecord>();
+const contentMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     // A button is added to the DOM by the extension which can be caught by the observer causing an infinite loop.
     if (
@@ -67,7 +67,7 @@ const videoListMutationObserver = new MutationObserver((mutations) => {
         return true;
       })
     ) {
-      videoListMutationSubject.next(mutation);
+      contentMutation$.next(mutation);
     }
   });
 });
@@ -91,7 +91,7 @@ const removeButtonClicked$ = new BehaviorSubject(false);
 const moveTopButtonClicked$ = new BehaviorSubject(false);
 const moveBottomButtonClicked$ = new BehaviorSubject(false);
 
-const addScrollToEndButton$ = videoListMutationSubject.pipe(
+const addScrollToEndButton$ = contentMutation$.pipe(
   filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
   first(),
   tap((record: MutationRecord) => {
@@ -119,6 +119,8 @@ const addScrollToEndButton$ = videoListMutationSubject.pipe(
         container.style.right = '0';
         const app = createApp(ScrollToContainerEndButton, {
           scrollContainer,
+          scrollWindow: true,
+          pillLook: true,
         });
         app.mount(container);
         return app;
@@ -131,7 +133,7 @@ const addScrollToEndButton$ = videoListMutationSubject.pipe(
   }),
 );
 
-const addCustomButtonsToDom$ = videoListMutationSubject.pipe(
+const addCustomButtonsToDom$ = contentMutation$.pipe(
   filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
   tap((record) => {
     const menuElement = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
@@ -191,7 +193,7 @@ const addCustomButtonsToDom$ = videoListMutationSubject.pipe(
     }
   }),
   catchError((error) => {
-    videoListMutationObserver.disconnect();
+    contentMutationObserver.disconnect();
     return throwError(() => error);
   }),
 );
@@ -372,8 +374,8 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
     null,
   ).singleNodeValue as HTMLElement;
 
-  const videoListObserverConfig: MutationObserverInit = { attributes: false, childList: true, subtree: true };
-  videoListMutationObserver.observe(ytdPopupManager, videoListObserverConfig);
+  const contentMutationObserverConfig: MutationObserverInit = { attributes: false, childList: true, subtree: true };
+  contentMutationObserver.observe(ytdPopupManager, contentMutationObserverConfig);
 
   const popupContainer = HtmlTreeNavigator.startFrom(document.body)
     .findFirst(new TagNavigationFilter('ytd-popup-container'))
@@ -388,7 +390,7 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
   const addScrollToEndButtonSubscription = addScrollToEndButton$.subscribe();
 
   return () => {
-    videoListMutationObserver.disconnect();
+    contentMutationObserver.disconnect();
     popupMutationObserver.disconnect();
     addRemoveButtonToPlaylistSubscription.unsubscribe();
     clickRemoveItemSubscription.unsubscribe();

@@ -20,6 +20,7 @@ import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import RemoveVideoPlaylistButton from '@/components/RemoveVideoPlaylistButton.vue';
 import { NodeTypes } from '@vue/compiler-core';
 import { getYtPopupFromDom, hideYtPopup } from '#imports';
+import ScrollToContainerEndButton from '@/components/ScrollToContainerEndButton.vue';
 
 const logger = createLogger('watching-playlist');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
@@ -76,6 +77,54 @@ const popupMutationObserver = new MutationObserver((mutations) => {
 });
 
 const removeButtonClicked$ = new BehaviorSubject<boolean>(false);
+
+const addScrollToEndButton$ = contentMutationSubject.pipe(
+  tap((record) => {
+    logger.debug('Mutation record: ', record);
+  }),
+  filter(
+    (record) =>
+      record.target.nodeName === 'DIV' &&
+      record.target.nodeType === NodeTypes.ELEMENT &&
+      (record.target as HTMLElement).id === 'index-container',
+  ),
+  first(),
+  tap((record: MutationRecord) => {
+    const playlistContainer = HtmlParentNavigator.startFrom(record.target as HTMLElement)
+      .find(new IdNavigationFilter('div', 'container'))
+      .intoParentNavigator(true)
+      .find(new IdNavigationFilter('div', 'container'))
+      .consume();
+    logger.debug('Search for playlist container yielded: ', playlistContainer);
+
+    const scrollContainer = HtmlTreeNavigator.startFrom(playlistContainer)
+      .findFirst(new IdNavigationFilter('div', 'items'))
+      .consume();
+    logger.debug('Search for scroll container yielded: ', scrollContainer);
+
+    const actionContainer = HtmlTreeNavigator.startFrom(playlistContainer)
+      .findFirst(new IdNavigationFilter('div', 'top-level-buttons-computed'))
+      .consume();
+    logger.debug('Search for action container yielded: ', actionContainer);
+
+    const scrollToBottomButton = createIntegratedUi(contentScriptContext$.value!, {
+      anchor: actionContainer,
+      position: 'inline',
+      append: 'last',
+      onMount: (container) => {
+        const app = createApp(ScrollToContainerEndButton, {
+          scrollContainer,
+        });
+        app.mount(container);
+        return app;
+      },
+      onRemove: (app) => {
+        app?.unmount();
+      },
+    });
+    scrollToBottomButton.mount();
+  }),
+);
 
 const createRemoveButtons$ = contentMutationSubject.pipe(
   filter((record) => record.target.nodeName === 'DIV' && (record.target as HTMLElement).id === 'menu'),
@@ -184,11 +233,13 @@ export function initWatchingPlaylist(ctx: ContentScriptContext): DisconnectFn {
 
   const createRemoveButtonSubscription = createRemoveButtons$.subscribe();
   const clickPopupRemoveButtonSubscription = clickPopupRemoveButton$.subscribe();
+  const addScrollToEndButtonSubscription = addScrollToEndButton$.subscribe();
 
   return () => {
     contentMutationObserver.disconnect();
     popupMutationObserver.disconnect();
     createRemoveButtonSubscription.unsubscribe();
     clickPopupRemoveButtonSubscription.unsubscribe();
+    addScrollToEndButtonSubscription.unsubscribe();
   };
 }

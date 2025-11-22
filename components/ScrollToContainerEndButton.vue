@@ -1,10 +1,21 @@
 <script setup lang="ts">
-const { scrollContainer } = defineProps<{
+const { scrollContainer, scrollWindow } = defineProps<{
   scrollContainer: HTMLElement;
+  scrollWindow: boolean;
+  pillLook: boolean;
 }>();
 
-function click() {
-  window.scrollTo({
+function scrollToTop() {
+  const scrollable = scrollWindow ? window : scrollContainer;
+  scrollable.scrollTo({
+    behavior: 'smooth',
+    top: 0,
+  });
+}
+
+function scrollToBottom() {
+  const scrollable = scrollWindow ? window : scrollContainer;
+  scrollable.scrollTo({
     behavior: 'smooth',
     top: scrollContainer.scrollHeight,
   });
@@ -13,9 +24,15 @@ function click() {
 
 <template>
   <div class="flex justify-end">
-    <button class="qa-btn qa-btn-pill" @click="click">
-      <i class="fa-solid fa-arrows-down-to-line fa-lg"></i>
-    </button>
+    <div class="flex">
+      <button class="qa-btn" :class="{ 'qa-btn-pill': pillLook }" @click="scrollToTop">
+        <i class="fa-solid fa-arrows-up-to-line fa-lg"></i>
+      </button>
+
+      <button class="qa-btn" :class="{ 'qa-btn-pill': pillLook }" @click="scrollToBottom">
+        <i class="fa-solid fa-arrows-down-to-line fa-lg"></i>
+      </button>
+    </div>
   </div>
 </template>
 
