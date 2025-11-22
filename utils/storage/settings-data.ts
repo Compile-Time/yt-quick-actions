@@ -21,6 +21,7 @@ interface SettingSearchStringsBase<T> {
   watchPlaylist: {
     removeEntry: T;
     watchLaterEntry: T;
+    videoSaveButton: T;
   };
   playlist: {
     removeEntry: T;

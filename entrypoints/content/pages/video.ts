@@ -31,7 +31,8 @@ import {
 } from '@/utils/storage/settings-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterVideoButton from '@/components/WatchLaterVideoButton.vue';
-import { getYtPopupFromDom } from '#imports';
+import { getTpYtIronDropDownFromDom, getYtPopupFromDom } from '#imports';
+import { CurrentPage } from '@/entrypoints/content';
 
 const logger = createLogger('video');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
@@ -40,24 +41,43 @@ storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
   }
 });
 
-let searchStrings: SettingSearchStrings['watchVideo'] = {
+let watchVideoSearchStrings: SettingSearchStrings['watchVideo'] = {
   watchLaterEntry: undefined,
   videoSaveButton: undefined,
 };
+let watchPlaylistSearchStrings: SettingSearchStrings['watchPlaylist'] = {
+  watchLaterEntry: undefined,
+  removeEntry: undefined,
+  videoSaveButton: undefined,
+};
+
 storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
-  logger.debug('Setting search strings changed: ', settingSearchStrings);
+  logger.debug('Watch video search strings changed: ', settingSearchStrings);
   if (settingSearchStrings?.watchVideo) {
-    searchStrings = settingSearchStrings.watchVideo;
+    watchVideoSearchStrings = settingSearchStrings.watchVideo;
   }
 });
 storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearchStrings) => {
-  logger.debug('Loaded setting search strings: ', settingSearchStrings);
+  logger.debug('Loaded watch video search strings: ', settingSearchStrings);
   if (settingSearchStrings?.watchVideo) {
-    searchStrings = settingSearchStrings.watchVideo;
+    watchVideoSearchStrings = settingSearchStrings.watchVideo;
+  }
+});
+storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
+  logger.debug('Watch playlist search strings changed: ', settingSearchStrings);
+  if (settingSearchStrings?.watchPlaylist) {
+    watchPlaylistSearchStrings = settingSearchStrings.watchPlaylist;
+  }
+});
+storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearchStrings) => {
+  logger.debug('Loaded watch playlist search strings: ', settingSearchStrings);
+  if (settingSearchStrings?.watchPlaylist) {
+    watchPlaylistSearchStrings = settingSearchStrings.watchPlaylist;
   }
 });
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
+const currentPage$ = new BehaviorSubject<CurrentPage | null>(null);
 
 const contentMutation$ = new Subject<MutationRecord>();
 const contentMutationObserver = new MutationObserver((mutations) => {
@@ -112,10 +132,17 @@ const createWatchLaterButton$ = combineLatest({
   first(),
   tap(({ topLevelButtonsComputed, moreOptionsButton }) => {
     let saveToPlaylistButton: HTMLElement | null;
-    if (searchStrings.videoSaveButton) {
-      logger.debug(`Using custom search string "${searchStrings.videoSaveButton}" for save to playlist button`);
+    const videoSaveSearchString =
+      currentPage$.value === CurrentPage.WATCHING_PLAYLIST
+        ? watchPlaylistSearchStrings.videoSaveButton
+        : watchVideoSearchStrings.videoSaveButton;
+
+    if (videoSaveSearchString) {
+      logger.debug(
+        `Using custom search string "${watchVideoSearchStrings.videoSaveButton}" for save to playlist button`,
+      );
       saveToPlaylistButton = HtmlTreeNavigator.startFrom(topLevelButtonsComputed.parentElement!)
-        .findFirst(new TextNavigationFilter('button', searchStrings.videoSaveButton))
+        .findFirst(new TextNavigationFilter('button', videoSaveSearchString))
         .consume();
     } else {
       logger.debug('Using default icon search for save to playlist button');
@@ -176,20 +203,17 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
   debounceTime(300),
   first(),
   tap(() => {
-    // "Reload" the DOM element for its children.
-    const tpYtIronDropdown = document.evaluate(
-      '/html/body/ytd-app/ytd-popup-container/tp-yt-iron-dropdown',
-      document,
-      null,
-      XPathResult.ANY_UNORDERED_NODE_TYPE,
-      null,
-    ).singleNodeValue as HTMLElement;
+    const tpYtIronDropdown = getTpYtIronDropDownFromDom();
+    const videoSaveSearchString =
+      currentPage$.value === CurrentPage.WATCHING_PLAYLIST
+        ? watchPlaylistSearchStrings.videoSaveButton
+        : watchVideoSearchStrings.videoSaveButton;
 
     let clickable: HTMLElement | null;
-    if (searchStrings.videoSaveButton) {
-      logger.debug(`Using custom search string "${searchStrings.videoSaveButton}" for watch later playlist`);
+    if (videoSaveSearchString) {
+      logger.debug(`Using custom search string "${watchVideoSearchStrings.videoSaveButton}" for watch later playlist`);
       clickable = HtmlTreeNavigator.startFrom(tpYtIronDropdown)
-        .findFirst(new TextNavigationFilter('tp-yt-paper-item', searchStrings.videoSaveButton))
+        .findFirst(new TextNavigationFilter('tp-yt-paper-item', videoSaveSearchString))
         .consume();
     } else {
       logger.debug('Using default text search for watch later playlist');
@@ -228,14 +252,17 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
   debounceTime(600),
   first(),
   tap(() => {
-    // "Reload" the DOM element for its children.
     const popupContainer = getYtPopupFromDom();
+    const watchLaterSearchString =
+      currentPage$.value === CurrentPage.WATCHING_PLAYLIST
+        ? watchPlaylistSearchStrings.watchLaterEntry
+        : watchVideoSearchStrings.watchLaterEntry;
 
     let clickable: HTMLElement | null;
-    if (searchStrings.watchLaterEntry) {
-      logger.debug(`Using custom search string "${searchStrings.watchLaterEntry}" for watch later playlist`);
+    if (watchLaterSearchString) {
+      logger.debug(`Using custom search string "${watchLaterSearchString}" for watch later playlist`);
       clickable = HtmlTreeNavigator.startFrom(popupContainer)
-        .findFirst(new TextNavigationFilter('span', searchStrings.watchLaterEntry))
+        .findFirst(new TextNavigationFilter('span', watchLaterSearchString))
         .consume();
     } else {
       logger.debug('Using default text search for watch later playlist');
@@ -288,8 +315,9 @@ const setupPopupMutationObserver$ = ytAppReady$.pipe(
   }),
 );
 
-export function initWatchVideo(ctx: ContentScriptContext): DisconnectFn {
+export function initWatchVideo(ctx: ContentScriptContext, currentPage: CurrentPage): DisconnectFn {
   contentScriptContext$.next(ctx);
+  currentPage$.next(currentPage);
 
   const contentObserverConf = { attributes: false, childList: true, subtree: true };
   contentMutationObserver.observe(document.body, contentObserverConf);

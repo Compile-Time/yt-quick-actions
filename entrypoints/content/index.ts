@@ -11,6 +11,13 @@ import './fontawesome.min.css';
 import './solid.min.css';
 import './yt-quick-actions.css';
 
+export enum CurrentPage {
+  HOME = 'HOME',
+  WATCHING_PLAYLIST = 'WATCHING_PLAYLIST',
+  WATCH_VIDEO = 'WATCH_VIDEO',
+  PLAYLIST = 'PLAYLIST',
+}
+
 export default defineContentScript({
   matches: ['*://www.youtube.com/*'],
   runAt: 'document_start',
@@ -36,11 +43,11 @@ export default defineContentScript({
       const pathAndQueryParams = `${location.pathname}${location.search}`;
       if (pathAndQueryParams.includes('watch') && pathAndQueryParams.includes('list=WL')) {
         disconnectFns.push(initWatchingPlaylist(ctx));
-        disconnectFns.push(initWatchVideo(ctx));
+        disconnectFns.push(initWatchVideo(ctx, CurrentPage.WATCH_VIDEO));
       } else if (pathAndQueryParams.includes('list=WL')) {
         disconnectFns.push(initPlaylistObservers(ctx));
       } else if (pathAndQueryParams.includes('watch')) {
-        disconnectFns.push(initWatchVideo(ctx));
+        disconnectFns.push(initWatchVideo(ctx, CurrentPage.WATCH_VIDEO));
       } else if (pathAndQueryParams.includes('subscriptions')) {
         disconnectFns.push(initHomeObserver(ctx));
       } else if (pathAndQueryParams === '/') {

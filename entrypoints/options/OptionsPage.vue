@@ -42,6 +42,7 @@ const settingSearchStrings = ref<SettingSearchStrings>({
   watchPlaylist: {
     removeEntry: undefined,
     watchLaterEntry: undefined,
+    videoSaveButton: undefined,
   },
 });
 storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((strings) => {
