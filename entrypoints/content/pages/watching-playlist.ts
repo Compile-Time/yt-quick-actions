@@ -31,6 +31,7 @@ storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
 let searchStrings: SettingSearchStrings['watchPlaylist'] = {
   removeEntry: undefined,
   watchLaterEntry: undefined,
+  videoSaveButton: undefined,
 };
 storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
   logger.debug('Setting search strings changed: ', settingSearchStrings);
@@ -141,26 +142,22 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
     if (clickable) {
       clickable.click();
     }
-
-    return popup;
   }),
   catchError((err) => {
     logger.error('Error occurred while trying to click the remove entry in the popup', err);
     popupMutationObserver.disconnect();
 
+    return of(true);
+  }),
+  tap((errored) => {
+    removeButtonClicked$.next(false);
     allowYtPopupVisibility();
 
-    return of(null);
-  }),
-  tap((popup) => {
-    removeButtonClicked$.next(false);
-
-    if (!popup) {
+    if (errored) {
       return;
     }
 
     clickPopupRemoveButton$.subscribe();
-    hideYtPopup(popup);
   }),
 );
 

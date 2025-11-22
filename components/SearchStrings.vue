@@ -19,6 +19,7 @@ const templateSearchStringText: TemplateSearchStrings = {
   watchPlaylist: {
     removeEntry: 'Popup remove item',
     watchLaterEntry: 'Popup watch later item',
+    videoSaveButton: 'Save button',
   },
   playlist: {
     removeEntry: 'Popup remove item',

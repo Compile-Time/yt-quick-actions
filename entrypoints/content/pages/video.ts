@@ -88,13 +88,13 @@ const contentMutationObserver = new MutationObserver((mutations) => {
   });
 });
 
-const popupMutationSubject = new Subject<MutationRecord>();
+const popupMutation$ = new Subject<MutationRecord>();
 const popupMutationObserver = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
     // We manipulate the style in some cases, and we generally don't check for it in any use case, so we can
     // ignore it.
     if (mutation.attributeName !== 'style') {
-      popupMutationSubject.next(mutation);
+      popupMutation$.next(mutation);
     }
   });
 });
@@ -138,9 +138,7 @@ const createWatchLaterButton$ = combineLatest({
         : watchVideoSearchStrings.videoSaveButton;
 
     if (videoSaveSearchString) {
-      logger.debug(
-        `Using custom search string "${watchVideoSearchStrings.videoSaveButton}" for save to playlist button`,
-      );
+      logger.debug(`Using custom search string "${videoSaveSearchString}" for save to playlist button`);
       saveToPlaylistButton = HtmlTreeNavigator.startFrom(topLevelButtonsComputed.parentElement!)
         .findFirst(new TextNavigationFilter('button', videoSaveSearchString))
         .consume();
@@ -193,12 +191,11 @@ const createWatchLaterButton$ = combineLatest({
   }),
 );
 
-const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
+const clickPopupVideoSaveButton$ = popupMutation$.pipe(
   filter(() => watchLaterButtonClicked$.value && !saveVideoInOptionsClicked$.value),
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
-    const popup = record.target as HTMLElement;
-    hideYtPopup(popup);
+    hideYtPopup();
   }),
   debounceTime(300),
   first(),
@@ -211,12 +208,12 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
 
     let clickable: HTMLElement | null;
     if (videoSaveSearchString) {
-      logger.debug(`Using custom search string "${watchVideoSearchStrings.videoSaveButton}" for watch later playlist`);
+      logger.debug(`Using custom search string "${videoSaveSearchString}" for save entry in popup`);
       clickable = HtmlTreeNavigator.startFrom(tpYtIronDropdown)
         .findFirst(new TextNavigationFilter('tp-yt-paper-item', videoSaveSearchString))
         .consume();
     } else {
-      logger.debug('Using default text search for watch later playlist');
+      logger.debug('Using default icon search for save entry in popup');
       clickable = HtmlTreeNavigator.startFrom(tpYtIronDropdown as HTMLElement)
         .findFirst(new SvgDrawPathNavigationFilter(SvgDrawPath.VIDEO_SAVE))
         .intoParentNavigator()
@@ -230,24 +227,30 @@ const clickPopupVideoSaveButton$ = popupMutationSubject.pipe(
     }
     saveVideoInOptionsClicked$.next(true);
   }),
+  map(() => false),
   catchError((error) => {
     logger.error('Error occurred while trying to click the save to playlist entry in the popup', error);
     popupMutationObserver.disconnect();
-    allowYtPopupVisibility();
 
-    return throwError(() => error);
+    return of(true);
   }),
-  tap(() => {
+  tap((errored) => {
+    allowYtPopupVisibility();
+    watchLaterButtonClicked$.next(false);
+
+    if (errored) {
+      return;
+    }
+
     clickPopupVideoSaveButton$.subscribe();
   }),
 );
 
-const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
+const clickPopupWatchLaterPlaylist$ = popupMutation$.pipe(
   filter(() => saveVideoInOptionsClicked$.value),
   filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
-    const popup = record.target as HTMLElement;
-    hideYtPopup(popup);
+    hideYtPopup();
   }),
   debounceTime(600),
   first(),
@@ -265,7 +268,7 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
         .findFirst(new TextNavigationFilter('span', watchLaterSearchString))
         .consume();
     } else {
-      logger.debug('Using default text search for watch later playlist');
+      logger.debug('Using default icon search for watch later playlist');
       clickable = HtmlTreeNavigator.startFrom(popupContainer)
         .findFirst(new TagNavigationFilter('yt-list-item-view-model'))
         .consume();
@@ -276,23 +279,22 @@ const clickPopupWatchLaterPlaylist$ = popupMutationSubject.pipe(
       clickable.click();
     }
   }),
+  map(() => false),
   catchError((err) => {
     logger.error('Error occurred while trying to click the watch later playlist in the popup', err);
     popupMutationObserver.disconnect();
-    allowYtPopupVisibility();
 
-    return of(null);
+    return of(true);
   }),
-  tap((record) => {
+  tap((errored) => {
     watchLaterButtonClicked$.next(false);
     saveVideoInOptionsClicked$.next(false);
+    allowYtPopupVisibility();
 
-    if (!record) {
+    if (errored) {
       return;
     }
 
-    const popup = record.target as HTMLElement;
-    allowYtPopupVisibility(popup);
     clickPopupWatchLaterPlaylist$.subscribe();
   }),
 );
