@@ -6,6 +6,7 @@ import {
   filter,
   first,
   map,
+  merge,
   of,
   shareReplay,
   Subject,
@@ -33,6 +34,7 @@ import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterVideoButton from '@/components/WatchLaterVideoButton.vue';
 import { getTpYtIronDropDownFromDom, getYtPopupFromDom } from '#imports';
 import { CurrentPage } from '@/entrypoints/content';
+import { HTMLElement } from 'linkedom';
 
 const logger = createLogger('video');
 storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
@@ -299,15 +301,23 @@ const clickPopupWatchLaterPlaylist$ = popupMutation$.pipe(
   }),
 );
 
-const ytAppReady$ = contentMutation$.pipe(
-  filter((record) => record.target.nodeName === 'YTD-APP'),
+const ytPopupFoundDuringInit$ = new BehaviorSubject<HTMLElement | null>(null);
+const ytPopupReady$ = merge([
+  contentMutation$.pipe(
+    filter((record) => record.target.nodeName === 'YTD-APP'),
+    map((record) => record.target as unknown as HTMLElement),
+  ),
+  ytPopupFoundDuringInit$,
+]).pipe(
+  filter((element) => !!element),
+  map(() => true),
   shareReplay({
     bufferSize: 1,
     refCount: true,
   }),
 );
 
-const setupPopupMutationObserver$ = ytAppReady$.pipe(
+const setupPopupMutationObserver$ = ytPopupReady$.pipe(
   tap(() => {
     const popupContainer = HtmlTreeNavigator.startFrom(document.body)
       .findFirst(new TagNavigationFilter('ytd-popup-container'))
@@ -323,6 +333,11 @@ export function initWatchVideo(ctx: ContentScriptContext, currentPage: CurrentPa
 
   const contentObserverConf = { attributes: false, childList: true, subtree: true };
   contentMutationObserver.observe(document.body, contentObserverConf);
+
+  const popupContainer = getYtPopupFromDom();
+  if (popupContainer) {
+    ytPopupFoundDuringInit$.next(popupContainer);
+  }
 
   const setupPopupMutationObserver = setupPopupMutationObserver$.subscribe();
   const createWatchLaterButtonSubscription = createWatchLaterButton$.subscribe();
