@@ -8,7 +8,7 @@ Concretely, YT Quick Actions offers the following features:
 - Add a remove button in playlists next to the more options button
 - Add a watch later button as an action under videos
 - Add a watch later button as an action in home page videos
-- Add a watch later button as an action in the subscriptions feed
+- Add a watch later button as an action in the subscription feed
 - Add a remove button for playlists being watched
 
 Having problems with the extension? See the [FAQ](#faq) section for more
@@ -33,7 +33,7 @@ The following permissions are required for the extension to work:
 
 ## Screenshots
 
-### Watch later button for home page video
+### Watch later button for a home page video
 
 ![Home page watch later button](documentation/images/home_page_sample.png "Home page watch later button")
 
@@ -41,11 +41,11 @@ The following permissions are required for the extension to work:
 
 ![Watch later button under playing video](documentation/images/video_watch_later_sample.png "Watch later button under playing video")
 
-### Remove button in watch later playlist
+### Remove button in the watch later playlist
 
 ![Remove button in watch later playlist](documentation/images/watch_later_remove_sample.png "Remove button in watch later playlist")
 
-### Remove button in currently playing playlist
+### Remove button in the currently playing playlist
 
 ![Remove button in currently playing playlist](documentation/images/watching_playlist_remove_sample.png "Remove button in currently playing playlist")
 
@@ -53,11 +53,11 @@ The following permissions are required for the extension to work:
 
 - Firefox
   - From addons.mozilla.org: [AMO](https://addons.mozilla.org/en-US/firefox/addon/yt-quick-actions/)
-  - From release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
+  - From the release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
 - Google Chrome
   - From Chrome Web Store:
     [Chrome web store](https://chrome.google.com/webstore/detail/yt-quick-actions/lopaoogidddnpogjngfhbaklhdecmcii)
-  - From release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
+  - From the release page (manual): [Releases](https://github.com/Compile-Time/yt-quick-actions/releases)
 
 ## Building
 
@@ -66,42 +66,33 @@ module reloading (HMR), run one of the `start` scripts mentioned below.
 
 ```sh
 # Firefox
-npm run start
-npm run start-no-hmr
+npm run dev:firefox
 
 # Chrome
-npm run start-ch
-npm run start-no-hmr-ch
+npm run dev
 ```
 
-These script will produce the following directories under the `dist` directory
-respectively:
+These scripts will produce build output under the `.output` directory.
 
-- `/dist/firefox-dev`
-- `/dist/chrome-dev`
-
-For production builds that can be zipped for upload to [AMO](https://addons.mozilla.org/en-US/firefox/) or the
-[Chrome web store](https://chrome.google.com/webstore/category/extensions) use the `build` scripts.
+For production builds that can be uploaded to [AMO](https://addons.mozilla.org/en-US/firefox/) or the
+[Chrome web store](https://chrome.google.com/webstore/category/extensions) use the `zip` scripts.
 
 ```sh
 # Firefox
-npm run build
+npm run zip:firefox
 
 # Chrome
-npm run build-ch
+npm run zip
 ```
 
-The production builds can also be found under `/dist`:
-
-- `/dist/firefox-prod`
-- `/dist/chrome-prod`
+The production builds will also be placed under `.output`.
 
 ## Build / CI tools
 
-- `act` - The tool [`act`](https://nektosact.com/introduction.html) can be used to
-  test the Github Action workflows of this project.
-- `husky` - Run CI tasks locally (`commitlint`).
-- `semantic-release` - Version bumping & release management.
+- [act](https://github.com/nektos/act) - `act` can be used to test the GitHub Action workflows of this project.
+- [husky](https://github.com/typicode/husky) - Run CI tasks locally (e.g. [commitlint](https://github.com/conventional-changelog/commitlint)).
+- [semantic-release](https://github.com/semantic-release/semantic-release) - Version bumping and release management.
+- [wxt](https://github.com/wxt-dev/wxt) - Building/bundling/packaging of the extension.
 
 ## Changelog
 
@@ -118,8 +109,8 @@ perform the different quick actions it provides. If these icons are changed
 in minor or major ways, the extension will fail to function.
 
 Therefore, if the extension does not work for you, it would be nice if you
-create an issue on this Github or write an E-Mail to `socialcoms@posteo.de`
-or `socialcoms.ch@gmail.com` (E-Mail for the Chrome Webstore version).
+create an issue on this GitHub or write an E-Mail to `socialcoms@posteo.de`
+or `socialcoms.ch@gmail.com` (E-Mail for the Chrome Web Store version).
 
 ### YouTube has a new design
 
