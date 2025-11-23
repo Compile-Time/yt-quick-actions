@@ -51,30 +51,41 @@ jobs:
           cache: "npm"
       - name: Install npm dependencies
         run: npm ci
-      - name: Update version in manifest files
+      - name: Update version in package(-lock).json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx semantic-release -d > dry-run.txt
           NEXT_VERSION=$(awk '/The next release version is/{print $NF}' dry-run.txt)
-          sed -i "s/\"version\": \".*\"/\"version\": \"$NEXT_VERSION\"/" manifest-firefox.json
-          sed -i "s/\"version\": \".*\"/\"version\": \"$NEXT_VERSION\"/" manifest-chrome.json
+          sed -i "s/\"version\": \".*\"/\"version\": \"$NEXT_VERSION\"/" package.json
+          sed -i "1,9s/\"version\": \".*\"/\"version\": \"$NEXT_VERSION\"/" package-lock.json
           rm dry-run.txt
       - name: Build Firefox
-        run: npm run build
+        run: npm run zip:firefox
       - name: Build Chrome
-        run: npm run build-ch
-      - name: Package Firefox
-        working-directory: ./dist/firefox-prod
-        run: zip -r ../../yt-quick-actions-firefox.zip ./
-      - name: Package Chrome
-        working-directory: ./dist/chrome-prod
-        run: zip -r ../../yt-quick-actions-chrome.zip ./
+        run: npm run zip
       - name: Create Checksum of firefox package
-        run: sha512sum yt-quick-actions-firefox.zip > yt-quick-actions-firefox.sha512sum
+        run: |
+          NEXT_VERSION=$(awk '/The next release version is/{print $NF}' dry-run.txt)
+          sha512sum ".output/yt-quick-actions-$NEXT_VERSION-firefox.zip" > ".output/yt-quick-actions-$NEXT_VERSION-firefox.sha512sum"
       - name: Create Checksum of chrome package
-        run: sha512sum yt-quick-actions-chrome.zip > yt-quick-actions-chrome.sha512sum
+        run: |
+          NEXT_VERSION=$(awk '/The next release version is/{print $NF}' dry-run.txt)
+          sha512sum ".output/yt-quick-actions-$NEXT_VERSION-chrome.zip" > ".output/yt-quick-actions-$NEXT_VERSION-chrome.sha512sum"
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+      - name: Submit to stores
+        run: |
+          npx wxt submit \
+            --chrome-zip .output/*-chrome.zip \
+            --firefox-zip .output/*-firefox.zip --firefox-sources-zip .output/*-sources.zip
+        env:
+          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+          FIREFOX_EXTENSION_ID: ${{ secrets.FIREFOX_EXTENSION_ID }}
+          FIREFOX_JWT_ISSUER: ${{ secrets.FIREFOX_JWT_ISSUER }}
+          FIREFOX_JWT_SECRET: ${{ secrets.FIREFOX_JWT_SECRET }}

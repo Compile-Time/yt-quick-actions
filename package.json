@@ -69,9 +69,7 @@
           "assets": [
             "CHANGELOG.md",
             "package.json",
-            "package-lock.json",
-            "manifest-firefox.json",
-            "manifest-chrome.json"
+            "package-lock.json"
           ]
         }
       ],
@@ -79,10 +77,8 @@
         "@semantic-release/github",
         {
           "assets": [
-            "yt-quick-actions-firefox.zip",
-            "yt-quick-actions-firefox.sha512sum",
-            "yt-quick-actions-chrome.zip",
-            "yt-quick-actions-chrome.sha512sum"
+            ".output/yt-quick-actions-*.zip",
+            ".output/yt-quick-actions-*.sha512sum"
           ]
         }
       ]
@@ -101,6 +97,8 @@
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "@wxt-dev/auto-icons": "^1.1.0",
