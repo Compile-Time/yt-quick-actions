@@ -1,4 +1,4 @@
-import { LogLevel } from '../enums/log-level';
+import { LogLevel } from './enums/log-level';
 
 export const SETTING_LOG_LEVELS = 'local:log-levels';
 export const SETTING_SEARCH_STRINGS = 'local:search-strings';
@@ -66,3 +66,59 @@ export type SettingSearchStringValues = SettingSearchStrings['homePage'] &
   SettingSearchStrings['watchVideo'] &
   SettingSearchStrings['watchPlaylist'] &
   SettingSearchStrings['playlist'];
+
+export const logLevelStorage = storage.defineItem<SettingLogLevels>(SETTING_LOG_LEVELS, {
+  fallback: {
+    homePage: LogLevel.WARN,
+    watchVideo: LogLevel.WARN,
+    watchPlaylist: LogLevel.WARN,
+    playlist: LogLevel.WARN,
+    settings: LogLevel.WARN,
+  },
+});
+
+export const searchStringStorage = storage.defineItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS, {
+  fallback: {
+    homePage: {
+      watchLaterEntry: undefined,
+    },
+    watchVideo: {
+      watchLaterEntry: undefined,
+      videoSaveButton: undefined,
+    },
+    playlist: {
+      moveToTopEntry: undefined,
+      moveToBottomEntry: undefined,
+      removeEntry: undefined,
+    },
+    watchPlaylist: {
+      removeEntry: undefined,
+      watchLaterEntry: undefined,
+      videoSaveButton: undefined,
+    },
+  },
+});
+
+export const featuresStorage = storage.defineItem<SettingFeatures<boolean>>(SETTING_FEATURES, {
+  fallback: {
+    homePage: {
+      disableWatchLater: false,
+    },
+    watchVideo: {
+      disableWatchLater: false,
+    },
+    watchPlaylist: {
+      disableRemove: false,
+      disableWatchLater: false,
+      disableScrollToTop: false,
+      disableScrollToBottom: false,
+    },
+    playlist: {
+      disableRemove: false,
+      disableMoveToTop: false,
+      disableMoveToBottom: false,
+      disableScrollToTop: false,
+      disableScrollToBottom: false,
+    },
+  },
+});

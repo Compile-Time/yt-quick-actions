@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SettingSearchStrings, SettingSearchStringValues, TemplateSearchStrings } from '@/utils/storage/settings-data';
+import { SettingSearchStrings, SettingSearchStringValues, TemplateSearchStrings } from '@/utils/storage';
 import { watchDebounced } from '@vueuse/shared';
 
 const props = defineProps<{ searchStrings: SettingSearchStrings }>();

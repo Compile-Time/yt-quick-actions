@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { LogLevel, logLevelFromStr } from '@/utils/enums/log-level';
-import { SettingLogLevels, TemplateLogLevels } from '@/utils/storage/settings-data';
+import { SettingLogLevels, TemplateLogLevels } from '@/utils/storage';
 
 const { logLevels } = defineProps<{ logLevels: SettingLogLevels }>();
 const emit = defineEmits({

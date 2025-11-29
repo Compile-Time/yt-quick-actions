@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SettingFeatures, SettingFeaturesValues, TemplateFeatures } from '@/utils/storage/settings-data';
+import { SettingFeatures, SettingFeaturesValues, TemplateFeatures } from '@/utils/storage';
 import { watchDebounced } from '@vueuse/shared';
 import ToggleComponent from '@/components/ToggleComponent.vue';
 

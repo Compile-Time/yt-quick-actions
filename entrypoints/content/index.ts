@@ -11,8 +11,10 @@ import './fontawesome.min.css';
 import './solid.min.css';
 import './yt-quick-actions.css';
 import {
+  featuresStorageUnwatch,
   homeScriptDisabled$,
   playlistScriptDisabled$,
+  searchStringStorageUnwatch,
   videoScriptDisabled$,
   watchingPlaylistScriptDisabled$,
 } from '@/entrypoints/content/state/settings';
@@ -48,6 +50,8 @@ export default defineContentScript({
 
       if (ctx.isInvalid) {
         // Extension is updated, uninstalled or disabled during runtime.
+        featuresStorageUnwatch();
+        searchStringStorageUnwatch();
         return;
       }
 

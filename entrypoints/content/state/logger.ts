@@ -1,5 +1,5 @@
 import { createLogger } from '@/utils/logging/log-provider';
-import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage/settings-data';
+import { SETTING_LOG_LEVELS, SettingLogLevels } from '@/utils/storage';
 import { Logger } from 'loglevel';
 
 export enum LoggerKind {
