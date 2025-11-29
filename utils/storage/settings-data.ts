@@ -2,6 +2,34 @@ import { LogLevel } from '../enums/log-level';
 
 export const SETTING_LOG_LEVELS = 'local:log-levels';
 export const SETTING_SEARCH_STRINGS = 'local:search-strings';
+export const SETTING_FEATURES = 'local:features';
+
+export interface SettingFeatures<T> {
+  homePage: {
+    disableWatchLater: T;
+  };
+  watchVideo: {
+    disableWatchLater: T;
+  };
+  watchPlaylist: {
+    disableRemove: T;
+    disableWatchLater: T;
+    disableScrollToTop: T;
+    disableScrollToBottom: T;
+  };
+  playlist: {
+    disableRemove: T;
+    disableMoveToTop: T;
+    disableMoveToBottom: T;
+    disableScrollToTop: T;
+    disableScrollToBottom: T;
+  };
+}
+export type TemplateFeatures = SettingFeatures<string>;
+export type SettingFeaturesValues = SettingFeatures<boolean>['homePage'] &
+  SettingFeatures<boolean>['watchVideo'] &
+  SettingFeatures<boolean>['watchPlaylist'] &
+  SettingFeatures<boolean>['playlist'];
 
 export interface SettingLogLevels {
   homePage: LogLevel;
