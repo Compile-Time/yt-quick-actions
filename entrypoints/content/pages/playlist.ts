@@ -8,13 +8,6 @@ import {
   TextNavigationFilter,
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { Ids, SvgDrawPath } from '@/utils/html-element-processing/element-data';
-import {
-  SETTING_LOG_LEVELS,
-  SETTING_SEARCH_STRINGS,
-  SettingLogLevels,
-  SettingSearchStrings,
-} from '@/utils/storage/settings-data';
-import { createLogger } from '@/utils/logging/log-provider';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import RemoveVideoPlaylistButton from '@/components/RemoveVideoPlaylistButton.vue';
 import MoveTopBottomContainer from '@/components/MoveTopBottomContainer.vue';
@@ -22,31 +15,10 @@ import { allowYtPopupVisibility } from '@/utils/yt-popup-visibility';
 import { getYtPopupFromDom } from '@/utils/yt-popup';
 import ScrollToContainerEndButton from '@/components/ScrollToContainerEndButton.vue';
 import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
+import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
+import { playlistSearchStrings$ } from '@/entrypoints/content/state/settings';
 
-const logger = createLogger('playlist');
-storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
-  if (logLevels?.playlist) {
-    logger.setLevel(logLevels.playlist);
-  }
-});
-
-let searchStrings: SettingSearchStrings['playlist'] = {
-  removeEntry: undefined,
-  moveToTopEntry: undefined,
-  moveToBottomEntry: undefined,
-};
-storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
-  logger.debug('Setting search strings changed: ', settingSearchStrings);
-  if (settingSearchStrings?.playlist) {
-    searchStrings = settingSearchStrings.playlist;
-  }
-});
-storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearchStrings) => {
-  logger.debug('Loaded setting search strings: ', settingSearchStrings);
-  if (settingSearchStrings?.playlist) {
-    searchStrings = settingSearchStrings.playlist;
-  }
-});
+const logger = getLogger(LoggerKind.PLAYLIST_SCRIPT);
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 
@@ -220,8 +192,8 @@ const clickRemoveItemInPopup$ = popupReadyAndHidden$.pipe(
     const popup = getYtPopupFromDom();
 
     let clickable;
-    if (searchStrings.removeEntry) {
-      logger.debug(`Using search string "${searchStrings.removeEntry}" for remove entry`);
+    if (playlistSearchStrings$.value.removeEntry) {
+      logger.debug(`Using search string "${playlistSearchStrings$.value.removeEntry}" for remove entry`);
       /*
       It's sadly not simple enough to just look for text inside a span tag.
       Therefore, below are the relevant tags for the menu items. These were taken with the help of console.log statements.
@@ -235,7 +207,7 @@ const clickRemoveItemInPopup$ = popupReadyAndHidden$.pipe(
       YTD-MENU-SERVICE-ITEM-RENDERER: Move to bottom
        */
       clickable = HtmlTreeNavigator.startFrom(popup)
-        .findFirst(new TextNavigationFilter('YTD-MENU-SERVICE-ITEM-RENDERER', searchStrings.removeEntry))
+        .findFirst(new TextNavigationFilter('YTD-MENU-SERVICE-ITEM-RENDERER', playlistSearchStrings$.value.removeEntry))
         .consume();
     } else {
       logger.debug('Using default icon search for remove entry');
@@ -278,10 +250,12 @@ const clickMoveTopButtonInPopup$ = popupReadyAndHidden$.pipe(
     const popup = getYtPopupFromDom();
 
     let clickable;
-    if (searchStrings.moveToTopEntry) {
-      logger.debug(`Using search string "${searchStrings.moveToTopEntry}" for move to top entry`);
+    if (playlistSearchStrings$.value.moveToTopEntry) {
+      logger.debug(`Using search string "${playlistSearchStrings$.value.moveToTopEntry}" for move to top entry`);
       clickable = HtmlTreeNavigator.startFrom(popup)
-        .findFirst(new TextNavigationFilter('YTD-MENU-SERVICE-ITEM-RENDERER', searchStrings.moveToTopEntry))
+        .findFirst(
+          new TextNavigationFilter('YTD-MENU-SERVICE-ITEM-RENDERER', playlistSearchStrings$.value.moveToTopEntry),
+        )
         .consume();
     } else {
       logger.debug('Using default icon search for move to top entry');
@@ -324,10 +298,12 @@ const clickMoveBottomButtonInPopup$ = popupReadyAndHidden$.pipe(
     const popup = getYtPopupFromDom();
 
     let clickable;
-    if (searchStrings.moveToBottomEntry) {
-      logger.debug(`Using search string "${searchStrings.moveToBottomEntry}" for move to bottom entry`);
+    if (playlistSearchStrings$.value.moveToBottomEntry) {
+      logger.debug(`Using search string "${playlistSearchStrings$.value.moveToBottomEntry}" for move to bottom entry`);
       clickable = HtmlTreeNavigator.startFrom(popup)
-        .findFirst(new TextNavigationFilter('YTD-MENU-SERVICE-ITEM-RENDERER', searchStrings.moveToBottomEntry))
+        .findFirst(
+          new TextNavigationFilter('YTD-MENU-SERVICE-ITEM-RENDERER', playlistSearchStrings$.value.moveToBottomEntry),
+        )
         .consume();
     } else {
       logger.debug('Using default icon search for move to bottom entry');

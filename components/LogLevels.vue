@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { LogLevel, logLevelFromStr } from '@/utils/enums/log-level';
-import { SettingLogLevels } from '@/utils/storage/settings-data';
+import { SettingLogLevels, TemplateLogLevels } from '@/utils/storage/settings-data';
 
 const { logLevels } = defineProps<{ logLevels: SettingLogLevels }>();
 const emit = defineEmits({
@@ -12,11 +12,12 @@ const logLevelOptions = Object.values(LogLevel).map((level) => ({
   label: level.toUpperCase(),
 }));
 
-const templateLoggerNames = {
+const templateLoggerNames: TemplateLogLevels = {
   homePage: 'Home page',
   watchVideo: 'Watch video',
   watchPlaylist: 'Watch playlist',
   playlist: 'Playlist',
+  settings: 'Settings',
 };
 
 function handleLogLevelChange(event: Event, loggerName: keyof SettingLogLevels) {

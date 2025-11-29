@@ -23,59 +23,14 @@ import {
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
-import { createLogger } from '@/utils/logging/log-provider';
-import {
-  SETTING_LOG_LEVELS,
-  SETTING_SEARCH_STRINGS,
-  SettingLogLevels,
-  SettingSearchStrings,
-} from '@/utils/storage/settings-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterVideoButton from '@/components/WatchLaterVideoButton.vue';
 import { getTpYtIronDropDownFromDom, getYtPopupFromDom } from '#imports';
 import { CurrentPage } from '@/entrypoints/content';
+import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
+import { watchPlaylistSearchStrings$, watchVideoSearchStrings$ } from '@/entrypoints/content/state/settings';
 
-const logger = createLogger('video');
-storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
-  if (logLevels?.watchVideo) {
-    logger.setLevel(logLevels.watchVideo);
-  }
-});
-
-let watchVideoSearchStrings: SettingSearchStrings['watchVideo'] = {
-  watchLaterEntry: undefined,
-  videoSaveButton: undefined,
-};
-let watchPlaylistSearchStrings: SettingSearchStrings['watchPlaylist'] = {
-  watchLaterEntry: undefined,
-  removeEntry: undefined,
-  videoSaveButton: undefined,
-};
-
-storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
-  logger.debug('Watch video search strings changed: ', settingSearchStrings);
-  if (settingSearchStrings?.watchVideo) {
-    watchVideoSearchStrings = settingSearchStrings.watchVideo;
-  }
-});
-storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearchStrings) => {
-  logger.debug('Loaded watch video search strings: ', settingSearchStrings);
-  if (settingSearchStrings?.watchVideo) {
-    watchVideoSearchStrings = settingSearchStrings.watchVideo;
-  }
-});
-storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
-  logger.debug('Watch playlist search strings changed: ', settingSearchStrings);
-  if (settingSearchStrings?.watchPlaylist) {
-    watchPlaylistSearchStrings = settingSearchStrings.watchPlaylist;
-  }
-});
-storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearchStrings) => {
-  logger.debug('Loaded watch playlist search strings: ', settingSearchStrings);
-  if (settingSearchStrings?.watchPlaylist) {
-    watchPlaylistSearchStrings = settingSearchStrings.watchPlaylist;
-  }
-});
+const logger = getLogger(LoggerKind.VIDEO_SCRIPT);
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 const currentPage$ = new BehaviorSubject<CurrentPage | null>(null);
@@ -135,8 +90,8 @@ const createWatchLaterButton$ = combineLatest({
     let saveToPlaylistButton: HTMLElement | null;
     const videoSaveSearchString =
       currentPage$.value === CurrentPage.WATCHING_PLAYLIST
-        ? watchPlaylistSearchStrings.videoSaveButton
-        : watchVideoSearchStrings.videoSaveButton;
+        ? watchPlaylistSearchStrings$.value.videoSaveButton
+        : watchVideoSearchStrings$.value.videoSaveButton;
 
     if (videoSaveSearchString) {
       logger.debug(`Using custom search string "${videoSaveSearchString}" for save to playlist button`);
@@ -204,8 +159,8 @@ const clickPopupVideoSaveButton$ = popupMutation$.pipe(
     const tpYtIronDropdown = getTpYtIronDropDownFromDom();
     const videoSaveSearchString =
       currentPage$.value === CurrentPage.WATCHING_PLAYLIST
-        ? watchPlaylistSearchStrings.videoSaveButton
-        : watchVideoSearchStrings.videoSaveButton;
+        ? watchPlaylistSearchStrings$.value.videoSaveButton
+        : watchVideoSearchStrings$.value.videoSaveButton;
 
     let clickable: HTMLElement | null;
     if (videoSaveSearchString) {
@@ -259,8 +214,8 @@ const clickPopupWatchLaterPlaylist$ = popupMutation$.pipe(
     const popupContainer = getYtPopupFromDom();
     const watchLaterSearchString =
       currentPage$.value === CurrentPage.WATCHING_PLAYLIST
-        ? watchPlaylistSearchStrings.watchLaterEntry
-        : watchVideoSearchStrings.watchLaterEntry;
+        ? watchPlaylistSearchStrings$.value.watchLaterEntry
+        : watchVideoSearchStrings$.value.watchLaterEntry;
 
     let clickable: HTMLElement | null;
     if (watchLaterSearchString) {

@@ -9,43 +9,15 @@ import {
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import { Ids, SvgDrawPath } from '@/utils/html-element-processing/element-data';
-import { createLogger } from '@/utils/logging/log-provider';
-import {
-  SETTING_LOG_LEVELS,
-  SETTING_SEARCH_STRINGS,
-  SettingLogLevels,
-  SettingSearchStrings,
-} from '@/utils/storage/settings-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import RemoveVideoPlaylistButton from '@/components/RemoveVideoPlaylistButton.vue';
 import { NodeTypes } from '@vue/compiler-core';
 import { getYtPopupFromDom, hideYtPopup } from '#imports';
 import ScrollToContainerEndButton from '@/components/ScrollToContainerEndButton.vue';
+import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
+import { watchPlaylistSearchStrings$ } from '@/entrypoints/content/state/settings';
 
-const logger = createLogger('watching-playlist');
-storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
-  if (logLevels?.watchPlaylist) {
-    logger.setLevel(logLevels.watchPlaylist);
-  }
-});
-
-let searchStrings: SettingSearchStrings['watchPlaylist'] = {
-  removeEntry: undefined,
-  watchLaterEntry: undefined,
-  videoSaveButton: undefined,
-};
-storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
-  logger.debug('Setting search strings changed: ', settingSearchStrings);
-  if (settingSearchStrings?.watchPlaylist) {
-    searchStrings = settingSearchStrings.watchPlaylist;
-  }
-});
-storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearchStrings) => {
-  logger.debug('Loaded setting search strings: ', settingSearchStrings);
-  if (settingSearchStrings?.watchPlaylist) {
-    searchStrings = settingSearchStrings.watchPlaylist;
-  }
-});
+const logger = getLogger(LoggerKind.WATCHING_PLAYLIST_SCRIPT);
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 
@@ -173,10 +145,12 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
     const popup = getYtPopupFromDom();
 
     let clickable: HTMLElement | null;
-    if (searchStrings.removeEntry) {
-      logger.debug(`Using search string "${searchStrings.removeEntry}" for remove entry`);
+    if (watchPlaylistSearchStrings$.value.removeEntry) {
+      logger.debug(`Using search string "${watchPlaylistSearchStrings$.value.removeEntry}" for remove entry`);
       clickable = HtmlTreeNavigator.startFrom(popup)
-        .findFirst(new TextNavigationFilter('ytd-menu-service-item-renderer', searchStrings.removeEntry))
+        .findFirst(
+          new TextNavigationFilter('ytd-menu-service-item-renderer', watchPlaylistSearchStrings$.value.removeEntry),
+        )
         .consume();
     } else {
       logger.debug('Using default icon search for remove entry');

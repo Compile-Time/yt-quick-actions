@@ -22,47 +22,15 @@ import {
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
-import { createLogger } from '@/utils/logging/log-provider';
-import {
-  SETTING_LOG_LEVELS,
-  SETTING_SEARCH_STRINGS,
-  SettingLogLevels,
-  SettingSearchStrings,
-} from '@/utils/storage/settings-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterHomeButton from '@/components/WatchLaterHomeButton.vue';
 import { getTpYtIronDropDownFromDom } from '@/utils/yt-popup';
+import { homeSearchStrings$ } from '@/entrypoints/content/state/settings';
+import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
 
-const logger = createLogger('home');
-storage.getItem<SettingLogLevels>(SETTING_LOG_LEVELS).then((logLevels) => {
-  if (logLevels?.homePage) {
-    logger.setLevel(logLevels.homePage);
-  }
-});
-storage.watch<SettingLogLevels>(SETTING_LOG_LEVELS, (logLevels) => {
-  if (logLevels?.homePage) {
-    logger.setLevel(logLevels.homePage);
-  }
-});
-
-let searchStrings: SettingSearchStrings['homePage'] = {
-  watchLaterEntry: undefined,
-};
-storage.getItem<SettingSearchStrings>(SETTING_SEARCH_STRINGS).then((settingSearchStrings) => {
-  logger.debug('Setting search strings changed: ', settingSearchStrings);
-  if (settingSearchStrings?.homePage) {
-    searchStrings = settingSearchStrings.homePage;
-  }
-});
-storage.watch<SettingSearchStrings>(SETTING_SEARCH_STRINGS, (settingSearchStrings) => {
-  logger.debug('Loaded setting search strings: ', settingSearchStrings);
-  if (settingSearchStrings?.homePage) {
-    searchStrings = settingSearchStrings.homePage;
-  }
-});
+const logger = getLogger(LoggerKind.HOME_SCRIPT);
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
-
 const queueWatchLaterClick$ = new Subject<HTMLElement>();
 
 const contentMutation$ = new Subject<MutationRecord>();
@@ -172,10 +140,10 @@ const clickPopupWatchLaterButton$ = popupMutation$.pipe(
     const popupContainer = getTpYtIronDropDownFromDom();
 
     let clickable: HTMLElement | null;
-    if (searchStrings.watchLaterEntry) {
-      logger.debug(`Using custom search string "${searchStrings.watchLaterEntry}" for watch later action`);
+    if (homeSearchStrings$.value.watchLaterEntry) {
+      logger.debug(`Using custom search string "${homeSearchStrings$.value.watchLaterEntry}" for watch later action`);
       clickable = HtmlTreeNavigator.startFrom(popupContainer)
-        .findFirst(new TextNavigationFilter('span', searchStrings.watchLaterEntry))
+        .findFirst(new TextNavigationFilter('span', homeSearchStrings$.value.watchLaterEntry))
         .intoParentNavigator()
         .find(new TagNavigationFilter('yt-list-item-view-model'))
         .consume();

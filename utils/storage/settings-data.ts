@@ -36,7 +36,9 @@ export interface SettingLogLevels {
   watchVideo: LogLevel;
   watchPlaylist: LogLevel;
   playlist: LogLevel;
+  settings: LogLevel;
 }
+export type TemplateLogLevels = Record<keyof SettingLogLevels, string>;
 
 interface SettingSearchStringsBase<T> {
   homePage: {

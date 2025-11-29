@@ -22,6 +22,7 @@ const loggers = ref<SettingLogLevels>({
   watchVideo: defaultLogLevel(),
   watchPlaylist: defaultLogLevel(),
   playlist: defaultLogLevel(),
+  settings: defaultLogLevel(),
 });
 storage.getItem<SettingLogLevels>(SETTING_LOG_LEVELS).then((levels) => {
   if (levels) {
