@@ -10,6 +10,12 @@ import './fa-solid-900.woff2';
 import './fontawesome.min.css';
 import './solid.min.css';
 import './yt-quick-actions.css';
+import {
+  homeScriptDisabled$,
+  playlistScriptDisabled$,
+  videoScriptDisabled$,
+  watchingPlaylistScriptDisabled$,
+} from '@/entrypoints/content/state/settings';
 
 export enum CurrentPage {
   HOME = 'HOME',
@@ -40,17 +46,26 @@ export default defineContentScript({
         fn();
       });
 
+      if (ctx.isInvalid) {
+        // Extension is updated, uninstalled or disabled during runtime.
+        return;
+      }
+
       const pathAndQueryParams = `${location.pathname}${location.search}`;
       if (pathAndQueryParams.includes('watch') && pathAndQueryParams.includes('list=WL')) {
-        disconnectFns.push(initWatchingPlaylist(ctx));
-        disconnectFns.push(initWatchVideo(ctx, CurrentPage.WATCHING_PLAYLIST));
-      } else if (pathAndQueryParams.includes('list=WL')) {
+        if (!videoScriptDisabled$.value) {
+          disconnectFns.push(initWatchVideo(ctx, CurrentPage.WATCHING_PLAYLIST));
+        }
+        if (!watchingPlaylistScriptDisabled$.value) {
+          disconnectFns.push(initWatchingPlaylist(ctx));
+        }
+      } else if (!playlistScriptDisabled$.value && pathAndQueryParams.includes('list=WL')) {
         disconnectFns.push(initPlaylistObservers(ctx));
-      } else if (pathAndQueryParams.includes('watch')) {
+      } else if (!videoScriptDisabled$.value && pathAndQueryParams.includes('watch')) {
         disconnectFns.push(initWatchVideo(ctx, CurrentPage.WATCH_VIDEO));
-      } else if (pathAndQueryParams.includes('subscriptions')) {
+      } else if (!homeScriptDisabled$.value && pathAndQueryParams.includes('subscriptions')) {
         disconnectFns.push(initHomeObserver(ctx));
-      } else if (pathAndQueryParams === '/') {
+      } else if (!homeScriptDisabled$.value && pathAndQueryParams === '/') {
         disconnectFns.push(initHomeObserver(ctx));
       }
     }
