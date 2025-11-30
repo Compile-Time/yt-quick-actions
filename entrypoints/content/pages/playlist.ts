@@ -68,8 +68,8 @@ const removeButtonClicked$ = new BehaviorSubject(false);
 const moveTopButtonClicked$ = new BehaviorSubject(false);
 const moveBottomButtonClicked$ = new BehaviorSubject(false);
 
-const menuElementToSetup$ = new Subject<HTMLElement>();
-const dragContainerToSetup$ = new Subject<{
+const menuElementForSetup$ = new Subject<HTMLElement>();
+const dragContainerForSetup$ = new Subject<{
   dragContainer: HTMLElement;
   menuElement: HTMLElement;
 }>();
@@ -124,14 +124,14 @@ const addCustomVideoItemsToDom$ = contentMutation$.pipe(
       .findFirst(new IdNavigationFilter('div', 'menu'))
       .consume();
     if (menuElement) {
-      menuElementToSetup$.next(menuElement);
+      menuElementForSetup$.next(menuElement);
     }
 
     const dragContainer = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
       .findFirst(new IdNavigationFilter('div', 'index-container'))
       .consume();
     if (dragContainer && menuElement) {
-      dragContainerToSetup$.next({ dragContainer, menuElement });
+      dragContainerForSetup$.next({ dragContainer, menuElement });
     }
   }),
   catchError((error) => {
@@ -140,7 +140,7 @@ const addCustomVideoItemsToDom$ = contentMutation$.pipe(
   }),
 );
 
-const setupRemoveButton$ = menuElementToSetup$.pipe(
+const setupRemoveButton$ = menuElementForSetup$.pipe(
   filter(() => !playlistRemoveDisabled$.value),
   tap((menuElement) => {
     const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
@@ -167,7 +167,7 @@ const setupRemoveButton$ = menuElementToSetup$.pipe(
   }),
 );
 
-const setupMoveButtons$ = dragContainerToSetup$.pipe(
+const setupMoveButtons$ = dragContainerForSetup$.pipe(
   filter(() => !playlistMoveTopBottomDisabled$.value),
   tap(({ dragContainer, menuElement }) => {
     dragContainer.style.position = 'relative';
