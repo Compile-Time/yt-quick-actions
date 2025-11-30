@@ -1,0 +1,36 @@
+@startuml YTQuickActions-Flow
+skinparam sequenceMessageAlign center
+skinparam wrapWidth 200
+skinparam maxMessageSize 200
+
+actor User
+participant "YouTube SPA" as YT
+participant "content/index.ts" as CI
+participant "state/settings.ts\n(BehaviorSubjects)" as SS
+participant "utils/storage.ts" as ST
+database "wxt.storage" as WS
+participant "Page Module\n(e.g., pages/video.ts)" as PM
+participant "Vue Component\n(e.g., ScrollToButtons)" as VC
+
+User -> YT : Navigate / change route
+YT -> CI : yt-navigate-start
+YT -> CI : (also on first load) DOMContentLoaded
+
+CI -> SS : ensure watchers active
+SS -> ST : featuresStorage.watch() / searchStringStorage.watch()
+ST -> WS : read values / defaults
+WS --> ST : persisted features & search strings
+ST --> SS : push values
+SS --> CI : BehaviorSubjects updated (disable flags, strings)
+
+CI -> PM : init...() returns DisconnectFn
+PM -> YT : Observe DOM (MutationObserver)
+PM -> SS : read BehaviorSubjects (gate features, read strings)
+PM -> VC : createApp(...).mount(...)
+VC -> YT : inject buttons/menus into DOM
+
+... route change ...
+YT -> CI : yt-navigate-start
+CI -> DisconnectFn : invoke() to clean up
+CI -> PM : init next module
+@enduml
