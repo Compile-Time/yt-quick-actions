@@ -20,15 +20,12 @@ const templateFeatureToggles: TemplateFeatures = {
   watchPlaylist: {
     disableRemove: 'Disable remove button',
     disableWatchLater: 'Disable watch later button',
-    disableScrollToBottom: 'Disable scroll to bottom button',
-    disableScrollToTop: 'Disable scroll to top button',
+    disableScrollTopBottom: 'Disable scroll to top or bottom buttons',
   },
   playlist: {
     disableRemove: 'Disable remove button',
-    disableMoveToTop: 'Diable move to top button',
-    disableMoveToBottom: 'Diable move to top bottom',
-    disableScrollToBottom: 'Disable scroll to bottom button',
-    disableScrollToTop: 'Disable scroll to top button',
+    disableMoveTopBottom: 'Disable move to top or bottom buttons',
+    disableScrollTopBottom: 'Disable scroll to top or bottom buttons',
   },
   watchVideo: {
     disableWatchLater: 'Disable watch later button',

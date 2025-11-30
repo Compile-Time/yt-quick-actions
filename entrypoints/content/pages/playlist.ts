@@ -13,10 +13,15 @@ import RemoveVideoPlaylistButton from '@/components/RemoveVideoPlaylistButton.vu
 import MoveTopBottomContainer from '@/components/MoveTopBottomContainer.vue';
 import { allowYtPopupVisibility } from '@/utils/yt-popup-visibility';
 import { getYtPopupFromDom } from '@/utils/yt-popup';
-import ScrollToContainerEndButton from '@/components/ScrollToContainerEndButton.vue';
+import ScrollToButtons from '@/components/ScrollToButtons.vue';
 import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
 import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
-import { playlistSearchStrings$ } from '@/entrypoints/content/state/settings';
+import {
+  playlistMoveTopBottomDisabled$,
+  playlistRemoveDisabled$,
+  playlistScrollTopBottomDisabled$,
+  playlistSearchStrings$,
+} from '@/entrypoints/content/state/settings';
 
 const logger = getLogger(LoggerKind.PLAYLIST_SCRIPT);
 
@@ -63,7 +68,14 @@ const removeButtonClicked$ = new BehaviorSubject(false);
 const moveTopButtonClicked$ = new BehaviorSubject(false);
 const moveBottomButtonClicked$ = new BehaviorSubject(false);
 
-const addScrollToEndButton$ = contentMutation$.pipe(
+const menuElementToSetup$ = new Subject<HTMLElement>();
+const dragContainerToSetup$ = new Subject<{
+  dragContainer: HTMLElement;
+  menuElement: HTMLElement;
+}>();
+
+const addScrollToButtons$ = contentMutation$.pipe(
+  filter(() => !playlistScrollTopBottomDisabled$.value),
   filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
   first(),
   tap((record: MutationRecord) => {
@@ -81,7 +93,7 @@ const addScrollToEndButton$ = contentMutation$.pipe(
       .consume();
     logger.debug('Search for scroll container yielded: ', scrollContainer);
 
-    const scrollToBottomButton = createIntegratedUi(contentScriptContext$.value!, {
+    const scrollToButtons = createIntegratedUi(contentScriptContext$.value!, {
       anchor: playlistSideBarHeader,
       position: 'inline',
       append: 'last',
@@ -89,7 +101,7 @@ const addScrollToEndButton$ = contentMutation$.pipe(
         container.style.position = 'absolute';
         container.style.bottom = '0';
         container.style.right = '0';
-        const app = createApp(ScrollToContainerEndButton, {
+        const app = createApp(ScrollToButtons, {
           scrollContainer,
           scrollWindow: true,
           pillLook: true,
@@ -101,72 +113,86 @@ const addScrollToEndButton$ = contentMutation$.pipe(
         app?.unmount();
       },
     });
-    scrollToBottomButton.mount();
+    scrollToButtons.mount();
   }),
 );
 
-const addCustomButtonsToDom$ = contentMutation$.pipe(
+const addCustomVideoItemsToDom$ = contentMutation$.pipe(
   filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
   tap((record) => {
     const menuElement = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
       .findFirst(new IdNavigationFilter('div', 'menu'))
       .consume();
     if (menuElement) {
-      const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
-        .findFirst(new IdNavigationFilter('button', 'button'))
-        .consume()!;
-
-      const removeButton = createIntegratedUi(contentScriptContext$.value!, {
-        anchor: menuElement.parentElement,
-        position: 'inline',
-        onMount: (container) => {
-          const app = createApp(RemoveVideoPlaylistButton, {
-            optionsButton,
-            removeButtonClickedSubject: removeButtonClicked$,
-          });
-          app.mount(container);
-          return app;
-        },
-        onRemove: (app) => {
-          app?.unmount();
-        },
-      });
-
-      removeButton.mount();
+      menuElementToSetup$.next(menuElement);
     }
 
     const dragContainer = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
       .findFirst(new IdNavigationFilter('div', 'index-container'))
       .consume();
     if (dragContainer && menuElement) {
-      dragContainer.style.position = 'relative';
-      const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
-        .findFirst(new IdNavigationFilter('button', 'button'))
-        .consume()!;
-
-      const moveToTopOrBottomContainer = createIntegratedUi(contentScriptContext$.value!, {
-        anchor: dragContainer,
-        position: 'inline',
-        onMount: (container) => {
-          container.style.position = 'absolute';
-          const app = createApp(MoveTopBottomContainer, {
-            optionsButton,
-            moveTopButtonClickedSubject: moveTopButtonClicked$,
-            moveBottomButtonClickedSubject: moveBottomButtonClicked$,
-          });
-          app.mount(container);
-          return app;
-        },
-        onRemove: (app) => {
-          app?.unmount();
-        },
-      });
-      moveToTopOrBottomContainer.mount();
+      dragContainerToSetup$.next({ dragContainer, menuElement });
     }
   }),
   catchError((error) => {
     contentMutationObserver.disconnect();
     return throwError(() => error);
+  }),
+);
+
+const setupRemoveButton$ = menuElementToSetup$.pipe(
+  filter(() => !playlistRemoveDisabled$.value),
+  tap((menuElement) => {
+    const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
+      .findFirst(new IdNavigationFilter('button', 'button'))
+      .consume()!;
+
+    const removeButton = createIntegratedUi(contentScriptContext$.value!, {
+      anchor: menuElement.parentElement,
+      position: 'inline',
+      onMount: (container) => {
+        const app = createApp(RemoveVideoPlaylistButton, {
+          optionsButton,
+          removeButtonClickedSubject: removeButtonClicked$,
+        });
+        app.mount(container);
+        return app;
+      },
+      onRemove: (app) => {
+        app?.unmount();
+      },
+    });
+
+    removeButton.mount();
+  }),
+);
+
+const setupMoveButtons$ = dragContainerToSetup$.pipe(
+  filter(() => !playlistMoveTopBottomDisabled$.value),
+  tap(({ dragContainer, menuElement }) => {
+    dragContainer.style.position = 'relative';
+    const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
+      .findFirst(new IdNavigationFilter('button', 'button'))
+      .consume()!;
+
+    const moveToTopOrBottomContainer = createIntegratedUi(contentScriptContext$.value!, {
+      anchor: dragContainer,
+      position: 'inline',
+      onMount: (container) => {
+        container.style.position = 'absolute';
+        const app = createApp(MoveTopBottomContainer, {
+          optionsButton,
+          moveTopButtonClickedSubject: moveTopButtonClicked$,
+          moveBottomButtonClickedSubject: moveBottomButtonClicked$,
+        });
+        app.mount(container);
+        return app;
+      },
+      onRemove: (app) => {
+        app?.unmount();
+      },
+    });
+    moveToTopOrBottomContainer.mount();
   }),
 );
 
@@ -359,11 +385,13 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
   const popupObserverConfig: MutationObserverInit = { attributes: true, childList: true, subtree: true };
   popupMutationObserver.observe(popupContainer, popupObserverConfig);
 
-  const addRemoveButtonToPlaylistSubscription = addCustomButtonsToDom$.subscribe();
+  const addRemoveButtonToPlaylistSubscription = addCustomVideoItemsToDom$.subscribe();
   const clickRemoveItemSubscription = clickRemoveItemInPopup$.subscribe();
   const clickMoveTopButtonSubscription = clickMoveTopButtonInPopup$.subscribe();
   const clickMoveBottomButtonSubscription = clickMoveBottomButtonInPopup$.subscribe();
-  const addScrollToEndButtonSubscription = addScrollToEndButton$.subscribe();
+  const addScrollToEndButtonSubscription = addScrollToButtons$.subscribe();
+  const setupRemoveButtonSubscription = setupRemoveButton$.subscribe();
+  const setupMoveButtonsSubscription = setupMoveButtons$.subscribe();
 
   return () => {
     contentMutationObserver.disconnect();
@@ -373,5 +401,7 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
     clickMoveTopButtonSubscription.unsubscribe();
     clickMoveBottomButtonSubscription.unsubscribe();
     addScrollToEndButtonSubscription.unsubscribe();
+    setupRemoveButtonSubscription.unsubscribe();
+    setupMoveButtonsSubscription.unsubscribe();
   };
 }

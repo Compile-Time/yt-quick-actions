@@ -28,7 +28,11 @@ import WatchLaterVideoButton from '@/components/WatchLaterVideoButton.vue';
 import { getTpYtIronDropDownFromDom, getYtPopupFromDom } from '#imports';
 import { CurrentPage } from '@/entrypoints/content';
 import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
-import { watchPlaylistSearchStrings$, watchVideoSearchStrings$ } from '@/entrypoints/content/state/settings';
+import {
+  videoWatchLaterDisabled$,
+  watchPlaylistSearchStrings$,
+  watchVideoSearchStrings$,
+} from '@/entrypoints/content/state/settings';
 
 const logger = getLogger(LoggerKind.VIDEO_SCRIPT);
 
@@ -82,6 +86,7 @@ const createWatchLaterButton$ = combineLatest({
   topLevelButtonsComputed: topLevelComputedButtonsMutations$,
   moreOptionsButton: moreOptionsMutations$,
 }).pipe(
+  filter(() => !videoWatchLaterDisabled$.value),
   // There may be multiple changes to the top level buttons or more options element, so we debounce the changes.
   debounceTime(400),
   // After the button is set up in the DOM, we don't need the subscription anymore.

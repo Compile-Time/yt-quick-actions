@@ -14,15 +14,12 @@ export interface SettingFeatures<T> {
   watchPlaylist: {
     disableRemove: T;
     disableWatchLater: T;
-    disableScrollToTop: T;
-    disableScrollToBottom: T;
+    disableScrollTopBottom: T;
   };
   playlist: {
     disableRemove: T;
-    disableMoveToTop: T;
-    disableMoveToBottom: T;
-    disableScrollToTop: T;
-    disableScrollToBottom: T;
+    disableMoveTopBottom: T;
+    disableScrollTopBottom: T;
   };
 }
 export type TemplateFeatures = SettingFeatures<string>;
@@ -110,15 +107,12 @@ export const featuresStorage = storage.defineItem<SettingFeatures<boolean>>(SETT
     watchPlaylist: {
       disableRemove: false,
       disableWatchLater: false,
-      disableScrollToTop: false,
-      disableScrollToBottom: false,
+      disableScrollTopBottom: false,
     },
     playlist: {
       disableRemove: false,
-      disableMoveToTop: false,
-      disableMoveToBottom: false,
-      disableScrollToTop: false,
-      disableScrollToBottom: false,
+      disableMoveTopBottom: false,
+      disableScrollTopBottom: false,
     },
   },
 });

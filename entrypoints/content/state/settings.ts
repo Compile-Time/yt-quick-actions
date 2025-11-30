@@ -12,12 +12,31 @@ export const homeScriptDisabled$ = new BehaviorSubject<boolean>(false);
 export const watchingPlaylistScriptDisabled$ = new BehaviorSubject<boolean>(false);
 export const playlistScriptDisabled$ = new BehaviorSubject<boolean>(false);
 export const videoScriptDisabled$ = new BehaviorSubject<boolean>(false);
+export const homeWatchLaterDisabled$ = new BehaviorSubject<boolean>(false);
+export const videoWatchLaterDisabled$ = new BehaviorSubject<boolean>(false);
+export const playlistMoveTopBottomDisabled$ = new BehaviorSubject<boolean>(false);
+export const playlistRemoveDisabled$ = new BehaviorSubject<boolean>(false);
+export const playlistScrollTopBottomDisabled$ = new BehaviorSubject<boolean>(false);
+export const watchPlaylistScrollTopBottomDisabled$ = new BehaviorSubject<boolean>(false);
+export const watchPlaylistRemoveDisabled$ = new BehaviorSubject<boolean>(false);
+export const watchPlaylistWatchLaterDisabled$ = new BehaviorSubject<boolean>(false);
 
 function pushScriptsDisabledStatus(features: SettingFeatures<boolean>) {
   homeScriptDisabled$.next(isScriptDisabled(features.homePage));
+  homeWatchLaterDisabled$.next(features.homePage.disableWatchLater);
+
   watchingPlaylistScriptDisabled$.next(isScriptDisabled(features.watchPlaylist));
+  watchPlaylistRemoveDisabled$.next(features.watchPlaylist.disableRemove);
+  watchPlaylistWatchLaterDisabled$.next(features.watchPlaylist.disableWatchLater);
+  watchPlaylistScrollTopBottomDisabled$.next(features.watchPlaylist.disableScrollTopBottom);
+
   playlistScriptDisabled$.next(isScriptDisabled(features.playlist));
+  playlistMoveTopBottomDisabled$.next(features.playlist.disableMoveTopBottom);
+  playlistRemoveDisabled$.next(features.playlist.disableRemove);
+  playlistScrollTopBottomDisabled$.next(features.playlist.disableScrollTopBottom);
+
   videoScriptDisabled$.next(isScriptDisabled(features.watchVideo));
+  videoWatchLaterDisabled$.next(features.watchVideo.disableWatchLater);
 }
 
 export const featuresStorageUnwatch = featuresStorage.watch((features) => {

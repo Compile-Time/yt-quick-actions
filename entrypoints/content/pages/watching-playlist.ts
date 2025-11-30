@@ -13,9 +13,13 @@ import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import RemoveVideoPlaylistButton from '@/components/RemoveVideoPlaylistButton.vue';
 import { NodeTypes } from '@vue/compiler-core';
 import { getYtPopupFromDom, hideYtPopup } from '#imports';
-import ScrollToContainerEndButton from '@/components/ScrollToContainerEndButton.vue';
+import ScrollToButtons from '@/components/ScrollToButtons.vue';
 import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
-import { watchPlaylistSearchStrings$ } from '@/entrypoints/content/state/settings';
+import {
+  watchPlaylistRemoveDisabled$,
+  watchPlaylistScrollTopBottomDisabled$,
+  watchPlaylistSearchStrings$,
+} from '@/entrypoints/content/state/settings';
 
 const logger = getLogger(LoggerKind.WATCHING_PLAYLIST_SCRIPT);
 
@@ -50,7 +54,8 @@ const popupMutationObserver = new MutationObserver((mutations) => {
 
 const removeButtonClicked$ = new BehaviorSubject<boolean>(false);
 
-const addScrollToEndButton$ = contentMutationSubject.pipe(
+const addScrollToButtons$ = contentMutationSubject.pipe(
+  filter(() => !watchPlaylistScrollTopBottomDisabled$.value),
   tap((record) => {
     logger.debug('Mutation record: ', record);
   }),
@@ -79,12 +84,12 @@ const addScrollToEndButton$ = contentMutationSubject.pipe(
       .consume();
     logger.debug('Search for action container yielded: ', actionContainer);
 
-    const scrollToBottomButton = createIntegratedUi(contentScriptContext$.value!, {
+    const scrollToButtons = createIntegratedUi(contentScriptContext$.value!, {
       anchor: actionContainer,
       position: 'inline',
       append: 'last',
       onMount: (container) => {
-        const app = createApp(ScrollToContainerEndButton, {
+        const app = createApp(ScrollToButtons, {
           scrollContainer,
         });
         app.mount(container);
@@ -94,11 +99,12 @@ const addScrollToEndButton$ = contentMutationSubject.pipe(
         app?.unmount();
       },
     });
-    scrollToBottomButton.mount();
+    scrollToButtons.mount();
   }),
 );
 
 const createRemoveButtons$ = contentMutationSubject.pipe(
+  filter(() => !watchPlaylistRemoveDisabled$.value),
   filter((record) => record.target.nodeName === 'DIV' && (record.target as HTMLElement).id === 'menu'),
   filter((record) =>
     HtmlParentNavigator.startFrom(record.target as HTMLElement)
@@ -207,7 +213,7 @@ export function initWatchingPlaylist(ctx: ContentScriptContext): DisconnectFn {
 
   const createRemoveButtonSubscription = createRemoveButtons$.subscribe();
   const clickPopupRemoveButtonSubscription = clickPopupRemoveButton$.subscribe();
-  const addScrollToEndButtonSubscription = addScrollToEndButton$.subscribe();
+  const addScrollToEndButtonSubscription = addScrollToButtons$.subscribe();
 
   return () => {
     contentMutationObserver.disconnect();

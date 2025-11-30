@@ -25,7 +25,7 @@ import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterHomeButton from '@/components/WatchLaterHomeButton.vue';
 import { getTpYtIronDropDownFromDom } from '@/utils/yt-popup';
-import { homeSearchStrings$ } from '@/entrypoints/content/state/settings';
+import { homeSearchStrings$, homeWatchLaterDisabled$ } from '@/entrypoints/content/state/settings';
 import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
 
 const logger = getLogger(LoggerKind.HOME_SCRIPT);
@@ -64,6 +64,7 @@ const popupMutationObserver = new MutationObserver((mutations) => {
 const watchLaterButtonClicked$ = new BehaviorSubject<boolean>(false);
 
 const createWatchLaterButtons$ = contentMutation$.pipe(
+  filter(() => !homeWatchLaterDisabled$.value),
   filter((mutationRecord) => {
     return mutationRecord.target.nodeName === 'DIV' && (mutationRecord.target as HTMLElement).id === 'content';
   }),
