@@ -2,7 +2,7 @@ import { initWatchingPlaylist } from '@/entrypoints/content/pages/watching-playl
 import { initWatchVideo } from '@/entrypoints/content/pages/video';
 import { initPlaylistObservers } from '@/entrypoints/content/pages/playlist';
 import { initHomeObserver } from '@/entrypoints/content/pages/home';
-import { DisconnectFn } from '@/utils/types/disconnectable';
+import { CleanupFn } from '@/utils/types/cleanup';
 import './fa-brands-400.ttf';
 import './fa-brands-400.woff2';
 import './fa-solid-900.ttf';
@@ -30,7 +30,7 @@ export default defineContentScript({
   matches: ['*://www.youtube.com/*'],
   runAt: 'document_start',
   main(ctx) {
-    const disconnectFns: DisconnectFn[] = [];
+    const cleanupFns: CleanupFn[] = [];
 
     /**
      * Initialize the relevant observers for the current YouTube page based on the location path.
@@ -44,7 +44,7 @@ export default defineContentScript({
      * statements.
      */
     function setupPageSubscription(): void {
-      disconnectFns.forEach((fn) => {
+      cleanupFns.forEach((fn) => {
         fn();
       });
 
@@ -58,19 +58,19 @@ export default defineContentScript({
       const pathAndQueryParams = `${location.pathname}${location.search}`;
       if (pathAndQueryParams.includes('watch') && pathAndQueryParams.includes('list=WL')) {
         if (!videoScriptDisabled$.value) {
-          disconnectFns.push(initWatchVideo(ctx, CurrentPage.WATCHING_PLAYLIST));
+          cleanupFns.push(initWatchVideo(ctx, CurrentPage.WATCHING_PLAYLIST));
         }
         if (!watchingPlaylistScriptDisabled$.value) {
-          disconnectFns.push(initWatchingPlaylist(ctx));
+          cleanupFns.push(initWatchingPlaylist(ctx));
         }
       } else if (!playlistScriptDisabled$.value && pathAndQueryParams.includes('list=WL')) {
-        disconnectFns.push(initPlaylistObservers(ctx));
+        cleanupFns.push(initPlaylistObservers(ctx));
       } else if (!videoScriptDisabled$.value && pathAndQueryParams.includes('watch')) {
-        disconnectFns.push(initWatchVideo(ctx, CurrentPage.WATCH_VIDEO));
+        cleanupFns.push(initWatchVideo(ctx, CurrentPage.WATCH_VIDEO));
       } else if (!homeScriptDisabled$.value && pathAndQueryParams.includes('subscriptions')) {
-        disconnectFns.push(initHomeObserver(ctx));
+        cleanupFns.push(initHomeObserver(ctx));
       } else if (!homeScriptDisabled$.value && pathAndQueryParams === '/') {
-        disconnectFns.push(initHomeObserver(ctx));
+        cleanupFns.push(initHomeObserver(ctx));
       }
     }
 

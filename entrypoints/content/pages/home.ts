@@ -13,7 +13,7 @@ import {
   throwError,
   windowCount,
 } from 'rxjs';
-import { DisconnectFn } from '@/utils/types/disconnectable';
+import { CleanupFn } from '@/utils/types/cleanup';
 import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
 import {
   SvgDrawPathNavigationFilter,
@@ -205,7 +205,7 @@ const processQueuedWatchLaterClick$ = queueWatchLaterClick$.pipe(
   concatAll(),
 );
 
-export function initHomeObserver(ctx: ContentScriptContext): DisconnectFn {
+export function initHomeObserver(ctx: ContentScriptContext): CleanupFn {
   contentScriptContext$.next(ctx);
 
   // Avoid listening to the whole DOM by using the ytd-page-manager element.

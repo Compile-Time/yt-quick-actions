@@ -1,4 +1,4 @@
-import { DisconnectFn } from '@/utils/types/disconnectable';
+import { CleanupFn } from '@/utils/types/cleanup';
 import { BehaviorSubject, catchError, debounceTime, filter, first, map, of, Subject, tap } from 'rxjs';
 import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
 import {
@@ -190,7 +190,7 @@ const clickPopupRemoveButton$ = popupMutationSubject.pipe(
   }),
 );
 
-export function initWatchingPlaylist(ctx: ContentScriptContext): DisconnectFn {
+export function initWatchingPlaylist(ctx: ContentScriptContext): CleanupFn {
   contentScriptContext$.next(ctx);
 
   // Avoid listening to the whole DOM by using the ytd-page-manager element.

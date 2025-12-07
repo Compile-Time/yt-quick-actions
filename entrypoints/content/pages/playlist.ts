@@ -1,5 +1,5 @@
 import { BehaviorSubject, catchError, debounceTime, filter, first, map, of, Subject, tap, throwError } from 'rxjs';
-import { DisconnectFn } from '@/utils/types/disconnectable';
+import { CleanupFn } from '@/utils/types/cleanup';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import {
   IdNavigationFilter,
@@ -22,8 +22,10 @@ import {
   playlistScrollTopBottomDisabled$,
   playlistSearchStrings$,
 } from '@/entrypoints/content/state/settings';
+import { DeduplicationAttribute, ElementDeduplicationTracker } from '@/utils/element-deduplication-tracker';
 
 const logger = getLogger(LoggerKind.PLAYLIST_SCRIPT);
+const elementDeduplicationTracker = new ElementDeduplicationTracker();
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 
@@ -114,20 +116,32 @@ const addScrollToButtons$ = contentMutation$.pipe(
       },
     });
     scrollToButtons.mount();
+    elementDeduplicationTracker.addDomElement(scrollToButtons);
   }),
 );
 
 const addCustomVideoItemsToDom$ = contentMutation$.pipe(
-  filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
+  filter(
+    (record) =>
+      record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER' ||
+      (record.attributeName === 'aria-label' && record.target.nodeName === 'H3'),
+  ),
   tap((record) => {
-    const menuElement = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
+    const startElement =
+      record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'
+        ? (record.target as HTMLElement)
+        : HtmlParentNavigator.startFrom(record.target as HTMLElement)
+            .find(new TagNavigationFilter('ytd-playlist-video-renderer'))
+            .consume();
+
+    const menuElement = HtmlTreeNavigator.startFrom(startElement)
       .findFirst(new IdNavigationFilter('div', 'menu'))
       .consume();
     if (menuElement) {
       menuElementForSetup$.next(menuElement);
     }
 
-    const dragContainer = HtmlTreeNavigator.startFrom(record.target as HTMLElement)
+    const dragContainer = HtmlTreeNavigator.startFrom(startElement)
       .findFirst(new IdNavigationFilter('div', 'index-container'))
       .consume();
     if (dragContainer && menuElement) {
@@ -147,6 +161,17 @@ const setupRemoveButton$ = menuElementForSetup$.pipe(
       .findFirst(new IdNavigationFilter('button', 'button'))
       .consume()!;
 
+    if (
+      elementDeduplicationTracker.checkForDeduplicationAttribute(
+        optionsButton,
+        DeduplicationAttribute.YT_QUICK_ACTIONS_REMOVE_BUTTON,
+      )
+    ) {
+      return;
+    }
+
+    elementDeduplicationTracker.addDomAttribute(optionsButton, DeduplicationAttribute.YT_QUICK_ACTIONS_REMOVE_BUTTON);
+
     const removeButton = createIntegratedUi(contentScriptContext$.value!, {
       anchor: menuElement.parentElement,
       position: 'inline',
@@ -164,6 +189,7 @@ const setupRemoveButton$ = menuElementForSetup$.pipe(
     });
 
     removeButton.mount();
+    elementDeduplicationTracker.addDomElement(removeButton);
   }),
 );
 
@@ -174,6 +200,20 @@ const setupMoveButtons$ = dragContainerForSetup$.pipe(
     const optionsButton = HtmlTreeNavigator.startFrom(menuElement)
       .findFirst(new IdNavigationFilter('button', 'button'))
       .consume()!;
+
+    if (
+      elementDeduplicationTracker.checkForDeduplicationAttribute(
+        optionsButton,
+        DeduplicationAttribute.YT_QUICK_ACTIONS_MOVE_TOP_BUTTOM_BUTTON,
+      )
+    ) {
+      return;
+    }
+
+    elementDeduplicationTracker.addDomAttribute(
+      optionsButton,
+      DeduplicationAttribute.YT_QUICK_ACTIONS_MOVE_TOP_BUTTOM_BUTTON,
+    );
 
     const moveToTopOrBottomContainer = createIntegratedUi(contentScriptContext$.value!, {
       anchor: dragContainer,
@@ -193,6 +233,7 @@ const setupMoveButtons$ = dragContainerForSetup$.pipe(
       },
     });
     moveToTopOrBottomContainer.mount();
+    elementDeduplicationTracker.addDomElement(moveToTopOrBottomContainer);
   }),
 );
 
@@ -364,7 +405,7 @@ const clickMoveBottomButtonInPopup$ = popupReadyAndHidden$.pipe(
   }),
 );
 
-export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
+export function initPlaylistObservers(ctx: ContentScriptContext): CleanupFn {
   contentScriptContext$.next(ctx);
 
   // Avoid listening to the whole DOM by using the ytd-page-manager element.
@@ -376,7 +417,7 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
     null,
   ).singleNodeValue as HTMLElement;
 
-  const contentMutationObserverConfig: MutationObserverInit = { attributes: false, childList: true, subtree: true };
+  const contentMutationObserverConfig: MutationObserverInit = { attributes: true, childList: true, subtree: true };
   contentMutationObserver.observe(ytdPopupManager, contentMutationObserverConfig);
 
   const popupContainer = HtmlTreeNavigator.startFrom(document.body)
@@ -403,5 +444,7 @@ export function initPlaylistObservers(ctx: ContentScriptContext): DisconnectFn {
     addScrollToEndButtonSubscription.unsubscribe();
     setupRemoveButtonSubscription.unsubscribe();
     setupMoveButtonsSubscription.unsubscribe();
+
+    elementDeduplicationTracker.cleanup();
   };
 }

@@ -13,7 +13,7 @@ import {
   tap,
   throwError,
 } from 'rxjs';
-import { DisconnectFn } from '@/utils/types/disconnectable';
+import { CleanupFn } from '@/utils/types/cleanup';
 import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
 import {
   IdNavigationFilter,
@@ -287,7 +287,7 @@ const setupPopupMutationObserver$ = ytPopupReady$.pipe(
   }),
 );
 
-export function initWatchVideo(ctx: ContentScriptContext, currentPage: CurrentPage): DisconnectFn {
+export function initWatchVideo(ctx: ContentScriptContext, currentPage: CurrentPage): CleanupFn {
   contentScriptContext$.next(ctx);
   currentPage$.next(currentPage);
 
