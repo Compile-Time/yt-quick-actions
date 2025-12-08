@@ -60,6 +60,8 @@ const popupMutationObserver = new MutationObserver((mutations) => {
   });
 });
 const popupReadyAndHidden$ = popupMutation$.pipe(
+  // Filter mutations to make the popup usable for non-extension use cases.
+  filter(() => removeButtonClicked$.value || moveTopButtonClicked$.value || moveBottomButtonClicked$.value),
   tap(() => {
     hideYtPopup();
   }),
