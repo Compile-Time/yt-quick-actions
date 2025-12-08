@@ -61,3 +61,26 @@ YouTube variables start with '--yt-spec'.
 .qa-watching-playlist-remove {
     margin-right: 1em;
 }
+
+.qa-scroll-to-overlay {
+    position: fixed;
+    bottom: 20px;
+    left: 48rem;
+}
+
+@media (max-width: 1312px) {
+    .qa-scroll-to-overlay {
+        position: fixed;
+        bottom: 20px;
+        left: 32rem;
+    }
+}
+
+@media (max-width: 1080px) {
+    .qa-scroll-to-overlay {
+        position: fixed;
+        bottom: 20px;
+        left: 1rem;
+        z-index: 3000;
+    }
+}

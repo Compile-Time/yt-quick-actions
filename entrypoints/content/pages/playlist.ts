@@ -83,14 +83,13 @@ const addScrollToButtons$ = contentMutation$.pipe(
   filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
   first(),
   tap((record: MutationRecord) => {
-    const playlistSideBarHeader = document.evaluate(
-      '/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-playlist-header-renderer/div/div[2]',
+    const contentRoot = document.evaluate(
+      '/html/body/ytd-app/div[@id="content"]',
       document,
       null,
       XPathResult.FIRST_ORDERED_NODE_TYPE,
       null,
     ).singleNodeValue! as HTMLElement;
-    playlistSideBarHeader.style.position = 'relative';
 
     const scrollContainer = HtmlParentNavigator.startFrom(record.target as HTMLElement)
       .find(new IdNavigationFilter('div', 'primary'))
@@ -98,13 +97,11 @@ const addScrollToButtons$ = contentMutation$.pipe(
     logger.debug('Search for scroll container yielded: ', scrollContainer);
 
     const scrollToButtons = createIntegratedUi(contentScriptContext$.value!, {
-      anchor: playlistSideBarHeader,
+      anchor: contentRoot,
       position: 'inline',
       append: 'last',
       onMount: (container) => {
-        container.style.position = 'absolute';
-        container.style.bottom = '0';
-        container.style.right = '0';
+        container.classList.add('qa-scroll-to-overlay');
         const app = createApp(ScrollToButtons, {
           scrollContainer,
           scrollWindow: true,

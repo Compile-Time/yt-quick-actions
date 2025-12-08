@@ -23,17 +23,27 @@ function scrollToBottom() {
 </script>
 
 <template>
-  <div class="flex justify-end">
-    <div class="flex">
-      <button class="qa-btn" :class="{ 'qa-btn-pill': pillLook }" @click="scrollToTop">
-        <i class="fa-solid fa-arrows-up-to-line fa-lg"></i>
-      </button>
+  <div class="qa-scroll-container">
+    <button class="qa-btn" :class="{ 'qa-btn-pill': pillLook }" @click="scrollToTop">
+      <i class="fa-solid fa-arrows-up-to-line fa-lg"></i>
+    </button>
 
-      <button class="qa-btn" :class="{ 'qa-btn-pill': pillLook }" @click="scrollToBottom">
-        <i class="fa-solid fa-arrows-down-to-line fa-lg"></i>
-      </button>
-    </div>
+    <button class="qa-btn" :class="{ 'qa-btn-pill': pillLook }" @click="scrollToBottom">
+      <i class="fa-solid fa-arrows-down-to-line fa-lg"></i>
+    </button>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.qa-scroll-container {
+  display: flex;
+  gap: 1rem;
+}
+
+@media (max-width: 1080px) {
+  .qa-scroll-container {
+    display: flex;
+    flex-direction: column;
+  }
+}
+</style>
