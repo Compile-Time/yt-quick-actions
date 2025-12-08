@@ -78,11 +78,13 @@ const dragContainerForSetup$ = new Subject<{
   menuElement: HTMLElement;
 }>();
 
-const addScrollToButtons$ = contentMutation$.pipe(
+const addScrollToButtons$ = menuElementForSetup$.pipe(
   filter(() => !playlistScrollTopBottomDisabled$.value),
-  filter((record) => record.target.nodeName === 'YTD-PLAYLIST-VIDEO-RENDERER'),
+  filter((menuElementForSetup) =>
+    HtmlParentNavigator.startFrom(menuElementForSetup).find(new IdNavigationFilter('div', 'primary')).exists(),
+  ),
   first(),
-  tap((record: MutationRecord) => {
+  tap((menuElementForSetup: HTMLElement) => {
     const contentRoot = document.evaluate(
       '/html/body/ytd-app/div[@id="content"]',
       document,
@@ -91,7 +93,7 @@ const addScrollToButtons$ = contentMutation$.pipe(
       null,
     ).singleNodeValue! as HTMLElement;
 
-    const scrollContainer = HtmlParentNavigator.startFrom(record.target as HTMLElement)
+    const scrollContainer = HtmlParentNavigator.startFrom(menuElementForSetup)
       .find(new IdNavigationFilter('div', 'primary'))
       .consume();
     logger.debug('Search for scroll container yielded: ', scrollContainer);
