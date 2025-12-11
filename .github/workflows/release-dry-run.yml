@@ -1,5 +1,5 @@
-name: "Release"
-run-name: "Release ${{ github.ref_name }}"
+name: "Release (Dry Run)"
+run-name: "Release ${{ github.ref_name }} (Dry Run)"
 on: workflow_dispatch
 
 jobs:
@@ -59,24 +59,30 @@ jobs:
           echo "The next version is $NEXT_VERSION"
           rm dry-run.txt
       - name: Build Firefox
-        run: npm run zip:firefox
+        run: |
+          npm run zip:firefox
+          ls -l .output
       - name: Build Chrome
-        run: npm run zip
+        run: |
+          npm run zip
+          ls -l .output
       - name: Create Checksum of firefox package
         run: |
           NEXT_VERSION=$(awk '/The next release version is/{print $NF}' dry-run.txt)
           sha512sum ".output/yt-quick-actions-$NEXT_VERSION-firefox.zip" > ".output/yt-quick-actions-$NEXT_VERSION-firefox.sha512sum"
+          cat .output/yt-quick-actions-$NEXT_VERSION-firefox.sha512sum
       - name: Create Checksum of chrome package
         run: |
           NEXT_VERSION=$(awk '/The next release version is/{print $NF}' dry-run.txt)
           sha512sum ".output/yt-quick-actions-$NEXT_VERSION-chrome.zip" > ".output/yt-quick-actions-$NEXT_VERSION-chrome.sha512sum"
+          cat .output/yt-quick-actions-$NEXT_VERSION-chrome.sha512sum
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+        run: npx semantic-release -d
       - name: Submit to stores
         run: |
-          npx wxt submit \
+          npx wxt submit --dry-run \
             --chrome-zip .output/*-chrome.zip \
             --firefox-zip .output/*-firefox.zip --firefox-sources-zip .output/*-sources.zip
         env:
