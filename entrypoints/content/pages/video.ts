@@ -154,11 +154,11 @@ const createWatchLaterButton$ = combineLatest({
 
 const clickPopupVideoSaveButton$ = popupMutation$.pipe(
   filter(() => watchLaterButtonClicked$.value && !saveVideoInOptionsClicked$.value),
-  filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
+  filter((record) => record.attributeName === 'hidden'),
   tap((record) => {
     hideYtPopup();
   }),
-  debounceTime(300),
+  debounceTime(600),
   first(),
   tap(() => {
     const tpYtIronDropdown = getTpYtIronDropDownFromDom();
@@ -209,10 +209,13 @@ const clickPopupVideoSaveButton$ = popupMutation$.pipe(
 
 const clickPopupWatchLaterPlaylist$ = popupMutation$.pipe(
   filter(() => saveVideoInOptionsClicked$.value),
-  filter((record) => record.target.nodeName === 'TP-YT-IRON-DROPDOWN'),
   tap((record) => {
-    hideYtPopup();
+    // Hiding the popup after the src filter causes a short flicker of the popup on the first run.
+    if (record.attributeName === 'aria-hidden') {
+      hideYtPopup();
+    }
   }),
+  filter((record) => record.attributeName === 'src' && record.target.nodeName === 'IMG'),
   debounceTime(600),
   first(),
   tap(() => {
