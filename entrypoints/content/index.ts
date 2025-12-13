@@ -15,12 +15,14 @@ import {
   homeScriptDisabled$,
   playlistScriptDisabled$,
   searchStringStorageUnwatch,
+  subscriptionScriptDisabled$,
   videoScriptDisabled$,
   watchingPlaylistScriptDisabled$,
 } from '@/entrypoints/content/state/settings';
 
 export enum CurrentPage {
   HOME = 'HOME',
+  SUBSCRIPTIONS = 'SUBSCRIPTIONS',
   WATCHING_PLAYLIST = 'WATCHING_PLAYLIST',
   WATCH_VIDEO = 'WATCH_VIDEO',
   PLAYLIST = 'PLAYLIST',
@@ -67,10 +69,10 @@ export default defineContentScript({
         cleanupFns.push(initPlaylistObservers(ctx));
       } else if (!videoScriptDisabled$.value && pathAndQueryParams.includes('watch')) {
         cleanupFns.push(initWatchVideo(ctx, CurrentPage.WATCH_VIDEO));
-      } else if (!homeScriptDisabled$.value && pathAndQueryParams.includes('subscriptions')) {
-        cleanupFns.push(initHomeObserver(ctx));
+      } else if (!subscriptionScriptDisabled$.value && pathAndQueryParams.includes('subscriptions')) {
+        cleanupFns.push(initHomeObserver(ctx, CurrentPage.SUBSCRIPTIONS));
       } else if (!homeScriptDisabled$.value && pathAndQueryParams === '/') {
-        cleanupFns.push(initHomeObserver(ctx));
+        cleanupFns.push(initHomeObserver(ctx, CurrentPage.HOME));
       }
     }
 

@@ -8,6 +8,9 @@ export interface SettingFeatures<T> {
   homePage: {
     disableWatchLater: T;
   };
+  subscriptionsPage: {
+    disableWatchLater: T;
+  };
   watchVideo: {
     disableWatchLater: T;
   };
@@ -22,7 +25,6 @@ export interface SettingFeatures<T> {
     disableScrollTopBottom: T;
   };
 }
-export type TemplateFeatures = SettingFeatures<string>;
 export type SettingFeaturesValues = SettingFeatures<boolean>['homePage'] &
   SettingFeatures<boolean>['watchVideo'] &
   SettingFeatures<boolean>['watchPlaylist'] &
@@ -35,7 +37,6 @@ export interface SettingLogLevels {
   playlist: LogLevel;
   settings: LogLevel;
 }
-export type TemplateLogLevels = Record<keyof SettingLogLevels, string>;
 
 interface SettingSearchStringsBase<T> {
   homePage: {
@@ -98,6 +99,9 @@ export const searchStringStorage = storage.defineItem<SettingSearchStrings>(SETT
 export const featuresStorage = storage.defineItem<SettingFeatures<boolean>>(SETTING_FEATURES, {
   fallback: {
     homePage: {
+      disableWatchLater: false,
+    },
+    subscriptionsPage: {
       disableWatchLater: false,
     },
     watchVideo: {

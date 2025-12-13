@@ -25,13 +25,19 @@ import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterHomeButton from '@/components/WatchLaterHomeButton.vue';
 import { getTpYtIronDropDownFromDom } from '@/utils/yt-popup';
-import { homeSearchStrings$, homeWatchLaterDisabled$ } from '@/entrypoints/content/state/settings';
+import {
+  homeSearchStrings$,
+  homeWatchLaterDisabled$,
+  subscriptionWatchLaterDisabled$,
+} from '@/entrypoints/content/state/settings';
 import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
+import { CurrentPage } from '@/entrypoints/content';
 
 const logger = getLogger(LoggerKind.HOME_SCRIPT);
 const elementDeduplicationTracker = new ElementDeduplicationTracker();
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
+const currentPage$ = new BehaviorSubject<CurrentPage | null>(null);
 const queueWatchLaterClick$ = new Subject<HTMLElement>();
 
 const contentMutation$ = new Subject<MutationRecord>();
@@ -65,7 +71,11 @@ const popupMutationObserver = new MutationObserver((mutations) => {
 const watchLaterButtonClicked$ = new BehaviorSubject<boolean>(false);
 
 const createWatchLaterButtons$ = contentMutation$.pipe(
-  filter(() => !homeWatchLaterDisabled$.value),
+  filter(
+    () =>
+      (!homeWatchLaterDisabled$.value && currentPage$.value === CurrentPage.HOME) ||
+      (!subscriptionWatchLaterDisabled$.value && currentPage$.value === CurrentPage.SUBSCRIPTIONS),
+  ),
   filter((mutationRecord) => {
     return mutationRecord.target.nodeName === 'DIV' && (mutationRecord.target as HTMLElement).id === 'content';
   }),
@@ -207,8 +217,9 @@ const processQueuedWatchLaterClick$ = queueWatchLaterClick$.pipe(
   concatAll(),
 );
 
-export function initHomeObserver(ctx: ContentScriptContext): CleanupFn {
+export function initHomeObserver(ctx: ContentScriptContext, currentPage: CurrentPage): CleanupFn {
   contentScriptContext$.next(ctx);
+  currentPage$.next(currentPage);
 
   // Avoid listening to the whole DOM by using the ytd-page-manager element.
   const ytdPageManager = document.evaluate(

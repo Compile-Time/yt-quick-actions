@@ -55,6 +55,12 @@
           "disableWatchLater": "Disable watch later button"
         }
       },
+      "subscriptionsPage": {
+        "title": "Subscriptions page",
+        "field": {
+          "disableWatchLater": "Disable watch later button"
+        }
+      },
       "watchVideo": {
         "title": "Watch video",
         "field": {

@@ -8,22 +8,33 @@ function isScriptDisabled(features: Record<string, boolean>): boolean {
   return features ? Object.values(features).every((feature) => feature) : false;
 }
 
+// Flags for script disabled states
 export const homeScriptDisabled$ = new BehaviorSubject<boolean>(false);
+export const subscriptionScriptDisabled$ = new BehaviorSubject<boolean>(false);
 export const watchingPlaylistScriptDisabled$ = new BehaviorSubject<boolean>(false);
 export const playlistScriptDisabled$ = new BehaviorSubject<boolean>(false);
 export const videoScriptDisabled$ = new BehaviorSubject<boolean>(false);
+
+// Flags for watch later disabled states
 export const homeWatchLaterDisabled$ = new BehaviorSubject<boolean>(false);
 export const videoWatchLaterDisabled$ = new BehaviorSubject<boolean>(false);
+export const subscriptionWatchLaterDisabled$ = new BehaviorSubject<boolean>(false);
+export const watchPlaylistWatchLaterDisabled$ = new BehaviorSubject<boolean>(false);
+// Flags for move top/bottom disabled states
 export const playlistMoveTopBottomDisabled$ = new BehaviorSubject<boolean>(false);
+// Flags for remove disabled states
 export const playlistRemoveDisabled$ = new BehaviorSubject<boolean>(false);
+export const watchPlaylistRemoveDisabled$ = new BehaviorSubject<boolean>(false);
+// Flags for scroll top/bottom disabled states
 export const playlistScrollTopBottomDisabled$ = new BehaviorSubject<boolean>(false);
 export const watchPlaylistScrollTopBottomDisabled$ = new BehaviorSubject<boolean>(false);
-export const watchPlaylistRemoveDisabled$ = new BehaviorSubject<boolean>(false);
-export const watchPlaylistWatchLaterDisabled$ = new BehaviorSubject<boolean>(false);
 
 function pushScriptsDisabledStatus(features: SettingFeatures<boolean>) {
   homeScriptDisabled$.next(isScriptDisabled(features.homePage));
   homeWatchLaterDisabled$.next(features.homePage.disableWatchLater);
+
+  subscriptionScriptDisabled$.next(isScriptDisabled(features.subscriptionsPage));
+  subscriptionWatchLaterDisabled$.next(features.subscriptionsPage.disableWatchLater);
 
   watchingPlaylistScriptDisabled$.next(isScriptDisabled(features.watchPlaylist));
   watchPlaylistRemoveDisabled$.next(features.watchPlaylist.disableRemove);
