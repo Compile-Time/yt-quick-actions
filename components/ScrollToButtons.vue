@@ -37,7 +37,7 @@ function scrollToBottom() {
 <style scoped>
 .qa-scroll-container {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 @media (max-width: 1080px) {
