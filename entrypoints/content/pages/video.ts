@@ -35,6 +35,7 @@ import {
 } from '@/entrypoints/content/state/settings';
 
 const logger = getLogger(LoggerKind.VIDEO_SCRIPT);
+const elementDeduplicationTracker = new ElementDeduplicationTracker();
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 const currentPage$ = new BehaviorSubject<CurrentPage | null>(null);
@@ -141,6 +142,7 @@ const createWatchLaterButton$ = combineLatest({
     });
 
     watchLaterButton.mount();
+    elementDeduplicationTracker.addDomElement(watchLaterButton);
   }),
   tap(() => {
     contentMutationObserver.disconnect();
@@ -314,5 +316,7 @@ export function initWatchVideo(ctx: ContentScriptContext, currentPage: CurrentPa
     createWatchLaterButtonSubscription.unsubscribe();
     clickPopupVideoSaveSubscription.unsubscribe();
     clickPopupWatchLaterPlaylistSubscription.unsubscribe();
+
+    elementDeduplicationTracker.cleanup();
   };
 }

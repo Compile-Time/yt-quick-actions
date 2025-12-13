@@ -29,6 +29,7 @@ import { homeSearchStrings$, homeWatchLaterDisabled$ } from '@/entrypoints/conte
 import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
 
 const logger = getLogger(LoggerKind.HOME_SCRIPT);
+const elementDeduplicationTracker = new ElementDeduplicationTracker();
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 const queueWatchLaterClick$ = new Subject<HTMLElement>();
@@ -104,6 +105,7 @@ const createWatchLaterButtons$ = contentMutation$.pipe(
       },
     });
     watchLaterButton.mount();
+    elementDeduplicationTracker.addDomElement(watchLaterButton);
   }),
   catchError((error) => {
     logger.error('Error occurred while creating watch later buttons', error);
@@ -234,5 +236,7 @@ export function initHomeObserver(ctx: ContentScriptContext): CleanupFn {
     popupMutationObserver.disconnect();
     createWatchLaterButtonSubscription.unsubscribe();
     queueWatchLaterClicksSubscription.unsubscribe();
+
+    elementDeduplicationTracker.cleanup();
   };
 }

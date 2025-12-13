@@ -20,8 +20,10 @@ import {
   watchPlaylistScrollTopBottomDisabled$,
   watchPlaylistSearchStrings$,
 } from '@/entrypoints/content/state/settings';
+import { ElementDeduplicationTracker } from '@/utils/element-deduplication-tracker';
 
 const logger = getLogger(LoggerKind.WATCHING_PLAYLIST_SCRIPT);
+const elementDeduplicationTracker = new ElementDeduplicationTracker();
 
 const contentScriptContext$ = new BehaviorSubject<ContentScriptContext | null>(null);
 
@@ -100,6 +102,7 @@ const addScrollToButtons$ = contentMutationSubject.pipe(
       },
     });
     scrollToButtons.mount();
+    elementDeduplicationTracker.addDomElement(scrollToButtons);
   }),
 );
 
@@ -136,6 +139,7 @@ const createRemoveButtons$ = contentMutationSubject.pipe(
     });
 
     removeButton.mount();
+    elementDeduplicationTracker.addDomElement(removeButton);
   }),
 );
 
@@ -221,5 +225,7 @@ export function initWatchingPlaylist(ctx: ContentScriptContext): CleanupFn {
     createRemoveButtonSubscription.unsubscribe();
     clickPopupRemoveButtonSubscription.unsubscribe();
     addScrollToEndButtonSubscription.unsubscribe();
+
+    elementDeduplicationTracker.cleanup();
   };
 }
