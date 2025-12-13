@@ -64,14 +64,14 @@ YouTube variables start with '--yt-spec'.
 
 .qa-scroll-to-overlay {
     position: fixed;
-    bottom: 20px;
+    bottom: 4rem;
     left: 48rem;
 }
 
 @media (max-width: 1312px) {
     .qa-scroll-to-overlay {
         position: fixed;
-        bottom: 20px;
+        bottom: 4rem;
         left: 32rem;
     }
 }
@@ -79,7 +79,7 @@ YouTube variables start with '--yt-spec'.
 @media (max-width: 1080px) {
     .qa-scroll-to-overlay {
         position: fixed;
-        bottom: 20px;
+        bottom: 4rem;
         left: 1rem;
         z-index: 3000;
     }
