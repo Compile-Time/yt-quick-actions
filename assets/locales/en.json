@@ -1,0 +1,50 @@
+{
+  "searchStrings": {
+    "homePage": {
+      "title": "Home page",
+      "field": {
+        "watchLaterEntry": "Popup watch later item"
+      },
+      "placeholder": {
+        "watchLaterEntry": "watch"
+      }
+    },
+    "watchPlaylist": {
+      "title": "Watch playlist",
+      "field": {
+        "removeEntry": "Popup remove item",
+        "watchLaterEntry": "Popup watch later item",
+        "videoSaveButton": "Save button"
+      },
+      "placeholder": {
+        "removeEntry": "remove",
+        "watchLaterEntry": "watch",
+        "videoSaveButton": "save"
+      }
+    },
+    "playlist": {
+      "title": "Playlist",
+      "field": {
+        "removeEntry": "Popup remove item",
+        "moveToBottomEntry": "Popup move to bottom item",
+        "moveToTopEntry": "Popup move to top item"
+      },
+      "placeholder": {
+        "removeEntry": "remove",
+        "moveToBottomEntry": "bottom",
+        "moveToTopEntry": "top"
+      }
+    },
+    "watchVideo": {
+      "title": "Watch video",
+      "field": {
+        "videoSaveButton": "Save button",
+        "watchLaterEntry": "Popup watch later item"
+      },
+      "placeholder": {
+        "videoSaveButton": "save",
+        "watchLaterEntry": "watch"
+      }
+    }
+  }
+}

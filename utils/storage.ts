@@ -58,7 +58,6 @@ interface SettingSearchStringsBase<T> {
 }
 
 export type SettingSearchStrings = SettingSearchStringsBase<string | undefined>;
-export type TemplateSearchStrings = SettingSearchStringsBase<string>;
 export type SettingSearchStringValues = SettingSearchStrings['homePage'] &
   SettingSearchStrings['watchVideo'] &
   SettingSearchStrings['watchPlaylist'] &
