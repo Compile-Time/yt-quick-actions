@@ -1,50 +1,89 @@
 {
-  "searchStrings": {
-    "homePage": {
-      "title": "Home page",
-      "field": {
-        "watchLaterEntry": "Popup watch later item"
+  "options": {
+    "searchStrings": {
+      "homePage": {
+        "title": "Home page",
+        "field": {
+          "watchLaterEntry": "Popup watch later item"
+        },
+        "placeholder": {
+          "watchLaterEntry": "watch"
+        }
       },
-      "placeholder": {
-        "watchLaterEntry": "watch"
+      "watchPlaylist": {
+        "title": "Watch playlist",
+        "field": {
+          "removeEntry": "Popup remove item",
+          "watchLaterEntry": "Popup watch later item",
+          "videoSaveButton": "Save button"
+        },
+        "placeholder": {
+          "removeEntry": "remove",
+          "watchLaterEntry": "watch",
+          "videoSaveButton": "save"
+        }
+      },
+      "playlist": {
+        "title": "Playlist",
+        "field": {
+          "removeEntry": "Popup remove item",
+          "moveToBottomEntry": "Popup move to bottom item",
+          "moveToTopEntry": "Popup move to top item"
+        },
+        "placeholder": {
+          "removeEntry": "remove",
+          "moveToBottomEntry": "bottom",
+          "moveToTopEntry": "top"
+        }
+      },
+      "watchVideo": {
+        "title": "Watch video",
+        "field": {
+          "videoSaveButton": "Save button",
+          "watchLaterEntry": "Popup watch later item"
+        },
+        "placeholder": {
+          "videoSaveButton": "save",
+          "watchLaterEntry": "watch"
+        }
       }
     },
-    "watchPlaylist": {
-      "title": "Watch playlist",
-      "field": {
-        "removeEntry": "Popup remove item",
-        "watchLaterEntry": "Popup watch later item",
-        "videoSaveButton": "Save button"
+    "features": {
+      "homePage": {
+        "title": "Home page",
+        "field": {
+          "disableWatchLater": "Disable watch later button"
+        }
       },
-      "placeholder": {
-        "removeEntry": "remove",
-        "watchLaterEntry": "watch",
-        "videoSaveButton": "save"
+      "watchVideo": {
+        "title": "Watch video",
+        "field": {
+          "disableWatchLater": "Disable watch later button"
+        }
+      },
+      "watchPlaylist": {
+        "title": "Watch playlist",
+        "field": {
+          "disableRemove": "Disable remove button",
+          "disableWatchLater": "Disable watch later button",
+          "disableScrollTopBottom": "Disable scroll to top or bottom buttons"
+        }
+      },
+      "playlist": {
+        "title": "Playlist",
+        "field": {
+          "disableRemove": "Disable remove button",
+          "disableMoveTopBottom": "Disable move to top or bottom buttons",
+          "disableScrollTopBottom": "Disable scroll to top or bottom buttons"
+        }
       }
     },
-    "playlist": {
-      "title": "Playlist",
-      "field": {
-        "removeEntry": "Popup remove item",
-        "moveToBottomEntry": "Popup move to bottom item",
-        "moveToTopEntry": "Popup move to top item"
-      },
-      "placeholder": {
-        "removeEntry": "remove",
-        "moveToBottomEntry": "bottom",
-        "moveToTopEntry": "top"
-      }
-    },
-    "watchVideo": {
-      "title": "Watch video",
-      "field": {
-        "videoSaveButton": "Save button",
-        "watchLaterEntry": "Popup watch later item"
-      },
-      "placeholder": {
-        "videoSaveButton": "save",
-        "watchLaterEntry": "watch"
-      }
+    "logLevels": {
+      "homePage": "Home page",
+      "watchVideo": "Watch video",
+      "watchPlaylist": "Watch playlist",
+      "playlist": "Playlist",
+      "settings": "Settings"
     }
-  }
+  },
 }

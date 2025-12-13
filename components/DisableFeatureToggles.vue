@@ -1,36 +1,14 @@
 <script setup lang="ts">
-import { SettingFeatures, SettingFeaturesValues, TemplateFeatures } from '@/utils/storage';
+import { SettingFeatures, SettingFeaturesValues } from '@/utils/storage';
 import { watchDebounced } from '@vueuse/shared';
 import ToggleComponent from '@/components/ToggleComponent.vue';
+import useI18n from '@/composables/useI18n';
 
 const props = defineProps<{ featureToggles: SettingFeatures<boolean> }>();
 const featureToggles = reactive<SettingFeatures<boolean>>(props.featureToggles);
 const featureSections = computed(() => Object.keys(featureToggles));
 
-const sectionTitles: Record<keyof SettingFeatures<boolean>, string> = {
-  homePage: 'Home page',
-  watchVideo: 'Watch video',
-  watchPlaylist: 'Watch playlist',
-  playlist: 'Playlist',
-};
-const templateFeatureToggles: TemplateFeatures = {
-  homePage: {
-    disableWatchLater: 'Disable watch later button',
-  },
-  watchPlaylist: {
-    disableRemove: 'Disable remove button',
-    disableWatchLater: 'Disable watch later button',
-    disableScrollTopBottom: 'Disable scroll to top or bottom buttons',
-  },
-  playlist: {
-    disableRemove: 'Disable remove button',
-    disableMoveTopBottom: 'Disable move to top or bottom buttons',
-    disableScrollTopBottom: 'Disable scroll to top or bottom buttons',
-  },
-  watchVideo: {
-    disableWatchLater: 'Disable watch later button',
-  },
-};
+const { t } = useI18n();
 
 const emit = defineEmits({
   change: (_: SettingFeatures<boolean>) => true,
@@ -74,7 +52,7 @@ function getInitialSectionToggleValue(section: keyof SettingFeatures<boolean>) {
 <template>
   <template v-for="(sectionValue, sectionKey, sectionIterationIndex) in props.featureToggles" :key="sectionKey">
     <div class="flex gap-4 mb-4">
-      <p class="">{{ sectionTitles[sectionKey] }}</p>
+      <p class="">{{ t(`options.features.${sectionKey}.title`) }}</p>
 
       <ToggleComponent
         :toggled="getInitialSectionToggleValue(sectionKey)"
@@ -84,7 +62,7 @@ function getInitialSectionToggleValue(section: keyof SettingFeatures<boolean>) {
 
     <div class="bg-base-200 border-base-300 features-grid gap-4">
       <template v-for="(value, key) in sectionValue" :key="key">
-        <label class="label whitespace-normal">{{ templateFeatureToggles[sectionKey][key] }}</label>
+        <label class="label whitespace-normal">{{ t(`options.features.${sectionKey}.field.${key as string}`) }}</label>
 
         <ToggleComponent
           :toggled="value"

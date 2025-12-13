@@ -39,16 +39,18 @@ function updateSearchString(
 
 <template>
   <template v-for="(sectionObject, sectionKey, sectionIterationIndex) in props.searchStrings" :key="sectionKey">
-    <p class="">{{ t(`searchStrings.${sectionKey}.title`) }}</p>
+    <p class="">{{ t(`options.searchStrings.${sectionKey}.title`) }}</p>
 
     <div class="bg-base-200 border-base-300 grid grid-cols-2 gap-4 items-center">
       <template v-for="(value, key) in sectionObject" :key="key">
-        <label class="label whitespace-normal">{{ t(`searchStrings.${sectionKey}.field.${key as string}`) }}</label>
+        <label class="label whitespace-normal">{{
+          t(`options.searchStrings.${sectionKey}.field.${key as string}`)
+        }}</label>
         <input
           type="text"
           class="input"
           :value="value"
-          :placeholder="t(`searchStrings.${sectionKey}.placeholder.${key as string}`)"
+          :placeholder="t(`options.searchStrings.${sectionKey}.placeholder.${key as string}`)"
           @input="(event) => updateSearchString(sectionKey, key, (event.target as HTMLInputElement).value)"
           @change="handleInputChange"
         />
