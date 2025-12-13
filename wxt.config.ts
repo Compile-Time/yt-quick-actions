@@ -7,8 +7,7 @@ export default defineConfig({
   autoIcons: {
     developmentIndicator: 'overlay',
   },
-  manifest: (manifest) => ({
-    ...manifest,
+  manifest: (_) => ({
     permissions: ['*://www.youtube.com/*', 'storage'],
     name: 'YT Quick Actions',
   }),
