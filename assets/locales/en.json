@@ -2,7 +2,7 @@
   "options": {
     "searchStrings": {
       "homePage": {
-        "title": "Home page",
+        "title": "Home/Subscriptions page",
         "field": {
           "watchLaterEntry": "Popup watch later item"
         },
@@ -85,11 +85,11 @@
       }
     },
     "logLevels": {
-      "homePage": "Home page",
+      "homePage": "Home/Subscriptions page",
       "watchVideo": "Watch video",
       "watchPlaylist": "Watch playlist",
       "playlist": "Playlist",
       "settings": "Settings"
     }
-  },
+  }
 }
