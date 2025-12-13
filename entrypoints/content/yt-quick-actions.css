@@ -84,3 +84,12 @@ YouTube variables start with '--yt-spec'.
         z-index: 3000;
     }
 }
+
+@media (max-width: 791px) {
+    .qa-scroll-to-overlay {
+        position: fixed;
+        bottom: 1rem;
+        right: 30%;
+        left: unset;
+    }
+}

@@ -46,4 +46,12 @@ function scrollToBottom() {
     flex-direction: column;
   }
 }
+
+@media (max-width: 791px) {
+  .qa-scroll-container {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+  }
+}
 </style>
