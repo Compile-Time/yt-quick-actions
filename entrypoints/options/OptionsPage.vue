@@ -59,22 +59,24 @@ function showSavedToast() {
 </script>
 
 <template>
-  <h1 class="text-3xl mb-8">Settings</h1>
+  <h1 class="text-3xl mb-8 text-center">Settings</h1>
 
-  <div class="tabs tabs-border w-lg">
-    <input type="radio" name="setting_tabs" class="tab" aria-label="Disable features" checked />
-    <div class="tab-content border-base-300 bg-base-200 p-10">
-      <DisableFeatureToggles :feature-toggles="settingFeatureToggles" @change="handleFeatureChange" />
-    </div>
+  <div class="flex flex-col items-center">
+    <div class="tabs tabs-border w-lg">
+      <input type="radio" name="setting_tabs" class="tab" aria-label="Disable features" checked />
+      <div class="tab-content border-base-300 bg-base-200 p-10">
+        <DisableFeatureToggles :feature-toggles="settingFeatureToggles" @change="handleFeatureChange" />
+      </div>
 
-    <input type="radio" name="setting_tabs" class="tab" aria-label="Search strings" checked />
-    <div class="tab-content border-base-300 bg-base-200 p-10">
-      <SearchStrings :search-strings="settingSearchStrings" @change="handleSearchSettingsChange" />
-    </div>
+      <input type="radio" name="setting_tabs" class="tab" aria-label="Search strings" checked />
+      <div class="tab-content border-base-300 bg-base-200 p-10">
+        <SearchStrings :search-strings="settingSearchStrings" @change="handleSearchSettingsChange" />
+      </div>
 
-    <input type="radio" name="setting_tabs" class="tab" aria-label="Logging" />
-    <div class="tab-content border-base-300 bg-base-200 p-10">
-      <LogLevels :log-levels="loggers" @log-level-changed="handleLogLevelChange" />
+      <input type="radio" name="setting_tabs" class="tab" aria-label="Logging" />
+      <div class="tab-content border-base-300 bg-base-200 p-10">
+        <LogLevels :log-levels="loggers" @log-level-changed="handleLogLevelChange" />
+      </div>
     </div>
   </div>
 
