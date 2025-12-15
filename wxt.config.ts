@@ -8,12 +8,23 @@ export default defineConfig({
   autoIcons: {
     developmentIndicator: 'overlay',
   },
-  manifest: (_) => ({
-    permissions: ['*://www.youtube.com/*', 'storage'],
-    name: '__MSG_extName__',
-    description: '__MSG_extDescription__',
-    default_locale: 'en',
-  }),
+  manifest: (configEnv) => {
+    const manifest: Record<string, unknown> = {
+      name: '__MSG_extName__',
+      description: '__MSG_extDescription__',
+      default_locale: 'en',
+    };
+
+    if (configEnv.browser === 'firefox') {
+      manifest.permissions = ['*://www.youtube.com/*', 'storage'];
+    }
+    if (configEnv.browser === 'chrome') {
+      manifest.permissions = ['storage'];
+      manifest.host_permissions = ['*://www.youtube.com/*'];
+    }
+
+    return manifest;
+  },
   vite: (configEnv) => ({
     plugins: [
       tailwindcss(),
