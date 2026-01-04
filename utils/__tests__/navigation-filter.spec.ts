@@ -3,6 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   AnyFilter,
+  AttributeNavigationFilter,
   IdNavigationFilter,
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
@@ -161,6 +162,38 @@ describe('NavigationFilter', () => {
 
       const result = filter.applySingle(path);
       expect(result).toEqual(path);
+    });
+  });
+
+  describe('AttributeNavigationFilter', () => {
+    it('should filter HTMLCollection by tag and attribute name', () => {
+      const filter = new AttributeNavigationFilter('span', 'id');
+      const htmlCollection = fakeDocument.getHtmlCollection();
+
+      const result: HTMLElement[] = filter.apply(htmlCollection);
+      expect(result.length).toEqual(3);
+      expect(result[0]).toEqual(fakeDocument.getElementById('span'));
+      expect(result[1]).toEqual(fakeDocument.getElementById('span2'));
+      expect(result[2]).toEqual(fakeDocument.getElementById('span2dup'));
+    });
+
+    it('should filter HTMLCollection by tag and attribute name and value', () => {
+      const filter = new AttributeNavigationFilter('span', 'id', 'span2');
+      const htmlCollection = fakeDocument.getHtmlCollection();
+
+      const result: HTMLElement[] = filter.apply(htmlCollection);
+      expect(result.length).toEqual(2);
+      expect(result[0]).toEqual(fakeDocument.getElementById('span2'));
+      expect(result[1]).toEqual(fakeDocument.getElementById('span2dup'));
+    });
+
+    it('should filter single HTMLElement', () => {
+      const filter = new AttributeNavigationFilter('div', 'data-test', 'true');
+      const htmlElement: HTMLElement = document.createElement('div');
+      htmlElement.setAttribute('data-test', 'true');
+
+      const result = filter.applySingle(htmlElement);
+      expect(result).toEqual(htmlElement);
     });
   });
 

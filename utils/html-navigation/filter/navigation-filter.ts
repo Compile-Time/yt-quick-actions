@@ -116,3 +116,36 @@ export class TextNavigationFilter extends NavigationFilter {
     return other.text === this.text;
   }
 }
+
+export class AttributeNavigationFilter extends NavigationFilter {
+  constructor(
+    private readonly tagName: string,
+    private readonly attributeName: string,
+    private readonly attributeValue?: string,
+  ) {
+    super();
+  }
+
+  protected applyCondition(element: HTMLElement | null): boolean {
+    if (!element) {
+      return false;
+    }
+
+    if (!this.attributeValue) {
+      return this.lowercaseEquals(element.tagName, this.tagName) && element.getAttribute(this.attributeName) !== null;
+    }
+
+    return (
+      this.lowercaseEquals(element.tagName, this.tagName) &&
+      element.getAttribute(this.attributeName) === this.attributeValue
+    );
+  }
+
+  equals(other: AttributeNavigationFilter): boolean {
+    return (
+      other.tagName === this.tagName &&
+      other.attributeName === this.attributeName &&
+      other.attributeValue === this.attributeValue
+    );
+  }
+}
