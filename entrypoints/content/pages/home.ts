@@ -97,7 +97,7 @@ const createWatchLaterButtons$ = contentMutation$.pipe(
       .consume()!;
     logger.debug('Search for more options button yielded: ', optionsButton);
 
-    divContent.setAttribute('style', 'position: relative;');
+    divContent.style.position = 'relative';
     const watchLaterButton = createIntegratedUi(contentScriptContext$.value!, {
       anchor: divContent,
       position: 'overlay',
@@ -115,7 +115,8 @@ const createWatchLaterButtons$ = contentMutation$.pipe(
       },
     });
     watchLaterButton.mount();
-    elementDeduplicationTracker.addDomElement(watchLaterButton);
+    // In some cases the DOM elements are re-used when going from the subscription page to the home page.
+    // elementDeduplicationTracker.addDomElement(watchLaterButton);
   }),
   catchError((error) => {
     logger.error('Error occurred while creating watch later buttons', error);
