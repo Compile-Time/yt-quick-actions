@@ -13,7 +13,10 @@
     "zip:firefox": "wxt zip -b firefox",
     "compile": "vue-tsc --noEmit",
     "postinstall": "wxt prepare",
-    "test": "vitest"
+    "test": "vitest",
+    "eslint": "eslint ./",
+    "prettier:check": "prettier --check .",
+    "prettier:write": "prettier --write ."
   },
   "commitlint": {
     "extends": [
