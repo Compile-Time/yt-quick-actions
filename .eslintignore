@@ -1,9 +1,0 @@
-coverage/
-.output
-.idea
-.wxt
-assets
-node_modules
-public
-eslint.config.js
-*.md
