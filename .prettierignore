@@ -1,7 +1,8 @@
 .parcel-cache
-dist
 node_modules
 assets
 package-lock.json
 *.md
 .flox
+**/fontawesome.min.css
+**/solid.min.css
