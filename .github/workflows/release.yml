@@ -1,5 +1,5 @@
-name: "Release"
-run-name: "Release ${{ github.ref_name }}"
+name: 'Release'
+run-name: 'Release ${{ github.ref_name }}'
 on: workflow_dispatch
 
 jobs:
@@ -45,7 +45,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
+          cache: 'npm'
       - name: Install npm dependencies
         run: npm ci
       - name: Update version in package(-lock).json

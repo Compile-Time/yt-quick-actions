@@ -1,10 +1,10 @@
 export enum LogLevel {
-  SILENT = "silent",
-  ERROR = "error",
-  WARN = "warn",
-  INFO = "info",
-  DEBUG = "debug",
-  TRACE = "trace",
+  SILENT = 'silent',
+  ERROR = 'error',
+  WARN = 'warn',
+  INFO = 'info',
+  DEBUG = 'debug',
+  TRACE = 'trace',
 }
 
 export function logLevelFromStr(str: string) {
@@ -28,7 +28,7 @@ export function logLevelFromStr(str: string) {
       return LogLevel.TRACE;
 
     default:
-      throw new Error("Given string does not match a LogLevel value!");
+      throw new Error('Given string does not match a LogLevel value!');
   }
 }
 

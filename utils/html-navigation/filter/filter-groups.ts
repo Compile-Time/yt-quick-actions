@@ -1,5 +1,5 @@
-import { SvgDrawPath } from "../../html-element-processing/element-data";
-import { AnyFilter, SvgDrawPathNavigationFilter } from "./navigation-filter";
+import { SvgDrawPath } from '../../html-element-processing/element-data';
+import { AnyFilter, SvgDrawPathNavigationFilter } from './navigation-filter';
 
 function drawPathToFilter(drawPath: SvgDrawPath): SvgDrawPathNavigationFilter {
   return new SvgDrawPathNavigationFilter(drawPath);

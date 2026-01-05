@@ -1,4 +1,4 @@
-import { NavigationFilter } from "./navigation-filter";
+import { NavigationFilter } from './navigation-filter';
 
 /**
  * Class to keep track of process state for a filter.

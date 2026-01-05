@@ -6,90 +6,90 @@ YouTube variables start with '--yt-spec'.
 */
 
 .qa-btn {
-    color: var(--yt-spec-text-primary);
-    border: none;
-    background: transparent;
-    pointer-events: auto;
+  color: var(--yt-spec-text-primary);
+  border: none;
+  background: transparent;
+  pointer-events: auto;
 
-    &.move-btn {
-        width: 36px;
-        height: 24px;
-    }
+  &.move-btn {
+    width: 36px;
+    height: 24px;
+  }
 
-    &.remove-btn {
-        width: 40px;
-        height: 40px;
-    }
+  &.remove-btn {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .qa-btn:hover {
-    color: red;
-    cursor: pointer;
+  color: red;
+  cursor: pointer;
 }
 
 .qa-btn-pill {
-    border-radius: 3em;
-    background-color: var(--yt-spec-badge-chip-background);
-    padding: 0.7em 0.8em;
-    margin-left: 0.5em;
+  border-radius: 3em;
+  background-color: var(--yt-spec-badge-chip-background);
+  padding: 0.7em 0.8em;
+  margin-left: 0.5em;
 }
 
 .qa-btn-pill:hover {
-    background-color: var(--yt-spec-button-chip-background-hover);
-    color: inherit;
+  background-color: var(--yt-spec-button-chip-background-hover);
+  color: inherit;
 }
 
 .qa-home-watch-later {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: flex-end;
-    pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: flex-end;
+  pointer-events: none;
 }
 
 .qa-drag-container-overlay {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    pointer-events: none;
-    gap: 6rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+  gap: 6rem;
 }
 
 .qa-watching-playlist-remove {
-    margin-right: 1em;
+  margin-right: 1em;
 }
 
 .qa-scroll-to-overlay {
-    position: fixed;
-    bottom: 4rem;
-    left: 48rem;
+  position: fixed;
+  bottom: 4rem;
+  left: 48rem;
 }
 
 @media (max-width: 1312px) {
-    .qa-scroll-to-overlay {
-        position: fixed;
-        bottom: 4rem;
-        left: 32rem;
-    }
+  .qa-scroll-to-overlay {
+    position: fixed;
+    bottom: 4rem;
+    left: 32rem;
+  }
 }
 
 @media (max-width: 1080px) {
-    .qa-scroll-to-overlay {
-        position: fixed;
-        bottom: 4rem;
-        left: 1rem;
-        z-index: 3000;
-    }
+  .qa-scroll-to-overlay {
+    position: fixed;
+    bottom: 4rem;
+    left: 1rem;
+    z-index: 3000;
+  }
 }
 
 @media (max-width: 791px) {
-    .qa-scroll-to-overlay {
-        position: fixed;
-        bottom: 1rem;
-        right: 30%;
-        left: unset;
-    }
+  .qa-scroll-to-overlay {
+    position: fixed;
+    bottom: 1rem;
+    right: 30%;
+    left: unset;
+  }
 }

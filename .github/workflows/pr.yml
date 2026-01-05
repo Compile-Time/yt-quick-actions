@@ -1,5 +1,5 @@
-name: "PR"
-run-name: "PR ${{ github.event.pull_request.number }}"
+name: 'PR'
+run-name: 'PR ${{ github.event.pull_request.number }}'
 on:
   pull_request:
 
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "npm"
+          cache: 'npm'
       - name: Install npm dependencies
         run: npm ci
       - name: Run Eslint

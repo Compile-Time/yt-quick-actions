@@ -8,12 +8,12 @@ export interface YtdMenuServiceItemRendererStructure {
 }
 
 export function setupYtdMenuServiceItemRendererSample(): YtdMenuServiceItemRendererStructure {
-  const ytdMenuServiceItemRenderer = document.createElement("ytd-menu-service-item-renderer");
-  const tpYtPaperItem = document.createElement("tp-yt-paper-item");
-  const ytIcon = document.createElement("yt-icon");
-  const svg = document.createElement("svg");
-  const g = document.createElement("g");
-  const path = document.createElement("path");
+  const ytdMenuServiceItemRenderer = document.createElement('ytd-menu-service-item-renderer');
+  const tpYtPaperItem = document.createElement('tp-yt-paper-item');
+  const ytIcon = document.createElement('yt-icon');
+  const svg = document.createElement('svg');
+  const g = document.createElement('g');
+  const path = document.createElement('path');
 
   g.appendChild(path);
   svg.appendChild(g);
