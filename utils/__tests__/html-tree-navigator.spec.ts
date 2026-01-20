@@ -1,6 +1,6 @@
-// @vitest-environment jsdom
+// @vitest-environment happy-dom
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import {
   IdNavigationFilter,

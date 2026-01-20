@@ -113,6 +113,7 @@
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-vue": "^10.5.1",
     "globals": "^16.5.0",
+    "happy-dom": "^20.3.4",
     "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "semantic-release": "^25.0.2",

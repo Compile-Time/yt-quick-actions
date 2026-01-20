@@ -1,4 +1,4 @@
-// @vitest-environment jsdom
+// @vitest-environment happy-dom
 
 import { describe, expect, it } from 'vitest';
 import {
@@ -8,6 +8,7 @@ import {
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
 } from '@/utils/html-navigation/filter/navigation-filter';
+import { Browser } from 'happy-dom';
 
 class FakeHtmlCollection<T extends Element> implements HTMLCollection {
   elements: T[];
@@ -79,13 +80,13 @@ class FakeDocument {
     return this.getSvgAsElement(drawPath).children;
   }
 
-  getSvgAsElement(drawPath = 'M 10 10'): HTMLElement {
+  getSvgAsElement(drawPath = 'M 10 10', svgId = 'svg', pathId = 'path'): HTMLElement {
     const svg = document.createElement('svg');
     const path = document.createElement('path');
 
-    svg.id = 'svg';
+    svg.id = svgId;
 
-    path.id = 'path';
+    path.id = pathId;
     path.setAttribute('d', drawPath);
 
     svg.appendChild(path);
@@ -102,10 +103,10 @@ class FakeDocument {
 }
 
 describe('NavigationFilter', () => {
-  const fakeDocument = new FakeDocument();
-
   describe('TagNavigationFilter', () => {
     it('should filter HTMLCollection by tag', () => {
+      const fakeDocument = new FakeDocument();
+
       const filter = new TagNavigationFilter('p');
       const htmlCollection = fakeDocument.getHtmlCollection();
 
@@ -115,6 +116,8 @@ describe('NavigationFilter', () => {
     });
 
     it('should filter single HTMLElement', () => {
+      const fakeDocument = new FakeDocument();
+
       const filter = new TagNavigationFilter('p');
       const htmlElement: HTMLElement = document.createElement('p');
 
@@ -125,6 +128,8 @@ describe('NavigationFilter', () => {
 
   describe('IdNavigationFilter', () => {
     it('should filter HTMLCollection by id and tag', () => {
+      const fakeDocument = new FakeDocument();
+
       const filter = new IdNavigationFilter('i', 'image');
       const htmlCollection = fakeDocument.getHtmlCollection();
 
@@ -134,6 +139,8 @@ describe('NavigationFilter', () => {
     });
 
     it('should filter single HTMLElement', () => {
+      const fakeDocument = new FakeDocument();
+
       const filter = new IdNavigationFilter('p', 'paragraph');
       const htmlElement: HTMLElement = document.createElement('p');
       htmlElement.id = 'paragraph';
@@ -145,6 +152,8 @@ describe('NavigationFilter', () => {
 
   describe('SvgDrawPathNavigationFilter', () => {
     it('should filter HTML collection by tag and svg draw path', () => {
+      const fakeDocument = new FakeDocument();
+
       const filter = new SvgDrawPathNavigationFilter('M 10 10');
       const htmlCollection = fakeDocument.getSvg();
 
@@ -154,6 +163,8 @@ describe('NavigationFilter', () => {
     });
 
     it('should filter single HTMLElement', () => {
+      const fakeDocument = new FakeDocument();
+
       const filter = new SvgDrawPathNavigationFilter('M 10 10');
       const path: HTMLElement = document.createElement('path');
 
@@ -167,6 +178,8 @@ describe('NavigationFilter', () => {
 
   describe('AttributeNavigationFilter', () => {
     it('should filter HTMLCollection by tag and attribute name', () => {
+      const fakeDocument = new FakeDocument();
+
       const filter = new AttributeNavigationFilter('span', 'id');
       const htmlCollection = fakeDocument.getHtmlCollection();
 
@@ -178,6 +191,8 @@ describe('NavigationFilter', () => {
     });
 
     it('should filter HTMLCollection by tag and attribute name and value', () => {
+      const fakeDocument = new FakeDocument();
+
       const filter = new AttributeNavigationFilter('span', 'id', 'span2');
       const htmlCollection = fakeDocument.getHtmlCollection();
 
@@ -188,6 +203,8 @@ describe('NavigationFilter', () => {
     });
 
     it('should filter single HTMLElement', () => {
+      const fakeDocument = new FakeDocument();
+
       const filter = new AttributeNavigationFilter('div', 'data-test', 'true');
       const htmlElement: HTMLElement = document.createElement('div');
       htmlElement.setAttribute('data-test', 'true');
@@ -199,6 +216,8 @@ describe('NavigationFilter', () => {
 
   describe('AnyFilter', () => {
     it('should be empty for draw path not present in filter', () => {
+      const fakeDocument = new FakeDocument();
+
       const anyFilter = new AnyFilter([
         new SvgDrawPathNavigationFilter('M 10 10'),
         new SvgDrawPathNavigationFilter('M 20 20'),
@@ -212,26 +231,28 @@ describe('NavigationFilter', () => {
     });
 
     it('should find multiple svg elements matching filter', () => {
+      const browser = new Browser();
+      const page = browser.newPage();
+      page.url = 'https://example.com';
+      page.content =
+        '<html><body>' +
+        '<path id="path1" d="M 10 10"></path>' +
+        '<path id="path2" d="M 20 20"></path>' +
+        '</body></html>';
+
       const anyFilter = new AnyFilter([
         new SvgDrawPathNavigationFilter('M 10 10'),
         new SvgDrawPathNavigationFilter('M 20 20'),
         new SvgDrawPathNavigationFilter('M 30 30'),
       ]);
 
-      const svg1 = fakeDocument.getSvgAsElement();
-      const svg2 = fakeDocument.getSvgAsElement('M 20 20');
-      const div = document.createElement('div');
-      div.appendChild(svg1);
-      div.appendChild(svg2);
-
-      const res = Object.values(div.children).flatMap((svg) => Object.values(svg.children));
-
-      const fakeHtmlCollection = new FakeHtmlCollection<Element>(res);
-
-      const result: HTMLElement[] = anyFilter.apply(fakeHtmlCollection);
+      const body = page.mainFrame.document.body;
+      const result: HTMLElement[] = anyFilter.apply(body.children as unknown as HTMLCollection);
       expect(result.length).toEqual(2);
-      expect(result[0]).toEqual(svg1.children.item(0));
-      expect(result[1]).toEqual(svg2.children.item(0));
+      expect(result[0].id).toEqual('path1');
+      expect(result[1].id).toEqual('path2');
+
+      browser.close().then();
     });
   });
 });
