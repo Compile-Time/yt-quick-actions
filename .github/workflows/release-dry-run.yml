@@ -68,11 +68,13 @@ jobs:
           ls -l .output
       - name: Create Checksum of firefox package
         run: |
+          npx semantic-release -d > dry-run.txt
           NEXT_VERSION=$(awk '/The next release version is/{print $NF}' dry-run.txt)
           sha512sum ".output/yt-quick-actions-$NEXT_VERSION-firefox.zip" > ".output/yt-quick-actions-$NEXT_VERSION-firefox.sha512sum"
           cat .output/yt-quick-actions-$NEXT_VERSION-firefox.sha512sum
       - name: Create Checksum of chrome package
         run: |
+          npx semantic-release -d > dry-run.txt
           NEXT_VERSION=$(awk '/The next release version is/{print $NF}' dry-run.txt)
           sha512sum ".output/yt-quick-actions-$NEXT_VERSION-chrome.zip" > ".output/yt-quick-actions-$NEXT_VERSION-chrome.sha512sum"
           cat .output/yt-quick-actions-$NEXT_VERSION-chrome.sha512sum
