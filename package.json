@@ -2,7 +2,7 @@
   "name": "yt-quick-actions",
   "description": "YT Quick Actions is a web extension for YouTube making actions related to watch later playlist management quicker to access.",
   "private": true,
-  "version": "1.1.7",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
