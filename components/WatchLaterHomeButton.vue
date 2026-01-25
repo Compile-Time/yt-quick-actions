@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { Subject } from 'rxjs';
 
-const { optionsButton, watchLaterClickSubject } = defineProps<{
-  optionsButton: HTMLElement;
+const { homeItemDiv, watchLaterClickSubject } = defineProps<{
+  homeItemDiv: HTMLElement;
   watchLaterClickSubject: Subject<HTMLElement>;
 }>();
 
 function click() {
-  watchLaterClickSubject.next(optionsButton);
+  watchLaterClickSubject.next(homeItemDiv);
 }
 </script>
 

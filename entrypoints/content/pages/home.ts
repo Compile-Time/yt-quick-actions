@@ -90,21 +90,16 @@ const createWatchLaterButtons$ = contentMutation$.pipe(
       .notExists(),
   ),
   tap((mutationRecord) => {
-    const divContent = mutationRecord.target as HTMLElement;
-    const optionsButton = HtmlTreeNavigator.startFrom(divContent)
-      .filter(new TagNavigationFilter('BUTTON-VIEW-MODEL'))
-      .findFirst(new TagNavigationFilter('BUTTON'))
-      .consume()!;
-    logger.debug('Search for more options button yielded: ', optionsButton);
+    const homeItemDiv = mutationRecord.target as HTMLElement;
 
-    divContent.style.position = 'relative';
+    homeItemDiv.style.position = 'relative';
     const watchLaterButton = createIntegratedUi(contentScriptContext$.value!, {
-      anchor: divContent,
+      anchor: homeItemDiv,
       position: 'overlay',
       onMount: (container) => {
         container.style.height = '100%';
         const app = createApp(WatchLaterHomeButton, {
-          optionsButton,
+          homeItemDiv,
           watchLaterClickSubject: queueWatchLaterClick$,
         });
         app.mount(container);
@@ -208,10 +203,21 @@ const processQueuedWatchLaterClick$ = queueWatchLaterClick$.pipe(
   windowCount(1),
   map((window) =>
     window.pipe(
-      switchMap((optionsButton) => {
+      switchMap((homeItemDiv) => {
+        logger.debug('Starting search for options button from ', homeItemDiv);
+        const optionsButton = HtmlTreeNavigator.startFrom(homeItemDiv)
+          .filter(new TagNavigationFilter('BUTTON-VIEW-MODEL'))
+          .findFirst(new TagNavigationFilter('BUTTON'))
+          .consume()!;
+        logger.debug('Search for more options button yielded: ', optionsButton);
+
         watchLaterButtonClicked$.next(true);
-        optionsButton.click();
-        return clickPopupWatchLaterButton$;
+        logger.debug('Attempting to open options menu with options button: ', optionsButton);
+        if (optionsButton) {
+          optionsButton.click();
+          return clickPopupWatchLaterButton$;
+        }
+        return of();
       }),
     ),
   ),
