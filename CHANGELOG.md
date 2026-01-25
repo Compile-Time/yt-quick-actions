@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/Compile-Time/yt-quick-actions/compare/1.2.0...1.2.1) (2026-01-25)
+
+
+### Bug Fixes
+
+* First row of home page videos can't be saved for later ([a2b9ec3](https://github.com/Compile-Time/yt-quick-actions/commit/a2b9ec3555b214f5171041c708ca1da5894c95fa))
+
 # [1.2.0](https://github.com/Compile-Time/yt-quick-actions/compare/1.1.7...1.2.0) (2026-01-21)
 
 
