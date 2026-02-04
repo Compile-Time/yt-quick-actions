@@ -149,3 +149,36 @@ export class AttributeNavigationFilter extends NavigationFilter {
     );
   }
 }
+
+export class AttributesNavigationFilter extends NavigationFilter {
+  constructor(
+    private readonly tagName: string,
+    private readonly attributes: { [key: string]: string },
+  ) {
+    super();
+  }
+
+  protected applyCondition(element: HTMLElement | null): boolean {
+    if (!element) {
+      return false;
+    }
+
+    return (
+      this.lowercaseEquals(element.tagName, this.tagName) &&
+      Object.entries(this.attributes).every(([key, value]) => {
+        const attrValue = element.getAttribute(key);
+        return attrValue !== null && attrValue.toLowerCase() === value.toLowerCase();
+      })
+    );
+  }
+
+  equals(other: AttributesNavigationFilter): boolean {
+    return (
+      this.tagName === other.tagName &&
+      Object.entries(this.attributes).every(([key, value]) => {
+        const otherValue = other.attributes[key];
+        return otherValue !== undefined && otherValue === value;
+      })
+    );
+  }
+}

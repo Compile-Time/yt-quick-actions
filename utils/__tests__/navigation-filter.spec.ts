@@ -176,6 +176,22 @@ describe('NavigationFilter', () => {
     });
   });
 
+  describe('AttributesNavigationFilter', () => {
+    it('should filter HTMLCollection by multiple attributes', () => {
+      const browser = new Browser();
+      const page = browser.newPage();
+      page.url = 'https://example.com';
+      page.content = DEFAULT_PAGE_HTML;
+
+      const filter = new AttributesNavigationFilter('span', { id: 'span', class: 'test' });
+      const htmlCollection = page.mainFrame.document.body.children[0].children as unknown as HTMLCollection;
+
+      const result: HTMLElement[] = filter.apply(htmlCollection);
+      expect(result.length).toEqual(1);
+      expect(result[0].id).toEqual('span');
+    });
+  });
+
   describe('AnyFilter', () => {
     it('should be empty for draw path not present in filter', () => {
       const browser = new Browser();
