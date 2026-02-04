@@ -16,6 +16,7 @@ import {
 import { CleanupFn } from '@/utils/types/cleanup';
 import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
 import {
+  AttributesNavigationFilter,
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
   TextNavigationFilter,
@@ -80,9 +81,18 @@ const createWatchLaterButtons$ = contentMutation$.pipe(
     return mutationRecord.target.nodeName === 'DIV' && (mutationRecord.target as HTMLElement).id === 'content';
   }),
   filter((mutationRecord) => {
-    return HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
-      .find(new TagNavigationFilter('YTD-RICH-SECTION-RENDERER'))
-      .notExists();
+    return (
+      HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
+        .find(new TagNavigationFilter('YTD-RICH-SECTION-RENDERER'))
+        .notExists() ||
+      (currentPage$.value === CurrentPage.HOME &&
+        HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
+          .find(new TagNavigationFilter('YTD-RICH-SECTION-RENDERER'))
+          .exists() &&
+        HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
+          .find(new AttributesNavigationFilter('div', { id: 'contents-container', class: 'ytd-rich-shelf-renderer' }))
+          .exists())
+    );
   }),
   filter((mutationRecord) =>
     HtmlTreeNavigator.startFrom(mutationRecord.target as HTMLElement)
