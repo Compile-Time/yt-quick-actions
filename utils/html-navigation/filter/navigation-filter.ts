@@ -165,9 +165,16 @@ export class AttributesNavigationFilter extends NavigationFilter {
 
     return (
       this.lowercaseEquals(element.tagName, this.tagName) &&
-      Object.entries(this.attributes).every(([key, value]) => {
-        const attrValue = element.getAttribute(key);
-        return attrValue !== null && attrValue.toLowerCase() === value.toLowerCase();
+      Object.entries(this.attributes).every(([attributeName, attributeValue]) => {
+        const attrValue = element.getAttribute(attributeName);
+        if (!attrValue) {
+          return false;
+        }
+
+        if (attributeName === 'class') {
+          return attrValue.split(' ').includes(attributeValue);
+        }
+        return attrValue.toLowerCase() === attributeValue.toLowerCase();
       })
     );
   }

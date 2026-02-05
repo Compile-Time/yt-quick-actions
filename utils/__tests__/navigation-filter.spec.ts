@@ -14,7 +14,7 @@ import { Browser } from 'happy-dom';
 const DEFAULT_PAGE_HTML = `
 <html><body>
   <div id="div">
-    <span id="span" class="test">span</span>
+    <span id="span" class="hello world test">span</span>
     <span id="span2">span2</span>
     <p id="paragraph">paragraph</p>
     <i id="image">image</i>
@@ -184,6 +184,34 @@ describe('NavigationFilter', () => {
       page.content = DEFAULT_PAGE_HTML;
 
       const filter = new AttributesNavigationFilter('span', { id: 'span', class: 'test' });
+      const htmlCollection = page.mainFrame.document.body.children[0].children as unknown as HTMLCollection;
+
+      const result: HTMLElement[] = filter.apply(htmlCollection);
+      expect(result.length).toEqual(1);
+      expect(result[0].id).toEqual('span');
+    });
+
+    it('should filter HTMLCollection by id', () => {
+      const browser = new Browser();
+      const page = browser.newPage();
+      page.url = 'https://example.com';
+      page.content = DEFAULT_PAGE_HTML;
+
+      const filter = new AttributesNavigationFilter('span', { id: 'span' });
+      const htmlCollection = page.mainFrame.document.body.children[0].children as unknown as HTMLCollection;
+
+      const result: HTMLElement[] = filter.apply(htmlCollection);
+      expect(result.length).toEqual(1);
+      expect(result[0].id).toEqual('span');
+    });
+
+    it('should filter HTMLCollection by class even if there are multiple classes', () => {
+      const browser = new Browser();
+      const page = browser.newPage();
+      page.url = 'https://example.com';
+      page.content = DEFAULT_PAGE_HTML;
+
+      const filter = new AttributesNavigationFilter('span', { class: 'test' });
       const htmlCollection = page.mainFrame.document.body.children[0].children as unknown as HTMLCollection;
 
       const result: HTMLElement[] = filter.apply(htmlCollection);

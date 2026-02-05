@@ -26,13 +26,13 @@ import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterVideoButton from '@/components/WatchLaterVideoButton.vue';
 import { getTpYtIronDropDownFromDom, getYtPopupFromDom } from '#imports';
-import { CurrentPage } from '@/entrypoints/content';
 import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
 import {
   videoWatchLaterDisabled$,
   watchPlaylistSearchStrings$,
   watchVideoSearchStrings$,
 } from '@/entrypoints/content/state/settings';
+import { CurrentPage } from '@/utils/types/current-page';
 
 const logger = getLogger(LoggerKind.VIDEO_SCRIPT);
 const elementDeduplicationTracker = new ElementDeduplicationTracker();

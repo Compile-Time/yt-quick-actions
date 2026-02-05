@@ -19,14 +19,7 @@ import {
   videoScriptDisabled$,
   watchingPlaylistScriptDisabled$,
 } from '@/entrypoints/content/state/settings';
-
-export enum CurrentPage {
-  HOME = 'HOME',
-  SUBSCRIPTIONS = 'SUBSCRIPTIONS',
-  WATCHING_PLAYLIST = 'WATCHING_PLAYLIST',
-  WATCH_VIDEO = 'WATCH_VIDEO',
-  PLAYLIST = 'PLAYLIST',
-}
+import { CurrentPage } from '@/utils/types/current-page';
 
 export default defineContentScript({
   matches: ['*://www.youtube.com/*'],

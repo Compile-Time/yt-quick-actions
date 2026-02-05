@@ -6,17 +6,18 @@ import {
   filter,
   first,
   map,
+  MonoTypeOperatorFunction,
   of,
+  pipe,
   Subject,
   switchMap,
   tap,
   throwError,
   windowCount,
+  withLatestFrom,
 } from 'rxjs';
 import { CleanupFn } from '@/utils/types/cleanup';
-import { HtmlParentNavigator } from '@/utils/html-navigation/html-parent-navigator';
 import {
-  AttributesNavigationFilter,
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
   TextNavigationFilter,
@@ -26,13 +27,10 @@ import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
 import { ContentScriptContext } from 'wxt/utils/content-script-context';
 import WatchLaterHomeButton from '@/components/WatchLaterHomeButton.vue';
 import { getTpYtIronDropDownFromDom } from '@/utils/yt-popup';
-import {
-  homeSearchStrings$,
-  homeWatchLaterDisabled$,
-  subscriptionWatchLaterDisabled$,
-} from '@/entrypoints/content/state/settings';
+import { homeSearchStrings$ } from '@/entrypoints/content/state/settings';
 import { getLogger, LoggerKind } from '@/entrypoints/content/state/logger';
-import { CurrentPage } from '@/entrypoints/content';
+import { testIfWatchLaterButtonShouldBeCreated } from '@/utils/page-logic/home';
+import { CurrentPage } from '@/utils/types/current-page';
 
 const logger = getLogger(LoggerKind.HOME_SCRIPT);
 const elementDeduplicationTracker = new ElementDeduplicationTracker();
@@ -54,6 +52,7 @@ const contentMutationObserver = new MutationObserver((mutations) => {
       })
     ) {
       contentMutation$.next(mutation);
+      console.log('contentMutation', mutation);
     }
   });
 });
@@ -71,58 +70,38 @@ const popupMutationObserver = new MutationObserver((mutations) => {
 
 const watchLaterButtonClicked$ = new BehaviorSubject<boolean>(false);
 
-const createWatchLaterButtons$ = contentMutation$.pipe(
-  filter(
-    () =>
-      (!homeWatchLaterDisabled$.value && currentPage$.value === CurrentPage.HOME) ||
-      (!subscriptionWatchLaterDisabled$.value && currentPage$.value === CurrentPage.SUBSCRIPTIONS),
-  ),
-  filter((mutationRecord) => {
-    return mutationRecord.target.nodeName === 'DIV' && (mutationRecord.target as HTMLElement).id === 'content';
-  }),
-  filter((mutationRecord) => {
-    return (
-      HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
-        .find(new TagNavigationFilter('YTD-RICH-SECTION-RENDERER'))
-        .notExists() ||
-      (currentPage$.value === CurrentPage.HOME &&
-        HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
-          .find(new TagNavigationFilter('YTD-RICH-SECTION-RENDERER'))
-          .exists() &&
-        HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
-          .find(new AttributesNavigationFilter('div', { id: 'contents-container', class: 'ytd-rich-shelf-renderer' }))
-          .exists())
-    );
-  }),
-  filter((mutationRecord) =>
-    HtmlTreeNavigator.startFrom(mutationRecord.target as HTMLElement)
-      .findFirst(new TagNavigationFilter('ytd-ad-slot-renderer'))
-      .notExists(),
-  ),
-  tap((mutationRecord) => {
-    const homeItemDiv = mutationRecord.target as HTMLElement;
+export function createWatchLaterButton(): MonoTypeOperatorFunction<[MutationRecord, CurrentPage | null]> {
+  return pipe(
+    tap(([mutationRecord]) => {
+      const homeItemDiv = mutationRecord.target as HTMLElement;
 
-    homeItemDiv.style.position = 'relative';
-    const watchLaterButton = createIntegratedUi(contentScriptContext$.value!, {
-      anchor: homeItemDiv,
-      position: 'overlay',
-      onMount: (container) => {
-        container.style.height = '100%';
-        const app = createApp(WatchLaterHomeButton, {
-          homeItemDiv,
-          watchLaterClickSubject: queueWatchLaterClick$,
-        });
-        app.mount(container);
-        return app;
-      },
-      onRemove: (app) => {
-        app?.unmount();
-      },
-    });
-    watchLaterButton.mount();
-    // In some cases the DOM elements are re-used when going from the subscription page to the home page.
-    // elementDeduplicationTracker.addDomElement(watchLaterButton);
-  }),
+      homeItemDiv.style.position = 'relative';
+      const watchLaterButton = createIntegratedUi(contentScriptContext$.value!, {
+        anchor: homeItemDiv,
+        position: 'overlay',
+        onMount: (container) => {
+          container.style.height = '100%';
+          const app = createApp(WatchLaterHomeButton, {
+            homeItemDiv,
+            watchLaterClickSubject: queueWatchLaterClick$,
+          });
+          app.mount(container);
+          return app;
+        },
+        onRemove: (app) => {
+          app?.unmount();
+        },
+      });
+      watchLaterButton.mount();
+      // In some cases the DOM elements are re-used when going from the subscription page to the home page.
+      // elementDeduplicationTracker.addDomElement(watchLaterButton);
+    }),
+  );
+}
+const createWatchLaterButtons$ = contentMutation$.pipe(
+  withLatestFrom(currentPage$),
+  testIfWatchLaterButtonShouldBeCreated(),
+  createWatchLaterButton(),
   catchError((error) => {
     logger.error('Error occurred while creating watch later buttons', error);
     contentMutationObserver.disconnect();
