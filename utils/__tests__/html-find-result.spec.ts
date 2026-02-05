@@ -2,11 +2,16 @@
 
 import { describe, expect, it } from 'vitest';
 import { HtmlFindResult } from '@/utils/html-navigation/html-find-result';
+import { Browser } from 'happy-dom';
 
 describe('HtmlFindResult', () => {
   describe('exists', () => {
     it('should return true when element exists', () => {
-      const element = document.createElement('div');
+      const browser = new Browser();
+      const page = browser.newPage();
+      page.content = '<div id="test"></div>';
+      const element = page.mainFrame.document.getElementById('test') as unknown as HTMLElement;
+
       const result = new HtmlFindResult(element);
       expect(result.exists()).toBeTruthy();
     });

@@ -8,14 +8,20 @@ import {
   TagNavigationFilter,
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { Tags } from '@/utils/html-element-processing/element-data';
+import { Browser } from 'happy-dom';
 
 describe('HtmlTreeNavigator', () => {
   it('should return a child div when navigating from a parent div', () => {
-    const div = document.createElement('div');
-    div.id = 'div1';
-    const div2 = document.createElement('div');
-    div2.id = 'div2';
-    div.appendChild(div2);
+    const browser = new Browser();
+    const page = browser.newPage();
+    page.content = `
+      <div id="div1">
+        <div id="div2"></div>
+      </div>
+    `;
+
+    const div = page.mainFrame.document.getElementById('div1') as unknown as HTMLElement;
+    const div2 = page.mainFrame.document.getElementById('div2') as unknown as HTMLElement;
 
     const elements = HtmlTreeNavigator.startFrom(div)
       .findAll(new TagNavigationFilter('div'))
@@ -25,11 +31,15 @@ describe('HtmlTreeNavigator', () => {
   });
 
   it('should return no element when filters do not match', () => {
-    const div = document.createElement('div');
-    div.id = 'div1';
-    const div2 = document.createElement('div');
-    div2.id = 'div2';
-    div.appendChild(div2);
+    const browser = new Browser();
+    const page = browser.newPage();
+    page.content = `
+      <div id="div1">
+        <div id="div2"></div>
+      </div>
+    `;
+
+    const div = page.mainFrame.document.getElementById('div1') as unknown as HTMLElement;
 
     const elements = HtmlTreeNavigator.startFrom(div)
       .findAll(new TagNavigationFilter('span'))
@@ -39,19 +49,20 @@ describe('HtmlTreeNavigator', () => {
   });
 
   it('should return multiple elements if target is not unique', () => {
-    const rootContainer = document.createElement('div');
-    rootContainer.id = 'root-container';
+    const browser = new Browser();
+    const page = browser.newPage();
+    page.content = `
+      <div id="root-container">
+        <div id="div1"></div>
+        <div id="div2"></div>
+        <div id="div3"></div>
+      </div>
+    `;
 
-    const div1 = document.createElement('div');
-    div1.id = 'div1';
-    const div2 = document.createElement('div');
-    div2.id = 'div2';
-    const div3 = document.createElement('div');
-    div3.id = 'div3';
-
-    rootContainer.appendChild(div1);
-    rootContainer.appendChild(div2);
-    rootContainer.appendChild(div3);
+    const rootContainer = page.mainFrame.document.getElementById('root-container') as unknown as HTMLElement;
+    const div1 = page.mainFrame.document.getElementById('div1') as unknown as HTMLElement;
+    const div2 = page.mainFrame.document.getElementById('div2') as unknown as HTMLElement;
+    const div3 = page.mainFrame.document.getElementById('div3') as unknown as HTMLElement;
 
     const elements = HtmlTreeNavigator.startFrom(rootContainer)
       .findAll(new TagNavigationFilter('div'))
@@ -61,47 +72,30 @@ describe('HtmlTreeNavigator', () => {
   });
 
   it('should return a single element even when multiple similar paths exist', () => {
-    const rootContainer = document.createElement('div');
-    rootContainer.id = 'root-container';
+    const browser = new Browser();
+    const page = browser.newPage();
+    page.content = `
+      <div id="root-container">
+        <div id="div1">
+          <svg id="svg1">
+            <g><path d="M10 10"></path></g>
+          </svg>
+        </div>
+        <div id="div2">
+          <svg id="svg2">
+            <g><path id="path2" d="M20 20"></path></g>
+          </svg>
+        </div>
+        <div id="div3">
+          <svg id="svg3">
+            <g><path d="M30 30"></path></g>
+          </svg>
+        </div>
+      </div>
+    `;
 
-    const div1 = document.createElement('div');
-    div1.id = 'div1';
-    const div2 = document.createElement('div');
-    div2.id = 'div2';
-    const div3 = document.createElement('div');
-    div3.id = 'div3';
-
-    const svg1 = document.createElement('svg');
-    svg1.id = 'svg1';
-    const svg2 = document.createElement('svg');
-    svg2.id = 'svg2';
-    const svg3 = document.createElement('svg');
-    svg3.id = 'svg3';
-
-    const g1 = document.createElement('g');
-    svg1.appendChild(g1);
-    const g2 = document.createElement('g');
-    svg2.appendChild(g2);
-    const g3 = document.createElement('g');
-    svg3.appendChild(g3);
-
-    const path1 = document.createElement('path');
-    path1.setAttribute('d', 'M10 10');
-    g1.appendChild(path1);
-    const path2 = document.createElement('path');
-    path2.setAttribute('d', 'M20 20');
-    g2.appendChild(path2);
-    const path3 = document.createElement('path');
-    path3.setAttribute('d', 'M30 30');
-    g3.appendChild(path3);
-
-    div1.appendChild(svg1);
-    div2.appendChild(svg2);
-    div3.appendChild(svg3);
-
-    rootContainer.appendChild(div1);
-    rootContainer.appendChild(div2);
-    rootContainer.appendChild(div3);
+    const rootContainer = page.mainFrame.document.getElementById('root-container') as unknown as HTMLElement;
+    const path2 = page.mainFrame.document.getElementById('path2') as unknown as HTMLElement;
 
     const elements = HtmlTreeNavigator.startFrom(rootContainer)
       .findAll(new SvgDrawPathNavigationFilter('M20 20'))
@@ -111,37 +105,24 @@ describe('HtmlTreeNavigator', () => {
   });
 
   it('should return the element whose path matches the most with the given filters', () => {
-    const rootContainer = document.createElement('div');
-    rootContainer.id = 'root-container';
+    const browser = new Browser();
+    const page = browser.newPage();
+    page.content = `
+      <div id="root-container">
+        <div id="div1">
+          <button id="button1">
+            <svg id="svg1">
+              <g><path id="path1" d="M10 10"></path></g>
+            </svg>
+          </button>
+        </div>
+        <div id="div2"><button></button></div>
+        <div id="div3"><button></button></div>
+      </div>
+    `;
 
-    const div1 = document.createElement('div');
-    div1.id = 'div1';
-    const div2 = document.createElement('div');
-    div2.id = 'div2';
-    const div3 = document.createElement('div');
-    div3.id = 'div3';
-
-    const button1 = document.createElement('button');
-    const button2 = document.createElement('button');
-    const button3 = document.createElement('button');
-
-    const svg1 = document.createElement('svg');
-    svg1.id = 'svg1';
-    const g1 = document.createElement('g');
-    svg1.appendChild(g1);
-    const path1 = document.createElement('path');
-    path1.setAttribute('d', 'M10 10');
-    g1.appendChild(path1);
-
-    button1.appendChild(svg1);
-
-    div1.appendChild(button1);
-    div2.appendChild(button2);
-    div3.appendChild(button3);
-
-    rootContainer.appendChild(div1);
-    rootContainer.appendChild(div2);
-    rootContainer.appendChild(div3);
+    const rootContainer = page.mainFrame.document.getElementById('root-container') as unknown as HTMLElement;
+    const path1 = page.mainFrame.document.getElementById('path1') as unknown as HTMLElement;
 
     const elements = HtmlTreeNavigator.startFrom(rootContainer)
       .filter(new TagNavigationFilter(Tags.BUTTON))
@@ -155,33 +136,22 @@ describe('HtmlTreeNavigator', () => {
     'should return the element whose path matches the most with the given filters even if it is not the' +
       ' last element in the tree',
     () => {
-      const rootContainer = document.createElement('div');
-      rootContainer.id = 'root-container';
+      const browser = new Browser();
+      const page = browser.newPage();
+      page.content = `
+        <div id="root-container">
+          <div id="div1">
+            <button id="button1">
+              <span>Span1</span>
+            </button>
+          </div>
+          <div id="div2"><button></button></div>
+          <div id="div3"><button></button></div>
+        </div>
+      `;
 
-      const div1 = document.createElement('div');
-      div1.id = 'div1';
-      const div2 = document.createElement('div');
-      div2.id = 'div2';
-      const div3 = document.createElement('div');
-      div3.id = 'div3';
-
-      const button1 = document.createElement('button');
-      button1.id = 'button1';
-      const button2 = document.createElement('button');
-      const button3 = document.createElement('button');
-
-      const span1 = document.createElement('span');
-      span1.textContent = 'Span1';
-
-      button1.appendChild(span1);
-
-      div1.appendChild(button1);
-      div2.appendChild(button2);
-      div3.appendChild(button3);
-
-      rootContainer.appendChild(div1);
-      rootContainer.appendChild(div2);
-      rootContainer.appendChild(div3);
+      const rootContainer = page.mainFrame.document.getElementById('root-container') as unknown as HTMLElement;
+      const button1 = page.mainFrame.document.getElementById('button1') as unknown as HTMLElement;
 
       const elements = HtmlTreeNavigator.startFrom(rootContainer)
         .filter(new TagNavigationFilter(Tags.DIV))
