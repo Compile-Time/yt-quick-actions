@@ -18,7 +18,7 @@ export function testIfWatchLaterButtonShouldBeCreated(): MonoTypeOperatorFunctio
     filter(([mutationRecord]) => {
       return mutationRecord.target.nodeName === 'DIV' && (mutationRecord.target as HTMLElement).id === 'content';
     }),
-    filter(([mutationRecord, currentPage]) => {
+    filter(([mutationRecord]) => {
       return (
         HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
           .find(new TagNavigationFilter('YTD-RICH-SECTION-RENDERER'))
@@ -29,10 +29,9 @@ export function testIfWatchLaterButtonShouldBeCreated(): MonoTypeOperatorFunctio
           HtmlTreeNavigator.startFrom(mutationRecord.target as HTMLElement)
             .findFirst(new TagNavigationFilter('YTM-SHORTS-LOCKUP-VIEW-MODEL-V2'))
             .notExists()) ||
-        (currentPage === CurrentPage.HOME &&
-          HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
-            .find(new TagNavigationFilter('YTD-RICH-SECTION-RENDERER'))
-            .exists() &&
+        (HtmlParentNavigator.startFrom(mutationRecord.target as HTMLElement)
+          .find(new TagNavigationFilter('YTD-RICH-SECTION-RENDERER'))
+          .exists() &&
           HtmlTreeNavigator.startFrom(mutationRecord.target as HTMLElement)
             .findFirst(new TagNavigationFilter('YTM-SHORTS-LOCKUP-VIEW-MODEL-V2'))
             .notExists() &&
