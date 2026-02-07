@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { Browser } from 'happy-dom';
 import {
   homeItemHtml,
+  homeRowNotifyStreamItemHtml,
   homeRowShortsSectionItemHtml,
   homeRowTopicsSectionHtml,
 } from '@/utils/__tests__/page-logic/dom-samples';
@@ -118,40 +119,86 @@ describe('Home page', () => {
         }),
     );
 
-    it('should not create the watch later button for shorts inside a section', () =>
-      new Promise<void>((done, fail) => {
-        const browser = new Browser();
-        const page = browser.newPage();
-        page.content = homeRowShortsSectionItemHtml;
+    it(
+      'should not create the watch later button for shorts inside a section',
+      { timeout: 3000 },
+      () =>
+        new Promise<void>((done, fail) => {
+          const browser = new Browser();
+          const page = browser.newPage();
+          page.content = homeRowShortsSectionItemHtml;
 
-        const subject = new Subject<[MutationRecord, CurrentPage]>();
-        subject.pipe(first(), testIfWatchLaterButtonShouldBeCreated()).subscribe(() => {
-          fail('Mutation passes the filters which should not happen!');
-        });
-        subject.pipe(first(), delay(2000)).subscribe(([mutation]) => {
-          expect(mutation).toBeTruthy();
-          done();
-        });
+          const subject = new Subject<[MutationRecord, CurrentPage]>();
+          subject.pipe(first(), testIfWatchLaterButtonShouldBeCreated()).subscribe(() => {
+            fail('Mutation passes the filters which should not happen!');
+          });
+          subject.pipe(first(), delay(2000)).subscribe(([mutation]) => {
+            expect(mutation).toBeTruthy();
+            done();
+          });
 
-        const mutationDiv = page.mainFrame.document.getElementsByName('test-setup-name')[0] as unknown as Node;
-        const nodeList = new MockNodeList([
-          page.mainFrame.document.getElementsByName('test-setup-name')[0] as unknown as Node,
-        ]);
-        subject.next([
-          {
-            addedNodes: nodeList,
-            target: mutationDiv,
-            type: 'childList',
-            oldValue: null,
-            attributeName: null,
-            attributeNamespace: null,
-            nextSibling: null,
-            previousSibling: null,
-            removedNodes: new MockNodeList([]),
-          },
-          CurrentPage.HOME,
-        ]);
-      }));
+          const mutationDiv = page.mainFrame.document.getElementsByName('test-setup-name')[0] as unknown as Node;
+          const nodeList = new MockNodeList([
+            page.mainFrame.document.getElementsByName('test-setup-name')[0] as unknown as Node,
+          ]);
+          subject.next([
+            {
+              addedNodes: nodeList,
+              target: mutationDiv,
+              type: 'childList',
+              oldValue: null,
+              attributeName: null,
+              attributeNamespace: null,
+              nextSibling: null,
+              previousSibling: null,
+              removedNodes: new MockNodeList([]),
+            },
+            CurrentPage.HOME,
+          ]);
+        }),
+    );
+
+    it(
+      'should create the watch later button for notify stream div items',
+      { timeout: 3000 },
+      () =>
+        new Promise<void>((done) => {
+          const browser = new Browser();
+          const page = browser.newPage();
+          page.content = homeRowNotifyStreamItemHtml;
+
+          const subject = new Subject<[MutationRecord, CurrentPage]>();
+          subject.pipe(first(), testIfWatchLaterButtonShouldBeCreated()).subscribe(([mutation]) => {
+            expect(mutation).toBeTruthy();
+            expect(mutation.addedNodes.length).toBe(1);
+
+            const div = mutation.addedNodes.item(0) as HTMLElement;
+            expect(div.nodeName).toBe('DIV');
+            expect(div.id).toBe('content');
+
+            done();
+          });
+
+          const mutationDiv = page.mainFrame.document.getElementsByName('test-setup-name')[0] as unknown as Node;
+          const nodeList = new MockNodeList([
+            page.mainFrame.document.getElementsByName('test-setup-name')[0] as unknown as Node,
+          ]);
+          subject.next([
+            {
+              addedNodes: nodeList,
+              target: mutationDiv,
+              type: 'childList',
+              oldValue: null,
+              attributeName: null,
+              attributeNamespace: null,
+              nextSibling: null,
+              previousSibling: null,
+              removedNodes: new MockNodeList([]),
+            },
+            CurrentPage.HOME,
+          ]);
+        }),
+    );
 
     it(
       'should create the watch later button for the section home item div',

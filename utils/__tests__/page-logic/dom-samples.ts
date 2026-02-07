@@ -2143,3 +2143,165 @@ export const homeRowShortsSectionItemHtml = `
   </div>
 </ytd-rich-section-renderer>
 `;
+
+export const homeRowNotifyStreamItemHtml = `
+<ytd-rich-item-renderer class="style-scope ytd-rich-grid-renderer" items-per-row="3" lockup="true"
+                        rendered-from-rich-grid=""><!--css-build:shady--><!--css_build_scope:ytd-rich-item-renderer-->
+  <!--css_build_styles:video.youtube.src.web.polymer.shared.ui.styles.yt_base_styles.yt.base.styles.css.js-->
+  <div id="content" class="style-scope ytd-rich-item-renderer" style="position: relative;" name="test-setup-name">
+    <yt-lockup-view-model class="ytd-rich-item-renderer lockup yt-lockup-view-model--wrapper">
+      <div
+        class="yt-lockup-view-model yt-lockup-view-model--vertical content-id-54zeY7w6oaQ yt-lockup-view-model--rich-grid-legacy-margin yt-lockup-view-model--flex-none">
+        <yt-touch-feedback-shape aria-hidden="true"
+                                 class="yt-spec-touch-feedback-shape yt-spec-touch-feedback-shape--touch-response yt-spec-touch-feedback-shape--thumbnail-size-large yt-spec-touch-feedback-shape--trigger-events">
+          <div class="yt-spec-touch-feedback-shape__stroke"></div>
+          <div class="yt-spec-touch-feedback-shape__fill"></div>
+        </yt-touch-feedback-shape>
+        <a href="/watch?v=54zeY7w6oaQ" class="yt-lockup-view-model__content-image" style="" aria-haspopup="false"
+           tabindex="-1" aria-hidden="true">
+          <yt-thumbnail-view-model
+            class="ytThumbnailViewModelHost ytThumbnailViewModelAspectRatio16By9 ytThumbnailViewModelLarge">
+            <div class="ytThumbnailViewModelImage"><img alt=""
+                                                        class="ytCoreImageHost ytCoreImageFillParentHeight ytCoreImageFillParentWidth ytCoreImageContentModeScaleAspectFill ytCoreImageLoaded"
+                                                        src="https://i.ytimg.com/vi/54zeY7w6oaQ/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&amp;rs=AOn4CLBw9kUdMhC13UKQp88BRg5RqPolNw">
+            </div>
+            <yt-thumbnail-overlay-badge-view-model
+              class="yt-thumbnail-overlay-badge-view-model yt-thumbnail-overlay-badge-view-model--bottom-end yt-thumbnail-overlay-badge-view-model--large">
+              <yt-thumbnail-badge-view-model
+                class="ytThumbnailBadgeViewModelHost yt-thumbnail-overlay-badge-view-model__badge">
+                <badge-shape
+                  class="yt-badge-shape yt-badge-shape--thumbnail-default yt-badge-shape--thumbnail-badge yt-badge-shape--typography">
+                  <div class="yt-badge-shape__text">Upcoming</div>
+                </badge-shape>
+              </yt-thumbnail-badge-view-model>
+            </yt-thumbnail-overlay-badge-view-model><!----></yt-thumbnail-view-model>
+        </a>
+        <div class="yt-lockup-view-model__metadata">
+          <yt-lockup-metadata-view-model
+            class="yt-lockup-metadata-view-model yt-lockup-metadata-view-model--vertical yt-lockup-metadata-view-model--standard yt-lockup-metadata-view-model--rich-grid-legacy-typography">
+            <div class="yt-lockup-metadata-view-model__avatar">
+              <yt-decorated-avatar-view-model class="ytDecoratedAvatarViewModelHost">
+                <yt-avatar-shape>
+                  <div
+                    class="yt-spec-avatar-shape yt-spec-avatar-shape__button yt-spec-avatar-shape__button--button-medium yt-spec-avatar-shape__button--tappable"
+                    aria-label="Go to channel YUY" role="button" tabindex="0">
+                    <div class="">
+                      <div class="yt-spec-avatar-shape--avatar-size-medium"><img alt=""
+                                                                                 class="ytCoreImageHost yt-spec-avatar-shape__image ytCoreImageFillParentHeight ytCoreImageFillParentWidth ytCoreImageContentModeScaleToFill ytCoreImageLoaded"
+                                                                                 src="https://yt3.ggpht.com/S5_mU5n-KM_2UXod45MyjlUB21awI_jyc2zb1cmGZ6Mb-sYq-49mAsncaI6R0IdIUomqEKfI=s68-c-k-c0x00ffffff-no-rj-mo">
+                        <div class="yt-spec-avatar-shape__image-overlays yt-spec-avatar-shape__image"></div>
+                      </div>
+                    </div>
+                  </div>
+                </yt-avatar-shape>
+              </yt-decorated-avatar-view-model>
+            </div>
+            <div class="yt-lockup-metadata-view-model__text-container"><h3
+              class="yt-lockup-metadata-view-model__heading-reset" title="【UMIGARI】 am fish"><a
+              href="/watch?v=54zeY7w6oaQ" class="yt-lockup-metadata-view-model__title" style="" aria-haspopup="false"
+              aria-label="【UMIGARI】 am fish"><span style=""
+                                                   class="yt-core-attributed-string yt-core-attributed-string--white-space-pre-wrap"
+                                                   dir="auto" role="text">【UMIGARI】 am fish</span></a></h3>
+              <div class="yt-lockup-metadata-view-model__metadata">
+                <yt-content-metadata-view-model
+                  class="yt-content-metadata-view-model yt-content-metadata-view-model--medium-text">
+                  <div class="yt-content-metadata-view-model__metadata-row"><span style=""
+                                                                                  class="yt-core-attributed-string yt-content-metadata-view-model__metadata-text yt-core-attributed-string--white-space-pre-wrap yt-core-attributed-string--link-inherit-color"
+                                                                                  dir="auto"><span class=""
+                                                                                                   style="font-weight: 400;"
+                                                                                                   dir="auto"><a
+                    class="yt-core-attributed-string__link yt-core-attributed-string__link--call-to-action-color yt-core-attributed-string--link-inherit-color"
+                    tabindex="0" href="/@YUY_IX" target="" force-new-state="true">YUY<span
+                    class="yt-core-attributed-string--link-inherit-color" style="color: rgb(170, 170, 170);" dir="auto"><span
+                    class="yt-core-attributed-string--inline-block-mod" style="margin-left: 4px;"><span
+                    class="ytIconWrapperHost yt-core-attributed-string__image-element yt-core-attributed-string__image-element--image-alignment-vertical-center"
+                    role="img" aria-label="" aria-hidden="true" style="height: 14px; width: 14px;"><span
+                    class="yt-icon-shape ytSpecIconShapeHost"><div
+                    style="width: 100%; height: 100%; display: block; fill: currentcolor;"><svg
+                    xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false"
+                    aria-hidden="true" style="pointer-events: none; display: inherit; width: 100%; height: 100%;"><path
+                    d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1Zm5.707 7.293a1 1 0 010 1.414L10 17.414l-3.707-3.707a1 1 0 111.414-1.414L10 14.586l6.293-6.293a1 1 0 011.414 0Z"></path></svg></div></span></span></span></span></a></span></span>
+                  </div>
+                  <div class="yt-content-metadata-view-model__metadata-row"><span style=""
+                                                                                  class="yt-core-attributed-string yt-content-metadata-view-model__metadata-text yt-core-attributed-string--white-space-pre-wrap yt-core-attributed-string--link-inherit-color"
+                                                                                  dir="auto" role="text">Scheduled for 2/7/26, 9:00 PM</span>
+                  </div>
+                </yt-content-metadata-view-model>
+              </div>
+            </div>
+            <div class="yt-lockup-metadata-view-model__menu-button">
+              <button-view-model class="ytSpecButtonViewModelHost">
+                <button
+                  class="yt-spec-button-shape-next yt-spec-button-shape-next--text yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-m yt-spec-button-shape-next--icon-button yt-spec-button-shape-next--enable-backdrop-filter-experiment"
+                  title="" style="" aria-label="More actions" aria-disabled="false">
+                  <div aria-hidden="true" class="yt-spec-button-shape-next__icon"><span class="ytIconWrapperHost"
+                                                                                        style="width: 24px; height: 24px;"><span
+                    class="yt-icon-shape ytSpecIconShapeHost"><div
+                    style="width: 100%; height: 100%; display: block; fill: currentcolor;"><svg
+                    xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" focusable="false"
+                    aria-hidden="true" style="pointer-events: none; display: inherit; width: 100%; height: 100%;"><path
+                    d="M12 4a2 2 0 100 4 2 2 0 000-4Zm0 6a2 2 0 100 4 2 2 0 000-4Zm0 6a2 2 0 100 4 2 2 0 000-4Z"></path></svg></div></span></span>
+                  </div>
+                  <yt-touch-feedback-shape aria-hidden="true"
+                                           class="yt-spec-touch-feedback-shape yt-spec-touch-feedback-shape--touch-response">
+                    <div class="yt-spec-touch-feedback-shape__stroke"></div>
+                    <div class="yt-spec-touch-feedback-shape__fill"></div>
+                  </yt-touch-feedback-shape>
+                </button>
+              </button-view-model>
+            </div>
+          </yt-lockup-metadata-view-model>
+          <lockup-attachments-view-model class="ytLockupAttachmentsViewModelHost">
+            <div class="ytLockupAttachmentsViewModelAttachment">
+              <yt-flexible-actions-view-model class="ytFlexibleActionsViewModelHost">
+                <div class="ytFlexibleActionsViewModelActionRow">
+                  <div class="ytFlexibleActionsViewModelAction ytFlexibleActionsViewModelActionRowAction">
+                    <toggle-button-view-model>
+                      <button-view-model class="ytSpecButtonViewModelHost">
+                        <button
+                          class="yt-spec-button-shape-next yt-spec-button-shape-next--tonal yt-spec-button-shape-next--mono yt-spec-button-shape-next--size-s yt-spec-button-shape-next--enable-backdrop-filter-experiment"
+                          title="" style="" aria-pressed="false" aria-disabled="false">
+                          <div class="yt-spec-button-shape-next__button-text-content">Notify me</div>
+                          <yt-touch-feedback-shape aria-hidden="true"
+                                                   class="yt-spec-touch-feedback-shape yt-spec-touch-feedback-shape--touch-response">
+                            <div class="yt-spec-touch-feedback-shape__stroke"></div>
+                            <div class="yt-spec-touch-feedback-shape__fill"></div>
+                          </yt-touch-feedback-shape>
+                        </button>
+                      </button-view-model>
+                    </toggle-button-view-model>
+                  </div>
+                </div>
+              </yt-flexible-actions-view-model>
+            </div>
+          </lockup-attachments-view-model>
+        </div>
+      </div>
+    </yt-lockup-view-model>
+    <div data-wxt-integrated="" style="overflow: visible; position: relative; width: 0px; height: 100%; display: block;"
+         data-v-app="">
+      <div id="qa-watch-later-home-button-container" class="qa-home-watch-later">
+        <button id="qa-watch-later-home-button" class="qa-btn"><i class="fa-solid fa-clock fa-lg"></i></button>
+      </div>
+    </div>
+    <div data-wxt-integrated="" style="overflow: visible; position: relative; width: 0px; height: 100%; display: block;"
+         data-v-app="">
+      <div id="qa-watch-later-home-button-container" class="qa-home-watch-later">
+        <button id="qa-watch-later-home-button" class="qa-btn"><i class="fa-solid fa-clock fa-lg"></i></button>
+      </div>
+    </div>
+    <div data-wxt-integrated="" style="overflow: visible; position: relative; width: 0px; height: 100%; display: block;"
+         data-v-app="">
+      <div id="qa-watch-later-home-button-container" class="qa-home-watch-later">
+        <button id="qa-watch-later-home-button" class="qa-btn"><i class="fa-solid fa-clock fa-lg"></i></button>
+      </div>
+    </div>
+  </div>
+  <yt-interaction id="interaction" class="extended rounded-large style-scope ytd-rich-item-renderer" hidden="">
+    <!--css-build:shady--><!--css_build_scope:yt-interaction-->
+    <!--css_build_styles:video.youtube.src.web.polymer.shared.ui.styles.yt_base_styles.yt.base.styles.css.js,video.youtube.src.web.polymer.shared.ui.yt_interaction.yt.interaction.css.js-->
+    <div class="stroke style-scope yt-interaction"></div>
+    <div class="fill style-scope yt-interaction"></div>
+  </yt-interaction>
+</ytd-rich-item-renderer>
+`;
