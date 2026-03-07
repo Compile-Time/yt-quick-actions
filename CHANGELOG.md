@@ -1,3 +1,17 @@
+# [1.3.0](https://github.com/Compile-Time/yt-quick-actions/compare/1.2.1...1.3.0) (2026-03-07)
+
+
+### Bug Fixes
+
+* Explore topics section has no watch later button ([ab8d4bc](https://github.com/Compile-Time/yt-quick-actions/commit/ab8d4bc859448b6dabe39a015a833ca4f212e3bb))
+* Home watch later overlaps with notify me for streams ([c9b7f12](https://github.com/Compile-Time/yt-quick-actions/commit/c9b7f129873c054ff1b053509860aa23882a483b))
+* Shorts section has useless watch later buttons ([8ec70ef](https://github.com/Compile-Time/yt-quick-actions/commit/8ec70efabf5a1993275eaff20eb66c35a1ba9626))
+
+
+### Features
+
+* Add AttributesNavigationFilter ([e96675f](https://github.com/Compile-Time/yt-quick-actions/commit/e96675f8edae2d3a4fbc46ea2230a52074429770))
+
 ## [1.2.1](https://github.com/Compile-Time/yt-quick-actions/compare/1.2.0...1.2.1) (2026-01-25)
 
 
