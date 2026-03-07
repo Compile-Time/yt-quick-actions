@@ -22,18 +22,19 @@
     {
       "attr_path": "nodejs",
       "broken": false,
-      "derivation": "/nix/store/0jp24w00c62cysdikz38xrnmxwzv0q4r-nodejs-24.13.0.drv",
+      "derivation": "/nix/store/4r8pl1c0vr0wmvng3jpnajgd37cnxfcl-nodejs-24.13.0.drv",
       "description": "Event-driven I/O framework for the V8 JavaScript engine",
       "install_id": "nodejs",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=e6eae2ee2110f3d31110d5c222cd395303343b08",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "nodejs-24.13.0",
       "pname": "nodejs",
-      "rev": "e6eae2ee2110f3d31110d5c222cd395303343b08",
-      "rev_count": 939624,
-      "rev_date": "2026-02-03T10:48:24Z",
-      "scrape_date": "2026-02-04T04:36:20.609043Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T04:40:27.483694Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -42,9 +43,7 @@
         "out"
       ],
       "outputs": {
-        "dev": "/nix/store/ywm49y8ncwny2nr0wvs6vmaxqjiqg523-nodejs-24.13.0-dev",
-        "libv8": "/nix/store/67xyvmmgkisc7mr16wbpyjq2fqyz44af-nodejs-24.13.0-libv8",
-        "out": "/nix/store/szvl8aalaplzshakdpyq8l5yq8q1bw66-nodejs-24.13.0"
+        "out": "/nix/store/cx0jd5mwhn7ihryyv0qp9d33f8s1iwb7-nodejs-24.13.0"
       },
       "system": "aarch64-darwin",
       "group": "nodejs",
@@ -53,18 +52,19 @@
     {
       "attr_path": "nodejs",
       "broken": false,
-      "derivation": "/nix/store/l64r4vxgdpi0jxp27mvr9sj2c2mq2cys-nodejs-24.13.0.drv",
+      "derivation": "/nix/store/pnwyrkhq53vm22yf620im61d2hmwdg0j-nodejs-24.13.0.drv",
       "description": "Event-driven I/O framework for the V8 JavaScript engine",
       "install_id": "nodejs",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=e6eae2ee2110f3d31110d5c222cd395303343b08",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "nodejs-24.13.0",
       "pname": "nodejs",
-      "rev": "e6eae2ee2110f3d31110d5c222cd395303343b08",
-      "rev_count": 939624,
-      "rev_date": "2026-02-03T10:48:24Z",
-      "scrape_date": "2026-02-04T05:06:09.961804Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T05:11:27.537081Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -73,9 +73,7 @@
         "out"
       ],
       "outputs": {
-        "dev": "/nix/store/qk4n3r5bvqzvpaq1qbpwwf47zg51wrhq-nodejs-24.13.0-dev",
-        "libv8": "/nix/store/rh9dg0mdq0hnp4cbdy4zdbmy6hnhxcfh-nodejs-24.13.0-libv8",
-        "out": "/nix/store/rpyb0275h916mxx8a0cm7yavm4qbr4j9-nodejs-24.13.0"
+        "out": "/nix/store/8dsjz52869ygjd6xdvibgk3ysl3fg6zp-nodejs-24.13.0"
       },
       "system": "aarch64-linux",
       "group": "nodejs",
@@ -84,18 +82,19 @@
     {
       "attr_path": "nodejs",
       "broken": false,
-      "derivation": "/nix/store/xgryfaiwfymf8ndij80ssly7q2kdq8y1-nodejs-24.13.0.drv",
+      "derivation": "/nix/store/0ymmyc8xzrbn2psvx4phljpqzs8r9z72-nodejs-24.13.0.drv",
       "description": "Event-driven I/O framework for the V8 JavaScript engine",
       "install_id": "nodejs",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=e6eae2ee2110f3d31110d5c222cd395303343b08",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "nodejs-24.13.0",
       "pname": "nodejs",
-      "rev": "e6eae2ee2110f3d31110d5c222cd395303343b08",
-      "rev_count": 939624,
-      "rev_date": "2026-02-03T10:48:24Z",
-      "scrape_date": "2026-02-04T05:34:22.939755Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T05:40:05.213815Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -104,9 +103,7 @@
         "out"
       ],
       "outputs": {
-        "dev": "/nix/store/rp55bch0hqxynmxnh7q5bs586kp0dib6-nodejs-24.13.0-dev",
-        "libv8": "/nix/store/dvl504xzwklpfjngdnn6kcpriklwsf6l-nodejs-24.13.0-libv8",
-        "out": "/nix/store/xhp1pnnq7hski7hwg36vw7kpxmg56khh-nodejs-24.13.0"
+        "out": "/nix/store/i9bak02hsrywwba0apxdn7ldvkf9jl6a-nodejs-24.13.0"
       },
       "system": "x86_64-darwin",
       "group": "nodejs",
@@ -115,18 +112,19 @@
     {
       "attr_path": "nodejs",
       "broken": false,
-      "derivation": "/nix/store/qk40027pvikybl0lvr1wmia9n8ljf99c-nodejs-24.13.0.drv",
+      "derivation": "/nix/store/nmzkrbm7lr655sc0xnl4yjch1lgc5jqh-nodejs-24.13.0.drv",
       "description": "Event-driven I/O framework for the V8 JavaScript engine",
       "install_id": "nodejs",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=e6eae2ee2110f3d31110d5c222cd395303343b08",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "nodejs-24.13.0",
       "pname": "nodejs",
-      "rev": "e6eae2ee2110f3d31110d5c222cd395303343b08",
-      "rev_count": 939624,
-      "rev_date": "2026-02-03T10:48:24Z",
-      "scrape_date": "2026-02-04T06:07:46.713693Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T06:14:10.663262Z",
       "stabilities": [
+        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -135,9 +133,7 @@
         "out"
       ],
       "outputs": {
-        "dev": "/nix/store/hc7fav9y6ai53nqbbpjxprwnkakl1w2d-nodejs-24.13.0-dev",
-        "libv8": "/nix/store/z7m56hl4rzdrfhnnkwig0ibzs1qz1x5d-nodejs-24.13.0-libv8",
-        "out": "/nix/store/9cyx2v23dip6p9q98384k9v06c96qskb-nodejs-24.13.0"
+        "out": "/nix/store/sy0c7j0npsq33d9zhnnzvjnzc52f4y0p-nodejs-24.13.0"
       },
       "system": "x86_64-linux",
       "group": "nodejs",
@@ -146,17 +142,17 @@
     {
       "attr_path": "act",
       "broken": false,
-      "derivation": "/nix/store/ccyl81slrphm32f6djd0kd6kqbn5zrps-act-0.2.84.drv",
+      "derivation": "/nix/store/2hylq02vqg137s1lfmmjpkqipdl3wkp4-act-0.2.84.drv",
       "description": "Run your GitHub Actions locally",
       "install_id": "act",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=88d3861acdd3d2f0e361767018218e51810df8a1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "act-0.2.84",
       "pname": "act",
-      "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
-      "rev_count": 931542,
-      "rev_date": "2026-01-21T18:02:10Z",
-      "scrape_date": "2026-01-23T04:32:29.841890Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T04:40:03.287029Z",
       "stabilities": [
         "staging",
         "unstable"
@@ -167,7 +163,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/a66igc76c2vzyl3q5z7c7kf7dr4b9is5-act-0.2.84"
+        "out": "/nix/store/i1f4l57vzk8gwbnwxjmalsr92c25jwsf-act-0.2.84"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -176,17 +172,17 @@
     {
       "attr_path": "act",
       "broken": false,
-      "derivation": "/nix/store/iihr3wvj2b5adbwvwv0dh11b0rn03vzk-act-0.2.84.drv",
+      "derivation": "/nix/store/nnf3di20dygjmw6bjb8h07dxapbfs7zk-act-0.2.84.drv",
       "description": "Run your GitHub Actions locally",
       "install_id": "act",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=88d3861acdd3d2f0e361767018218e51810df8a1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "act-0.2.84",
       "pname": "act",
-      "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
-      "rev_count": 931542,
-      "rev_date": "2026-01-21T18:02:10Z",
-      "scrape_date": "2026-01-23T05:12:33.590614Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T05:10:48.815316Z",
       "stabilities": [
         "staging",
         "unstable"
@@ -197,7 +193,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/wwrpc61p07x97b27ryhyks8zc9bq4j5c-act-0.2.84"
+        "out": "/nix/store/qj7834kzixm1qrsjhykcgmzgdsnidm5g-act-0.2.84"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -206,17 +202,17 @@
     {
       "attr_path": "act",
       "broken": false,
-      "derivation": "/nix/store/jihh2ph2y8idpf34s5mmv9k4p7kdza9p-act-0.2.84.drv",
+      "derivation": "/nix/store/gx3756r74idlg19ach9sa8gngq73vs4x-act-0.2.84.drv",
       "description": "Run your GitHub Actions locally",
       "install_id": "act",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=88d3861acdd3d2f0e361767018218e51810df8a1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "act-0.2.84",
       "pname": "act",
-      "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
-      "rev_count": 931542,
-      "rev_date": "2026-01-21T18:02:10Z",
-      "scrape_date": "2026-01-23T05:49:36.063515Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T05:39:40.954282Z",
       "stabilities": [
         "staging",
         "unstable"
@@ -227,7 +223,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/v5fv7inyakck6m1f5q4xz78gfk7r1al7-act-0.2.84"
+        "out": "/nix/store/7n7yipgkvkg6dbfwhr507wcyiy3xppaq-act-0.2.84"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -236,17 +232,17 @@
     {
       "attr_path": "act",
       "broken": false,
-      "derivation": "/nix/store/yg9mcbj6lgsisnh6z9pqzfjsvaz0iiq8-act-0.2.84.drv",
+      "derivation": "/nix/store/piskkzbb3p78ln8sp25m2cq0w41lz3mk-act-0.2.84.drv",
       "description": "Run your GitHub Actions locally",
       "install_id": "act",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=88d3861acdd3d2f0e361767018218e51810df8a1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "act-0.2.84",
       "pname": "act",
-      "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
-      "rev_count": 931542,
-      "rev_date": "2026-01-21T18:02:10Z",
-      "scrape_date": "2026-01-23T06:35:54.266619Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T06:13:29.485041Z",
       "stabilities": [
         "staging",
         "unstable"
@@ -257,7 +253,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/vpqyxvqac1f8pwva5ffxidr98qbfhn20-act-0.2.84"
+        "out": "/nix/store/z063ds4yv84j3h769b5lc0hlf29qqwc6-act-0.2.84"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -266,17 +262,17 @@
     {
       "attr_path": "pre-commit",
       "broken": false,
-      "derivation": "/nix/store/jgrnpz21mnwqs9j0dk18vzrzqsnnddqw-pre-commit-4.5.1.drv",
+      "derivation": "/nix/store/a2dwdj3782wn57a3yys7ypbjikjscjrz-pre-commit-4.5.1.drv",
       "description": "Framework for managing and maintaining multi-language pre-commit hooks",
       "install_id": "pre-commit",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=88d3861acdd3d2f0e361767018218e51810df8a1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "pre-commit-4.5.1",
       "pname": "pre-commit",
-      "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
-      "rev_count": 931542,
-      "rev_date": "2026-01-21T18:02:10Z",
-      "scrape_date": "2026-01-23T04:33:07.504411Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T04:40:42.388314Z",
       "stabilities": [
         "staging",
         "unstable"
@@ -287,8 +283,8 @@
         "out"
       ],
       "outputs": {
-        "dist": "/nix/store/ka8xgfcs4kcw6r6pdqxcyp5yismakg7n-pre-commit-4.5.1-dist",
-        "out": "/nix/store/hqp4liqx5x8mv2qyr1hsl5qv5bd33p7i-pre-commit-4.5.1"
+        "dist": "/nix/store/vx8bcz0p4c4nr57i0kszdnfk3vrxhc4n-pre-commit-4.5.1-dist",
+        "out": "/nix/store/l55n4b26170g382dxchwchs5bb2mm816-pre-commit-4.5.1"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -297,17 +293,17 @@
     {
       "attr_path": "pre-commit",
       "broken": false,
-      "derivation": "/nix/store/l9dkrq40y67mrinwxack690cjw5h59p2-pre-commit-4.5.1.drv",
+      "derivation": "/nix/store/q85l06xl9vx9l6l8hm6ig1f488rbhr5d-pre-commit-4.5.1.drv",
       "description": "Framework for managing and maintaining multi-language pre-commit hooks",
       "install_id": "pre-commit",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=88d3861acdd3d2f0e361767018218e51810df8a1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "pre-commit-4.5.1",
       "pname": "pre-commit",
-      "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
-      "rev_count": 931542,
-      "rev_date": "2026-01-21T18:02:10Z",
-      "scrape_date": "2026-01-23T05:13:29.587986Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T05:11:48.412394Z",
       "stabilities": [
         "staging",
         "unstable"
@@ -318,8 +314,8 @@
         "out"
       ],
       "outputs": {
-        "dist": "/nix/store/xplnq33klgsmw31an3ds9lsikl127xsr-pre-commit-4.5.1-dist",
-        "out": "/nix/store/gjpbnhr5bxzh1ngx4mw47zl4gsb3iy9c-pre-commit-4.5.1"
+        "dist": "/nix/store/l94g308gxsvwzil56ssvg0nb55gkjxfj-pre-commit-4.5.1-dist",
+        "out": "/nix/store/vry6jkxxy96b4vv8sr2yw2p2llangkd5-pre-commit-4.5.1"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -328,17 +324,17 @@
     {
       "attr_path": "pre-commit",
       "broken": false,
-      "derivation": "/nix/store/7ds2m93f3xgaim2gpdpqs86xrbh11lkp-pre-commit-4.5.1.drv",
+      "derivation": "/nix/store/77wwhjxj6lc04bh2p8a14w6bv73d503x-pre-commit-4.5.1.drv",
       "description": "Framework for managing and maintaining multi-language pre-commit hooks",
       "install_id": "pre-commit",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=88d3861acdd3d2f0e361767018218e51810df8a1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "pre-commit-4.5.1",
       "pname": "pre-commit",
-      "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
-      "rev_count": 931542,
-      "rev_date": "2026-01-21T18:02:10Z",
-      "scrape_date": "2026-01-23T05:50:14.717202Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T05:40:20.293898Z",
       "stabilities": [
         "staging",
         "unstable"
@@ -349,8 +345,8 @@
         "out"
       ],
       "outputs": {
-        "dist": "/nix/store/a2j9ifzbzz3hfyf83qgjadpr9i866r80-pre-commit-4.5.1-dist",
-        "out": "/nix/store/jflhh85nx06kvgiq6h1p9vz31vl4gmzg-pre-commit-4.5.1"
+        "dist": "/nix/store/grbm0lk0i1fqliqj6lhgvymnr2kggvaj-pre-commit-4.5.1-dist",
+        "out": "/nix/store/h3g711srm8fn3c12xs638bhrgs7vqml4-pre-commit-4.5.1"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -359,17 +355,17 @@
     {
       "attr_path": "pre-commit",
       "broken": false,
-      "derivation": "/nix/store/jb4m95x9z3yp4s1xd98lxgw8976zk3v4-pre-commit-4.5.1.drv",
+      "derivation": "/nix/store/qdfv3mvgnw3r8lv23kfbll6n59vqrr2a-pre-commit-4.5.1.drv",
       "description": "Framework for managing and maintaining multi-language pre-commit hooks",
       "install_id": "pre-commit",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=88d3861acdd3d2f0e361767018218e51810df8a1",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=80bdc1e5ce51f56b19791b52b2901187931f5353",
       "name": "pre-commit-4.5.1",
       "pname": "pre-commit",
-      "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
-      "rev_count": 931542,
-      "rev_date": "2026-01-21T18:02:10Z",
-      "scrape_date": "2026-01-23T06:36:54.311708Z",
+      "rev": "80bdc1e5ce51f56b19791b52b2901187931f5353",
+      "rev_count": 958232,
+      "rev_date": "2026-03-04T11:34:51Z",
+      "scrape_date": "2026-03-06T06:14:32.028255Z",
       "stabilities": [
         "staging",
         "unstable"
@@ -380,8 +376,8 @@
         "out"
       ],
       "outputs": {
-        "dist": "/nix/store/v54bc85lpnnii94mgxqjxv1x5r51ihi5-pre-commit-4.5.1-dist",
-        "out": "/nix/store/d3cs4k7ps9pxdq8l264s7hijiml10rzm-pre-commit-4.5.1"
+        "dist": "/nix/store/l3z236pck7hx6lz5x4s46xa0vkmjmvsh-pre-commit-4.5.1-dist",
+        "out": "/nix/store/j3m430mdag04c150qlr72zbvhmpkb1cz-pre-commit-4.5.1"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
