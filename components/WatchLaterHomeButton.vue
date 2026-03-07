@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 const { homeItemDiv, watchLaterClickSubject } = defineProps<{
   homeItemDiv: HTMLElement;
   watchLaterClickSubject: Subject<HTMLElement>;
+  hasLockupAttachments: boolean;
 }>();
 
 function click() {
@@ -12,7 +13,11 @@ function click() {
 </script>
 
 <template>
-  <div id="qa-watch-later-home-button-container" class="qa-home-watch-later">
+  <div
+    id="qa-watch-later-home-button-container"
+    class="qa-home-watch-later"
+    :class="{ 'has-lockup-attachments': hasLockupAttachments }"
+  >
     <button id="qa-watch-later-home-button" class="qa-btn" @click="click">
       <i class="fa-solid fa-clock fa-lg"></i>
     </button>

@@ -48,6 +48,10 @@ YouTube variables start with '--yt-spec'.
   justify-content: flex-end;
   align-items: flex-end;
   pointer-events: none;
+
+  &.has-lockup-attachments {
+    bottom: 48px;
+  }
 }
 
 .qa-drag-container-overlay {

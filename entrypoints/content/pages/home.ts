@@ -14,13 +14,13 @@ import {
   tap,
   throwError,
   windowCount,
-  withLatestFrom,
+  withLatestFrom
 } from 'rxjs';
 import { CleanupFn } from '@/utils/types/cleanup';
 import {
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
-  TextNavigationFilter,
+  TextNavigationFilter
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import { SvgDrawPath } from '@/utils/html-element-processing/element-data';
@@ -74,6 +74,10 @@ export function createWatchLaterButton(): MonoTypeOperatorFunction<[MutationReco
   return pipe(
     tap(([mutationRecord]) => {
       const homeItemDiv = mutationRecord.target as HTMLElement;
+      const hasLockupAttachments = new HtmlTreeNavigator(homeItemDiv)
+        .findFirst(new TagNavigationFilter('LOCKUP-ATTACHMENTS-VIEW-MODEL'))
+        .exists();
+      logger.debug('home item has lockup attachments', hasLockupAttachments);
 
       homeItemDiv.style.position = 'relative';
       const watchLaterButton = createIntegratedUi(contentScriptContext$.value!, {
@@ -84,6 +88,7 @@ export function createWatchLaterButton(): MonoTypeOperatorFunction<[MutationReco
           const app = createApp(WatchLaterHomeButton, {
             homeItemDiv,
             watchLaterClickSubject: queueWatchLaterClick$,
+            hasLockupAttachments,
           });
           app.mount(container);
           return app;
