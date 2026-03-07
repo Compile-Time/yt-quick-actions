@@ -14,13 +14,13 @@ import {
   tap,
   throwError,
   windowCount,
-  withLatestFrom
+  withLatestFrom,
 } from 'rxjs';
 import { CleanupFn } from '@/utils/types/cleanup';
 import {
   SvgDrawPathNavigationFilter,
   TagNavigationFilter,
-  TextNavigationFilter
+  TextNavigationFilter,
 } from '@/utils/html-navigation/filter/navigation-filter';
 import { HtmlTreeNavigator } from '@/utils/html-navigation/html-tree-navigator';
 import { SvgDrawPath } from '@/utils/html-element-processing/element-data';

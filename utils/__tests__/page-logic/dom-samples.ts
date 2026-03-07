@@ -2224,7 +2224,7 @@ export const homeRowNotifyStreamItemHtml = `
                   </div>
                   <div class="yt-content-metadata-view-model__metadata-row"><span style=""
                                                                                   class="yt-core-attributed-string yt-content-metadata-view-model__metadata-text yt-core-attributed-string--white-space-pre-wrap yt-core-attributed-string--link-inherit-color"
-                                                                                  dir="auto" role="text">Scheduled for 2/7/26, 9:00 PM</span>
+                                                                                  dir="auto" role="text">Scheduled for 2/7/26, 9:00 PM</span>
                   </div>
                 </yt-content-metadata-view-model>
               </div>
