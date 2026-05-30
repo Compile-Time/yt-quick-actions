@@ -6,10 +6,15 @@ YouTube variables start with '--yt-spec'.
 */
 
 .qa-btn {
-  color: var(--yt-spec-text-primary);
+  color: var(--primary-text-color);
   border: none;
   background: transparent;
   pointer-events: auto;
+
+  &:hover {
+    color: red;
+    cursor: pointer;
+  }
 
   &.move-btn {
     width: 36px;
@@ -22,20 +27,15 @@ YouTube variables start with '--yt-spec'.
   }
 }
 
-.qa-btn:hover {
-  color: red;
-  cursor: pointer;
-}
-
 .qa-btn-pill {
   border-radius: 3em;
-  background-color: var(--yt-spec-badge-chip-background);
+  background-color: var(--yt-live-chat-action-panel-renderer-fallback-background-color);
   padding: 0.7em 0.8em;
   margin-left: 0.5em;
 }
 
 .qa-btn-pill:hover {
-  background-color: var(--yt-spec-button-chip-background-hover);
+  background-color: var(--yt-sys-color-baseline--button-chip-background-hover);
   color: inherit;
 }
 
