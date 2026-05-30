@@ -106,8 +106,8 @@
     "@semantic-release/git": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
-    "@wxt-dev/auto-icons": "^1.1.0",
-    "@wxt-dev/module-vue": "^1.0.2",
+    "@wxt-dev/auto-icons": "^1.1.1",
+    "@wxt-dev/module-vue": "^1.0.3",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -121,6 +121,6 @@
     "typescript-eslint": "^8.46.3",
     "vitest": "^4.0.6",
     "vue-tsc": "^3.0.6",
-    "wxt": "^0.20.11"
+    "wxt": "^0.20.26"
   }
 }
