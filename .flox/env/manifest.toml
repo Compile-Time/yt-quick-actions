@@ -6,7 +6,7 @@
 ##
 ## -------------------------------------------------------------------
 # Flox manifest version managed by Flox CLI
-version = 1
+schema-version = "1.12.0"
 
 
 ## Install Packages --------------------------------------------------
@@ -18,6 +18,7 @@ version = 1
 nodejs.pkg-path = "nodejs"
 nodejs.pkg-group = "nodejs"
 pre-commit.pkg-path = "pre-commit"
+pre-commit.outputs = "all"
 act.pkg-path = "act"
 
 ## Environment Variables ---------------------------------------------
