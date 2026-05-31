@@ -94,6 +94,17 @@ The production builds will also be placed under `.output`.
 - [semantic-release](https://github.com/semantic-release/semantic-release) - Version bumping and release management.
 - [wxt](https://github.com/wxt-dev/wxt) - Building/bundling/packaging of the extension.
 
+## Publishing
+
+Publishing is done with tools provided
+by [wxt - Publishing](https://wxt.dev/guide/essentials/publishing.html). This is set up for Firefox and Chrome.
+
+This requires tokens to be set up in the environment of the GitHub actions.
+
+> **Note:** The Chrome web store tokens expire after inactivity. This will cause failure in the GitHub action when
+> publishing. Therefore, the dry-run pipeline should be run before publishing to ensure that the token is
+> functional.
+
 ## Changelog
 
 Version changes can be found here: 
