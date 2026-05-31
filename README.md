@@ -105,6 +105,9 @@ This requires tokens to be set up in the environment of the GitHub actions.
 > publishing. Therefore, the dry-run pipeline should be run before publishing to ensure that the token is
 > functional.
 
+In the case that the automatic submission does not work, the `release-no-submit` pipeline should be used to bump the
+extension version and to create release artifacts that can be manually uploaded to the extension store fronts.
+
 ## Changelog
 
 Version changes can be found here: 
