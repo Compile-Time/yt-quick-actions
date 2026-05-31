@@ -6,7 +6,7 @@ YouTube variables start with '--yt-spec'.
 */
 
 .qa-btn {
-  color: var(--primary-text-color);
+  color: var(--yt-sys-color-baseline--text-primary);
   border: none;
   background: transparent;
   pointer-events: auto;
