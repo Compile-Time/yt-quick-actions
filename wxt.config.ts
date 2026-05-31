@@ -17,6 +17,14 @@ export default defineConfig({
 
     if (configEnv.browser === 'firefox') {
       manifest.permissions = ['*://www.youtube.com/*', 'storage'];
+      manifest.browser_specific_settings = {
+        gecko: {
+          id: '{e34f8313-fac0-4c80-8f91-bb6ac28f4f19}',
+          data_collection_permissions: {
+            required: ['none'],
+          },
+        },
+      };
     }
     if (configEnv.browser === 'chrome') {
       manifest.permissions = ['storage'];
