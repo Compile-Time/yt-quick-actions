@@ -1,5 +1,5 @@
-name: 'Release'
-run-name: 'Release ${{ github.ref_name }}'
+name: 'Release (no auto publish)'
+run-name: 'Release ${{ github.ref_name }} (no auto publish)'
 on: workflow_dispatch
 
 jobs:
