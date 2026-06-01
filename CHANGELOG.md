@@ -1,3 +1,11 @@
+## [1.3.1](https://github.com/Compile-Time/yt-quick-actions/compare/1.3.0...1.3.1) (2026-06-01)
+
+
+### Bug Fixes
+
+* `--primary-text-color` does not update ([ca3c4a5](https://github.com/Compile-Time/yt-quick-actions/commit/ca3c4a5f04b1e0dc390d3dd5394d5d8c1ca888da))
+* CSS colors reference outdated variables ([c99f00a](https://github.com/Compile-Time/yt-quick-actions/commit/c99f00a9bde1ff40ce9780f1e3f78e4087a68c28))
+
 # [1.3.0](https://github.com/Compile-Time/yt-quick-actions/compare/1.2.1...1.3.0) (2026-03-07)
 
 
